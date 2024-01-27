@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  dayjs:
+    specifier: ^1.11.10
+    version: 1.11.10
   element-plus:
     specifier: ^2.5.3
     version: 2.5.3(vue@3.4.15)
