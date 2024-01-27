@@ -10,5 +10,9 @@ module.exports = {
   ],
   parserOptions: {
     ecmaVersion: 'latest'
-  }
+  },
+  // 常用函数自动导入
+  extends: [
+    './.eslintrc-auto-import.json',
+  ],
 }
