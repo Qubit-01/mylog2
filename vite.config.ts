@@ -25,5 +25,9 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
-  }
+  },
+  server: {
+    host: '0.0.0.0', //显示当前局域网地址
+    open: false, //是否自动启动浏览器
+  },
 })
