@@ -7,5 +7,9 @@
     {
       "path": "./tsconfig.app.json"
     }
-  ]
+  ],
+  "compilerOptions": {
+    // element 的 Volar 支持
+    "types": ["element-plus/global"]
+  }
 }

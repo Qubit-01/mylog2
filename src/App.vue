@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
+const a = ref(true)
 </script>
 
 <template>
   <header>
     <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+    <ElSwitch v-model="a" />
 
     <div class="wrapper">
       <HelloWorld msg="You did it!" />
