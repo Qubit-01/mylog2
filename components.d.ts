@@ -8,15 +8,15 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     ElSwitch: typeof import('element-plus/es')['ElSwitch']
-    HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
-    IconCommunity: typeof import('./src/components/icons/IconCommunity.vue')['default']
-    IconDocumentation: typeof import('./src/components/icons/IconDocumentation.vue')['default']
-    IconEcosystem: typeof import('./src/components/icons/IconEcosystem.vue')['default']
-    IconSupport: typeof import('./src/components/icons/IconSupport.vue')['default']
-    IconTooling: typeof import('./src/components/icons/IconTooling.vue')['default']
+    FooterComp: typeof import('./src/components/Main/FooterComp.vue')['default']
+    HeaderComp: typeof import('./src/components/Main/HeaderComp.vue')['default']
+    HomeComp: typeof import('./src/components/Home/HomeComp.vue')['default']
+    LogComp: typeof import('./src/components/Log/LogComp.vue')['default']
+    LoginComp: typeof import('./src/components/Login/LoginComp.vue')['default']
+    MainComp: typeof import('./src/components/Main/MainComp.vue')['default']
+    MiddleComp: typeof import('./src/components/Main/MiddleComp.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    TheWelcome: typeof import('./src/components/TheWelcome.vue')['default']
-    WelcomeItem: typeof import('./src/components/WelcomeItem.vue')['default']
+    SigninComp: typeof import('./src/components/Login/SigninComp.vue')['default']
   }
 }
