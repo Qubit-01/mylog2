@@ -1,0 +1,29 @@
+<script setup lang="ts">
+import axios from 'axios'
+
+const hitokoto = ref("")
+const getHitoketo = async () => {
+  const res = await axios.get("https://v2.jinrishici.com/one.json")
+  hitokoto.value = res.data.data.content
+}
+
+onMounted(getHitoketo)
+</script>
+
+<template>
+  <div class="one-sentence" @click="getHitoketo()" v-m>
+    <div class="tittle">一言</div>
+    <div class="lanitems">{{ hitokoto }}</div>
+  </div>
+</template>
+
+<style scoped lang="less">
+.one-sentence {
+  font-size: 14px;
+
+  .tittle {
+    font-weight: bolder;
+    margin-bottom: 8px;
+  }
+}
+</style>

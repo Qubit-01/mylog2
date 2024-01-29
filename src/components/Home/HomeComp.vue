@@ -3,8 +3,20 @@
 </script>
 
 <template>
-    <div>主页显示log的组件</div>
-    <div v-for="i in 100">log</div>
+  <div class="home">
+    <div v-for="i in 100" class="log" v-m>log</div>
+  </div>
 </template>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+.home {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+
+  .log {
+    border-radius: var(--border-radius);
+    padding: var(--padding)
+  }
+}
+</style>

@@ -48,7 +48,7 @@ onBeforeUnmount(() => clearInterval(timer))
 </script>
 
 <template>
-  <footer class="-m">
+  <footer v-m>
     <div class="center">
       <div class="statistic">
         <div>

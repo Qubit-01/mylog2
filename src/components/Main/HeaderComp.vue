@@ -1,11 +1,13 @@
 <script setup lang="ts">
-// import { Sunny, Moon } from '@element-plus/icons-vue'
-const theme = ref<boolean>(true)
+import { useUserStore } from '@/stores/user';
+import { Sunny, Moon } from '@element-plus/icons-vue'
+import { ElButton } from 'element-plus';
+const User = useUserStore()
 </script>
 
 <template>
   <div class="header">
-    <header class="-m">
+    <header v-m>
       <div class="center">
         <div class="left">
           <div class="logo">
@@ -28,11 +30,11 @@ const theme = ref<boolean>(true)
               <div class="hoverBottom mypage" @click="logout">退出登录</div>
             </div>
           </div> -->
-          <!-- <ElSwitch v-model="theme" inline-prompt
-            style="--el-switch-on-color: var(--btn-color); --el-switch-off-color: var(--btn-color)" active-text="暗"
-            inactive-text="亮" /> -->
-          <!-- <ElSwitch v-model="theme" inline-prompt active-text="暗" inactive-text="亮" 
-          :active-action-icon="Moon" :inactive-action-icon="Sunny"/> -->
+          <div class="user">
+            用户名
+          </div>
+          <ElSwitch v-model="User.isDark" :active-action-icon="Moon" :inactive-action-icon="Sunny" />
+          
         </div>
       </div>
     </header>
@@ -48,6 +50,7 @@ const theme = ref<boolean>(true)
 
 header {
   position: fixed;
+  z-index: 50;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -65,13 +68,10 @@ header {
     align-items: center;
 
     >nav {
-      // border: 1px solid;
       display: flex;
       justify-content: space-between;
       font-size: 20px;
       height: var(--height);
-
-      // width: 200px;
 
       >a {
         text-decoration: none;
@@ -108,7 +108,10 @@ header {
       }
     }
 
-    >.right {}
+    >.right {
+      display: flex;
+      align-items: center;
+    }
   }
 }
 
