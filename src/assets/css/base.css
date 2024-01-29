@@ -1,3 +1,61 @@
+:root {
+  /* 各个元素间的间距 */
+  --gap: 20px;
+  /* 页面宽度在最大挡位时的宽度 */
+  --center-width: 65%;
+}
+
+/* 中间模块通用 */
+.-m {
+  position: relative;
+  overflow: hidden;
+
+  background-color: var(--model-back-color);
+  border: var(--model-border);
+  box-shadow: var(--model-shadow);
+  backdrop-filter: blur(6px);
+
+  /* &:hover { */
+    /* background-color: var(--model-back-color-hover); */
+    /* box-shadow: var(--model-shadow-hover); */
+    /* //backdrop-filter: blur(10px); */
+  /* } */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* color palette from <https://github.com/vuejs/theme> */
 :root {
   --vt-c-white: #ffffff;
@@ -83,10 +141,4 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-
-
-:root {
-  --gap: 10px;
 }

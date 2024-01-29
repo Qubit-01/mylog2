@@ -11,6 +11,7 @@
     <MainComp />
     <FooterComp />
   </div>
+  <el-backtop :right="20" :bottom="20" />
 </template>
 
 <style scoped lang="less">

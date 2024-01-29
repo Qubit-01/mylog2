@@ -4,7 +4,8 @@ import dayjs from 'dayjs'
 let User = { data: {} }
 
 // 用户注册时间
-const userCreatetime = dayjs(User?.data?.userCreatetime).valueOf()
+// const userCreatetime = dayjs(User?.data?.userCreatetime).valueOf()
+const userCreatetime = dayjs().valueOf()
 
 const webRuntime = ref([0, 0, 0, 0])
 const serverTime = ref([0, 0, 0, 0])
@@ -47,7 +48,7 @@ onBeforeUnmount(() => clearInterval(timer))
 </script>
 
 <template>
-  <footer>
+  <footer class="-m">
     <div class="center">
       <div class="statistic">
         <div>
@@ -100,12 +101,15 @@ onBeforeUnmount(() => clearInterval(timer))
 footer {
   position: sticky;
   top: 100vh;
-
-  border-width: 1px 0;
   margin-top: var(--gap);
 
+  // 覆盖 -m 的一些样式
+  border-bottom: 0;
+  border-left: 0;
+  border-right: 0;
+
   >.center {
-    width: 65%;
+    width: var(--center-width);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
