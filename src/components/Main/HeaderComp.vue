@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { useUserStore } from '@/stores/user';
+import { useUserStore } from '@/stores/user'
 import { Sunny, Moon } from '@element-plus/icons-vue'
-import { ElButton } from 'element-plus';
 const User = useUserStore()
 </script>
 
@@ -33,8 +32,8 @@ const User = useUserStore()
           <div class="user">
             用户名
           </div>
-          <ElSwitch v-model="User.isDark" :active-action-icon="Moon" :inactive-action-icon="Sunny" />
-          
+          <ElSwitch v-model="User.isDark" class="theme-switch" :active-action-icon="Moon" :inactive-action-icon="Sunny" />
+
         </div>
       </div>
     </header>
@@ -111,6 +110,12 @@ header {
     >.right {
       display: flex;
       align-items: center;
+
+      .theme-switch {
+        --el-switch-on-color: #2c2c2c;
+        --el-switch-off-color: #f2f2f255;
+        --color: #333;
+      }
     }
   }
 }

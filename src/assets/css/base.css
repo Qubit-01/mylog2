@@ -10,7 +10,8 @@
 }
 
 html {
-  --color-background: #222;
+  --body-background-color: #222;
+  --body-background-image: url(https://pic1.zhimg.com/v2-8a4275beeee5d3798a647db30b96e9d8_r.jpg);
 
   /* -m 模块 */
   --m-background-color: #eee5;
@@ -18,8 +19,9 @@ html {
 }
 
 html.dark {
-  --color-background: #444;
-  
+  --body-background-color: #444;
+  --body-background-image: url(https://bit-1310383539.cos.ap-chengdu.myqcloud.com/note-imgs/1666594529103-6.jpg);
+
   /* -m 模块 */
   --m-background-color: #4445;
   --m-border: 1px solid #fff5;
@@ -58,8 +60,7 @@ body {
   color: var(--color-text);
   /* background: var(--color-background); */
   background-color: var(--body-background-color);
-  /* background-image: url(https://pic1.zhimg.com/v2-8a4275beeee5d3798a647db30b96e9d8_r.jpg); */
-  background-image: url(https://bit-1310383539.cos.ap-chengdu.myqcloud.com/note-imgs/1666594529103-6.jpg);
+  background-image: var(--body-background-image);
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -68,8 +69,8 @@ body {
 
   transition:
     color 0.5s,
-    background-color 0.5s;
-  /* line-height: 1.6; */
+    background-color 0.5s,
+    background-image 1s;
   font-family:
     Inter,
     -apple-system,
