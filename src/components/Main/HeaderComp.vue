@@ -61,6 +61,8 @@ header {
 
   >.center {
     width: var(--center-width);
+    transition:
+      width 0.5s;
 
     display: flex;
     justify-content: space-between;

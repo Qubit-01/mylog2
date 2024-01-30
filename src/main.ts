@@ -11,6 +11,8 @@ import * as Icons from '@element-plus/icons-vue' // element 图标
 import 'dayjs/locale/zh-cn' // element 用的dayjs要设置时区
 import App from './App.vue'
 import router from './router'
+import axios from 'axios'
+axios.defaults.baseURL = 'https://localhost:8081'
 
 const app = createApp(App)
 

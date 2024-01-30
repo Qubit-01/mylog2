@@ -7,10 +7,15 @@
   --border-radius: 6px;
   /* 默认padding */
   --padding: 8px;
+
+  @media (max-width: 1024px) {
+    /* 页面宽度在小挡位时的宽度 */
+    --center-width: 95%;
+  }
 }
 
 html {
-  --body-background-color: #222;
+  --body-background-color: #ccc;
   --body-background-image: url(https://pic1.zhimg.com/v2-8a4275beeee5d3798a647db30b96e9d8_r.jpg);
 
   /* -m 模块 */
@@ -19,7 +24,7 @@ html {
 }
 
 html.dark {
-  --body-background-color: #444;
+  --body-background-color: #333;
   --body-background-image: url(https://bit-1310383539.cos.ap-chengdu.myqcloud.com/note-imgs/1666594529103-6.jpg);
 
   /* -m 模块 */
@@ -60,7 +65,7 @@ body {
   color: var(--color-text);
   /* background: var(--color-background); */
   background-color: var(--body-background-color);
-  background-image: var(--body-background-image);
+  /* background-image: var(--body-background-image); */
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -70,7 +75,8 @@ body {
   transition:
     color 0.5s,
     background-color 0.5s,
-    background-image 1s;
+    background-image 0.5s,
+    width 0.5s;
   font-family:
     Inter,
     -apple-system,

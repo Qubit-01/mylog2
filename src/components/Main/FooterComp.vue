@@ -110,11 +110,12 @@ footer {
 
   >.center {
     width: var(--center-width);
+    transition:
+      width 0.5s;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    transition: 0.5s;
 
     .statistic {
       display: flex;

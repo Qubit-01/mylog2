@@ -32,10 +32,13 @@
     width: var(--center-width);
     display: flex;
     gap: var(--gap);
+    transition:
+      width 0.5s;
 
     .middle {
       order: 2;
       flex: 1;
+      overflow: auto;
     }
 
     .left {

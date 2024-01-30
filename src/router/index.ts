@@ -9,10 +9,10 @@ const router = createRouter({
       component: MainView,
       children: [{
         path: '', name: 'home', // 主页
-        component: () => import('../components/Home/HomeComp.vue'),
+        component: () => import('../components/Home/HomePage.vue'),
       }, {
         path: 'mylog', name: 'mylog', // 我的记录页
-        component: () => import('../components/Log/LogComp.vue'),
+        component: () => import('../components/Log/LogPage.vue'),
       },]
     },
     {
