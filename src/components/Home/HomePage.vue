@@ -22,10 +22,10 @@ logs.getLogsHome()
 
 <style scoped lang="less">
 .home {
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: var(--gap);
-  overflow: hidden;
 
   .top-log {
     border-radius: var(--border-radius);

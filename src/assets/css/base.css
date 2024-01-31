@@ -63,9 +63,8 @@ html.dark {
 body {
   min-height: 100vh;
   color: var(--color-text);
-  /* background: var(--color-background); */
   background-color: var(--body-background-color);
-  /* background-image: var(--body-background-image); */
+  background-image: var(--body-background-image);
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
