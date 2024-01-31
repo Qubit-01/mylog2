@@ -80,3 +80,41 @@ html.dark { // 里面的样式自己覆盖
   --el-bg-color: #626aef; /* 自定义深色背景颜色 */
 }
 ```
+
+
+```css
+// 模块
+// 阿里云的毛玻璃
+// 这是比较透的
+    width: 368px;
+    background: hsla(0,0%,100%,.4);
+    border-radius: 16px;
+    height: 200px;
+    padding: 30px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    transition: all .2s linear;
+    box-shadow: 0 2px 16px 0 rgba(158,175,194,.08);
+    align-items: center;
+    backdrop-filter: blur(8px);
+
+
+
+  // 这是不太透明的，就是前两个属性
+    background: hsla(0,0%,100%,.92);
+    box-shadow: none;
+
+    cursor: pointer;
+    width: 368px;
+    border-radius: 16px;
+    height: 200px;
+    padding: 30px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    transition: all .2s linear;
+    align-items: center;
+    backdrop-filter: blur(8px);
+
+```
