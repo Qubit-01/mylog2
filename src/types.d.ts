@@ -11,7 +11,7 @@ export interface Log {
     videos: string[]
     audios: string[]
     files: string[]
-    location: [[number, number], string]
+    location: [[number, number], string] | undefined
     people: string[]
     info: {
         title?: string // log的标题

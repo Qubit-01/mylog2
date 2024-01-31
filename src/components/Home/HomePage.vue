@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import axios from 'axios'
+import { useLogStore } from '@/stores/log';
 
-const logs = reactive({
-  list: []
-})
-
-axios.get('log/get_logs_home', {
-  params: { skip: 0, limit: 10 },
-}).then(res => {
-  logs.list = res.data
-})
+const logs = useLogStore()
+logs.getLogsHome()
 </script>
 
 <template>
   <div class="home">
-    <div v-for="i in logs.list" class="log" v-m>
-      <Log :log="i"></Log>
+    <div class="top-log" v-m>
+      指定
     </div>
+    <template v-if="!logs.loading">
+      <Log v-for="i in logs.list" :log="i" />
+    </template>
+    <div v-else v-m>
+      加载中...
+    </div>
+
   </div>
 </template>
 
@@ -27,9 +27,9 @@ axios.get('log/get_logs_home', {
   gap: var(--gap);
   overflow: hidden;
 
-  .log {
+  .top-log {
     border-radius: var(--border-radius);
-    padding: var(--padding)
-  }
+    padding: var(--padding);
+  } 
 }
 </style>
