@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useLogStore } from '@/stores/log';
+import useLogStore from '@/stores/log';
 
 const logs = useLogStore()
 logs.getLogsHome()
@@ -8,7 +8,7 @@ logs.getLogsHome()
 <template>
   <div class="home">
     <div class="top-log" v-m>
-      指定
+      置顶
     </div>
     <template v-if="!logs.loading">
       <Log v-for="i in logs.list" :log="i" />

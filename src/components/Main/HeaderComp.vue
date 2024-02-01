@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useUserStore } from '@/stores/user'
+import useUserStore from '@/stores/user'
 import { Sunny, Moon } from '@element-plus/icons-vue'
 const User = useUserStore()
 </script>

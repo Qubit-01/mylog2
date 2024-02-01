@@ -16,3 +16,5 @@ export const useUserStore = defineStore('user', () => {
 
   return { isDark, theme, toggleTheme }
 })
+
+export default useUserStore

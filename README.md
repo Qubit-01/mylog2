@@ -68,11 +68,6 @@ todo: 废弃，以前是待办事项，应该加进log的tags中
 
 ## 一些element的操作
 ```js
-// 亮暗主题切换
-import { useDark, useToggle } from '@vueuse/core'
-const isDark = useDark() // 响应式数据，布尔值，修改这个值，会直接修改主题
-const toggleDark = useToggle(isDark) // 调用 toggleDark() 即可改变主题
-
 // main.ts 自定义主题css
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import './styles/dark/css-vars.css'  // 自己新建一个css文件，在官方的后面导入即可覆盖
