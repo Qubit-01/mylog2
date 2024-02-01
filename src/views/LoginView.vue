@@ -4,7 +4,7 @@ console.log('🐔[Welcome.vue-:2] Welcome被加载')
 
 <template>
   <div class="login-view">
-    <div class="window" v-m>
+    <div class="window">
       <RouterView />
     </div>
   </div>
@@ -19,9 +19,8 @@ console.log('🐔[Welcome.vue-:2] Welcome被加载')
 
   .window {
     margin: auto;
-    height: 100px;
-    width: 100px;
-    border: 1px solid;
+    min-height: 100px;
+    min-width: 100px;
   }
 }
 </style>
