@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import axios from 'axios'
 import type { User } from '@/types'
+import { loginPswd } from '@/api/user'
 
 
 const login = reactive({
@@ -9,15 +9,17 @@ const login = reactive({
 })
 
 const doLogin = async () => {
-  const { data: user }: { data: User } = await axios.post("user/login_pswd", login)
-  console.log(user)
-  if (user) {
-    console.log("存储用户信息跳转")
-  } else {
-    console.log("错误")
-  }
-}
 
+  let user: User | null = null
+
+  try {
+    user = (await loginPswd(login.name, login.pswd)).data
+  } catch (e) {
+    console.log('请求失败', e)
+  }
+
+  console.log(user)
+}
 
 </script>
 

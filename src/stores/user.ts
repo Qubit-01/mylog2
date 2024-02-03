@@ -1,7 +1,14 @@
 export const useUserStore = defineStore('user', () => {
+
+  const loading = ref(true)
+
+
+
   const isDark = ref(true)
 
   const theme = computed(() => isDark.value ? 'light' : 'dark')
+
+
 
   watchEffect(() => {
     const html = document.getElementsByTagName('html')[0]
@@ -13,6 +20,11 @@ export const useUserStore = defineStore('user', () => {
   const toggleTheme = (theme: boolean) => {
     isDark.value = theme || !isDark.value
   }
+
+
+
+
+  
 
   return { isDark, theme, toggleTheme }
 })

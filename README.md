@@ -3,8 +3,21 @@
 
 使用 Vue3 + TS + Pinia + Element Plus 重构Mylog项目。  
 
-My Multi Media Log 万象录 多元记 知行台
- 
+网站名称待定： My Multi Media Log 万象录 多元记 知行台
+网站域名待定： pro(已被注册)、ink、pub、run、plus
+
+# 架构
+
+```js
+// 主题css，暂时不开发
+./assets/css/themes/dark.css
+// 基础css，定义了全局css变量、明暗主题、m模块的样式
+./assets/css/base.less
+// 里面就一个RouterView，整个页面的路由，其中的js部分是加载页面后必须执行的
+// 如 User 请求，主题设置 
+App.vue
+
+``` 
 
 旧项目的缺陷：
 
@@ -74,42 +87,4 @@ import './styles/dark/css-vars.css'  // 自己新建一个css文件，在官方�
 html.dark { // 里面的样式自己覆盖
   --el-bg-color: #626aef; /* 自定义深色背景颜色 */
 }
-```
-
-
-```css
-// 模块
-// 阿里云的毛玻璃
-// 这是比较透的
-    width: 368px;
-    background: hsla(0,0%,100%,.4);
-    border-radius: 16px;
-    height: 200px;
-    padding: 30px 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    transition: all .2s linear;
-    box-shadow: 0 2px 16px 0 rgba(158,175,194,.08);
-    align-items: center;
-    backdrop-filter: blur(8px);
-
-
-
-  // 这是不太透明的，就是前两个属性
-    background: hsla(0,0%,100%,.92);
-    box-shadow: none;
-
-    cursor: pointer;
-    width: 368px;
-    border-radius: 16px;
-    height: 200px;
-    padding: 30px 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    transition: all .2s linear;
-    align-items: center;
-    backdrop-filter: blur(8px);
-
 ```

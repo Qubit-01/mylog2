@@ -1,6 +1,3 @@
-import './assets/css/themes/dark.css'
-import './assets/css/base.css'
-
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
@@ -12,8 +9,11 @@ import 'dayjs/locale/zh-cn' // element 用的dayjs要设置时区
 import App from './App.vue'
 import router from './router'
 import axios from 'axios'
-axios.defaults.baseURL = 'https://localhost:8081'
-// axios.defaults.baseURL = 'https://mylog.cool:8081'
+
+import './assets/css/base.less'
+
+// axios.defaults.baseURL = 'https://localhost:8081'
+axios.defaults.baseURL = 'https://mylog.cool:8081'
 // axios 默认json，但是后端要加注解，麻烦
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
 
@@ -29,3 +29,4 @@ app.directive('m', dom => dom.classList.add('-m'))
 
 
 app.mount('#app')
+

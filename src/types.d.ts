@@ -1,8 +1,8 @@
 import type dayjs from "dayjs"
 
-
-
-
+/**
+ * Log的数据结构
+ */
 export interface Log {
     id: string
     userid: string
@@ -26,6 +26,9 @@ export interface Log {
     }
 }
 
+/**
+ * 用户数据结构
+ */
 export interface User {
     id: number
     name: string

@@ -1,3 +1,7 @@
+/**
+ * :root 是全局的，无关明暗主题的
+ * html 和 html.dark 是单独为主题设置的
+ */
 :root {
   /* 各个元素间的间距 */
   --gap: 20px;
@@ -18,9 +22,13 @@ html {
   --body-background-color: #ccc;
   --body-background-image: url(https://pic1.zhimg.com/v2-8a4275beeee5d3798a647db30b96e9d8_r.jpg);
 
+
   /* -m 模块 */
-  --m-background-color: #eee5;
+  // --m-background-color: #eee5;
+  --m-background-color: hsla(0, 0%, 100%, .4);
   --m-border: 1px solid #fff5;
+  --m-shadow: var(--el-box-shadow-lighter);
+  --m-hover-shadow: var(--el-box-shadow-light);
 }
 
 html.dark {
@@ -30,23 +38,25 @@ html.dark {
   /* -m 模块 */
   --m-background-color: #4445;
   --m-border: 1px solid #fff5;
+  --m-shadow: var(--el-box-shadow-lighter);
+  --m-hover-shadow: var(--el-box-shadow-light);
 }
 
 /* 中间模块通用 */
 .-m {
   position: relative;
   overflow: hidden;
-
+  transition:
+    box-shadow 0.2s linear,
+    width 0.2s linear;
   background-color: var(--m-background-color);
-  border: var(--m-border);
+  /* border: var(--m-border); */
   box-shadow: var(--m-shadow);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
 
-  /* &:hover { */
-  /* background-color: var(--model-back-color-hover); */
-  /* box-shadow: var(--model-shadow-hover); */
-  /* //backdrop-filter: blur(10px); */
-  /* } */
+  &:hover {
+    box-shadow: var(--m-hover-shadow);
+  }
 }
 
 
