@@ -1,6 +1,7 @@
 import axios from 'axios'
 import type { Log } from '@/types'
 import dayjs from 'dayjs'
+import { getLogsHome as getLogs } from '@/api/log'
 
 /**
  * 处理单个Log，直接操作参数
@@ -22,14 +23,12 @@ export const useLogStore = defineStore('log', () => {
   const list = ref<Log[]>([])
   const params = reactive({ skip: 0, limit: 20 })
   const loading = ref(true)
-  const getLogsHome = () => {
+  const getLogsHome = async () => {
     loading.value = true
-    axios.get('log/get_logs_home', { params })
-      .then(res => {
-        res.data.forEach(handleLog)
-        list.value = res.data
-        loading.value = false
-      })
+    const data  = await getLogs(params)
+    data.forEach(handleLog)
+    list.value = data
+    loading.value = false
   }
 
 

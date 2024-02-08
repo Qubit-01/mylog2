@@ -22,7 +22,6 @@ logs.getLogsHome()
 
 <style scoped lang="less">
 .home {
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: var(--gap);

@@ -12,11 +12,6 @@ import axios from 'axios'
 
 import './assets/css/base.less'
 
-// axios.defaults.baseURL = 'https://localhost:8081'
-axios.defaults.baseURL = 'https://mylog.cool:8081'
-// axios 默认json，但是后端要加注解，麻烦
-axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
-
 const app = createApp(App)
 
 app.use(createPinia())

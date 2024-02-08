@@ -36,9 +36,9 @@
       width 0.5s;
 
     .middle {
+      width: 0;
       order: 2;
       flex: 1;
-      overflow: auto;
     }
 
     .left {

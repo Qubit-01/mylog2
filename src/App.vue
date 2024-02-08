@@ -2,8 +2,8 @@
   加载页面必须做的事情
 -->
 <script setup lang="ts">
-import useUserStore from '@/stores/user'
-const User = useUserStore()
+import useGlobalStore from '@/stores/global'
+const Global = useGlobalStore()
 </script>
 
 <template>

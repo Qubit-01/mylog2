@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import useUserStore from '@/stores/user'
-import { Sunny, Moon } from '@element-plus/icons-vue'
-const User = useUserStore()
+import useGlobalStore from '@/stores/global'
+const Global = useGlobalStore()
+const User = Global.user
 </script>
 
 <template>
@@ -30,10 +30,9 @@ const User = useUserStore()
             </div>
           </div> -->
           <div class="user">
-            用户名
+            {{ User.name }}
           </div>
-          <ElSwitch v-model="User.isDark" class="theme-switch" :active-action-icon="Moon" :inactive-action-icon="Sunny" />
-
+          <ThemeSwitch />
         </div>
       </div>
     </header>
@@ -48,7 +47,7 @@ const User = useUserStore()
 }
 
 header {
-  // position: fixed;
+  position: fixed;
   z-index: 50;
   width: 100%;
   display: flex;
@@ -101,9 +100,9 @@ header {
 
         img {
           position: absolute;
-          height: 30px;
+          height: 34px;
           left: 70px;
-          top: 20px;
+          top: 25px;
           opacity: 0.7;
         }
       }
