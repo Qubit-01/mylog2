@@ -2,7 +2,6 @@ import { getUserByToken } from "@/api/user"
 import type { User } from "@/types"
 import { deepMerge } from "@/utils"
 
-const router = useRouter()
 /**
  * 全局数据
  * 
@@ -16,12 +15,12 @@ const router = useRouter()
  * 默认值 》 本地存储 》 云端获取
  * 
  * 
- * 通过
- * 
- * 
  * 
  */
+
 export const useGlobalStore = defineStore('global', () => {
+  const router = useRouter()
+
 
   // 当前默认用户数据
   const user = reactive<User>({
@@ -78,7 +77,7 @@ export const useGlobalStore = defineStore('global', () => {
 
 
   return {
-    user, token, isLogined, logout, 
+    user, token, isLogined, logout,
     isDark,
   }
 })

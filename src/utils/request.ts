@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import Env from '@/stores/constant'
 /**
  * 组件 --1--> API --2--> request
  * 
@@ -14,12 +15,10 @@ import { ElMessage } from 'element-plus'
  *   options: {}
  * })
  * 
- */ 
-
+ */
 
 const request = axios.create({
-  // baseURL: 'https://localhost:8081',
-  baseURL: 'https://mylog.cool:8081',
+  baseURL: Env.baseURL,
   headers: {
     post: {
       // axios 默认json，但是后端要加注解，麻烦
@@ -48,5 +47,16 @@ request.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+
+// 防抖方法，参一传入函数，参二传入延迟时间
+export function debounce(fn: Function, delay: number): (...args: any[]) => void {
+  let timer: number
+  return (...args: any[]) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => fn(...args), delay)
+  }
+}
+
 
 export default request

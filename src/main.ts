@@ -8,7 +8,6 @@ import * as Icons from '@element-plus/icons-vue' // element 图标
 import 'dayjs/locale/zh-cn' // element 用的dayjs要设置时区
 import App from './App.vue'
 import router from './router'
-import axios from 'axios'
 
 import './assets/css/base.less'
 
@@ -22,6 +21,4 @@ for (const [k, c] of Object.entries(Icons)) app.component(k, c)
 // 注册指令：给元素加-m的class
 app.directive('m', dom => dom.classList.add('-m'))
 
-
 app.mount('#app')
-
