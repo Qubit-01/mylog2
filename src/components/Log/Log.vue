@@ -26,7 +26,7 @@ const { log } = defineProps<{ log: Log }>()
       <!-- style="white-space: pre-wrap;display: inline;" -->
       <div v-overflow-ellipsis="3">{{ log.content }}</div>
       <!-- <span v-if="(log.videos.length || log.files.length) && !isOpen" class="openBtn" @click="isOpen = true"> -->
-      ▼<!--<span v-if="log.imgs.length">📸×{{ log.imgs.length }}</span>-->
+      <!--▼<span v-if="log.imgs.length">📸×{{ log.imgs.length }}</span>-->
       <!-- <span v-if="log.videos.length">&nbsp;🎬×{{ log.videos.length }}</span> -->
       <!-- <span v-if="log.files.length">&nbsp;📁×{{ log.files.length }}</span> -->
       <!-- </span> -->
@@ -82,7 +82,7 @@ const { log } = defineProps<{ log: Log }>()
   .block-media {
     --block-height: 100px;
     --block-border-radius: 6px;
-    --block-gap: 4px;
+    --block-gap: 2px;
 
     display: flex;
     flex-wrap: wrap;
