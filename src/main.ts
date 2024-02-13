@@ -20,5 +20,20 @@ app.use(router)
 for (const [k, c] of Object.entries(Icons)) app.component(k, c)
 // 注册指令：给元素加-m的class
 app.directive('m', dom => dom.classList.add('-m'))
+// 注册指令：超出省略号，传入行数，默认一行
+app.directive('overflowEllipsis', (dom, { value = 1 }) => {
+  Object.assign(dom.style,
+    value === 1 ? { // 单行省略号
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    } : { // 多行省略号
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      display: '-webkit-box',
+      webkitLineClamp: value,
+      webkitBoxOrient: 'vertical',
+    })
+})
 
 app.mount('#app')

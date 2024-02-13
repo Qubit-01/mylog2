@@ -19,6 +19,11 @@ onMounted(getHitoketo)
 
 <style scoped lang="less">
 .one-sentence {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: var(--border-radius);
+  padding: var(--border-radius);
   font-size: 14px;
 
   .tittle {

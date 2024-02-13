@@ -14,7 +14,7 @@ const login = reactive({
 })
 
 const doLogin = async () => {
-  let user: User | null = null
+  let user: User
   user = await loginPswd(login)
   if (user) {
     ElMessage.success(`欢迎你，${user.name} ！`)
@@ -26,7 +26,6 @@ const doLogin = async () => {
     ElMessage.error('用户名或密码错误')
   }
 }
-
 </script>
 
 <template>

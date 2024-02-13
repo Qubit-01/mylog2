@@ -11,7 +11,9 @@
       <div class="middle">
         <RouterView />
       </div>
-      <div class="left">左栏</div>
+      <div class="left">
+        <UserLan />
+      </div>
       <div class="right">
         <OneSentence />
       </div>
@@ -53,12 +55,8 @@
 
     .left,
     .right {
-      >div {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+      >* {
         border-radius: var(--border-radius);
-        padding: var(--border-radius);
       }
     }
   }

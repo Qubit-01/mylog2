@@ -7,11 +7,10 @@ logs.getLogsHome()
 
 <template>
   <div class="home">
-    <div class="top-log" v-m>
-      置顶
-    </div>
+    
+    <HomeTopLog/>
     <template v-if="!logs.loading">
-      <Log v-for="i in logs.list" :log="i" />
+      <Log v-for="i in logs.homeList" :log="i" />
     </template>
     <div v-else v-m>
       加载中...
@@ -25,10 +24,5 @@ logs.getLogsHome()
   display: flex;
   flex-direction: column;
   gap: var(--gap);
-
-  .top-log {
-    border-radius: var(--border-radius);
-    padding: var(--padding);
-  } 
 }
 </style>

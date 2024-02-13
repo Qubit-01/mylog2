@@ -10,9 +10,7 @@
 <script setup lang="ts">
 import type { Log } from '@/types'
 
-const { log } = defineProps<{
-  log: Log
-}>()
+const { log } = defineProps<{ log: Log }>()
 // console.log(log)
 
 
@@ -20,40 +18,52 @@ const { log } = defineProps<{
 
 <template>
   <div class="log" v-m>
-    <div class="title" v-if="log.info?.title">
+    <div class="title" v-if="log.info?.title" v-overflow-ellipsis>
       {{ log.info?.title }}
     </div>
 
     <div class="content">
-      {{ log.content }}
+      <!-- style="white-space: pre-wrap;display: inline;" -->
+      <div v-overflow-ellipsis="3">{{ log.content }}</div>
+      <!-- <span v-if="(log.videos.length || log.files.length) && !isOpen" class="openBtn" @click="isOpen = true"> -->
+      ▼<!--<span v-if="log.imgs.length">📸×{{ log.imgs.length }}</span>-->
+      <!-- <span v-if="log.videos.length">&nbsp;🎬×{{ log.videos.length }}</span> -->
+      <!-- <span v-if="log.files.length">&nbsp;📁×{{ log.files.length }}</span> -->
+      <!-- </span> -->
     </div>
 
-    <div class="imgs" v-if="log.imgs.length" v-m>
-      <div v-for="i in log.imgs" key="i">{{ i }}</div>
+    <div class="block-media" v-if="log.imgs.length">
+      <ViewerImgs :files="log.imgs" />
+      <ViewerVideos :files="log.videos" />
     </div>
-
-
-    <div>
-      {{ log.username }} |
-      {{ log.sendtime.format("YY-M-D H:mm") }}
-      <template v-if="log.sendtime.diff(log.logtime, 'minutes')">
-        | {{ log.logtime.format("YY-M-D H:mm") }}
-      </template>
-
-
-      <ElTag v-for="p in log.people" key="t" size="small">{{ p }}</ElTag>
-      <ElTag v-for="t in log.tags" key="t" size="small">{{ t }}</ElTag>
-      <ElTag v-if="log.info.markdown" size="small">MarkDown</ElTag>
-      <span v-if="log.location.length">{{ log.location[1] }}</span>
-      <a v-if="log.info.link" :href="log.info.link" target="_blank">查看原文</a>
-
-    </div>
-
-    <div v-m>
-      更多
-      <div>{{ log.videos }}</div>
+    <!-- 
       <div>{{ log.audios }}</div>
       <div>{{ log.files }}</div>
+     -->
+
+    <div class="tags">
+      <ElTag v-for="p in log.people" :key="p" size="small">{{ p }}</ElTag>
+      <ElTag v-for="t in log.tags" :key="t" size="small">{{ t }}</ElTag>
+      <ElTag v-if="log.info.markdown" size="small">MarkDown</ElTag>
+
+    </div>
+
+    <div class="bottom">
+      <div>{{ log.username }}</div>
+      ·
+      <el-tooltip effect="light" placement="top">
+        <div>{{ log.logtime.format("YYYY-MM-DD HH:mm") }}</div>
+        <template #content>
+          发送时间：{{ log.sendtime.format("YYYY-MM-DD HH:mm") }}<br />
+          记录时间：{{ log.logtime.format("YYYY-MM-DD HH:mm") }}
+        </template>
+      </el-tooltip>
+      ·
+      <div v-if="log.location.length">{{ log.location[1] }}</div>
+
+      <div v-if="log.info.link">
+        <a :href="log.info.link" target="_blank">查看原文</a>
+      </div>
     </div>
 
   </div>
@@ -67,6 +77,21 @@ const { log } = defineProps<{
   .title {
     font-size: 1.2rem;
     font-weight: bolder;
+  }
+
+  .block-media {
+    --block-height: 100px;
+    --block-border-radius: 6px;
+    --block-gap: 4px;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--block-gap);
+  }
+
+  .bottom {
+    display: flex;
+    gap: 4px;
   }
 }
 </style>
