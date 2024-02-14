@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
+import useGlobalStore from '@/stores/global'
 
-let User = { data: {} }
+const User = useGlobalStore().user
 
 // 用户注册时间
-// const userCreatetime = dayjs(User?.data?.userCreatetime).valueOf()
-const userCreatetime = dayjs().valueOf()
+const userCreatetime = dayjs(User.createtime).valueOf()
 
 const webRuntime = ref([0, 0, 0, 0])
 const serverTime = ref([0, 0, 0, 0])
@@ -32,7 +32,6 @@ let timer = setInterval(() => {
   pageRuntime.value = [d, h, m, lenth]
 
   // 服务时间
-
   lenth = Math.floor((time - userCreatetime) / 1000)
   d = Math.floor(lenth / (60 * 60 * 24))
   lenth %= (60 * 60 * 24)
@@ -59,7 +58,7 @@ onBeforeUnmount(() => clearInterval(timer))
           </div>
         </div>
         <div>
-          <el-tooltip content="从您注册时间到现在" placement="top">
+          <el-tooltip content="从您注册时间到现在" effect="light" placement="top">
             <div class="title">已为你服务</div>
           </el-tooltip>
           <div class="time">

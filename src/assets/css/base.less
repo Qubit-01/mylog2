@@ -58,6 +58,22 @@ html.dark {
   }
 }
 
+/* 超出省略号 */
+// 单行省略号
+.-overflow-ellipsis-s {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 多行省略号， 默认3行，但是会被指令调用时要被覆盖
+.-overflow-ellipsis-m {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
 
 
 
