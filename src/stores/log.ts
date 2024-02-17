@@ -1,7 +1,75 @@
 import type { Log } from '@/types'
 import dayjs from 'dayjs'
-import { getLogsHome as getLogs } from '@/api/log'
+import { getLogsHome, getLogsAllByToken } from '@/api/log'
 import Env from '@/stores/constant'
+import useGlobalStore from './global'
+
+// 请求响应
+export type LogsResp = {
+  list: Log[],
+  params: { skip: number, limit: number },
+  loading: boolean,
+  addLogs?: () => Promise<void>, // 分页添加log
+  getLogs?: () => Promise<void>, // 获取全部log
+  [key: string]: any,
+}
+
+/**
+ * 这里定个标准, 后端回传的log, 除了location都不能为null
+ * 数组没有值就是 [], 对象没有值就是 {}
+ */
+export const useLogStore = defineStore('log', () => {
+  const global = useGlobalStore()
+
+  // 首页的logs，每时每刻都是完好的数据
+  const home = reactive<LogsResp>({
+    list: [],
+    params: { skip: 0, limit: 10 },
+    loading: false,
+    addLogs: async () => {
+      home.loading = true
+      const data = await getLogsHome(home.params)
+      data.forEach(handleLog)
+      home.list.push(...data)
+      home.params.skip += home.params.limit
+      home.loading = false
+    }
+  })
+
+
+  const mylog = reactive<LogsResp>({
+    list: [],
+    listAll: [],
+    params: { skip: 0, limit: 50 },
+    loading: false,
+    addLogs: async () => {
+      mylog.loading = true
+      // const data = await getLogsAllByToken({ token: global.token, ...mylog.params })
+      // data.forEach(handleLog)
+      // mylog.list.push(...data)
+      mylog.list.push(...mylog.listAll.slice(mylog.params.skip, mylog.params.skip + mylog.params.limit))
+      mylog.params.skip += mylog.params.limit
+      mylog.loading = false
+    
+    },
+    // 获取所有mylog，要先清空数组
+    getLogs: async () => {
+      mylog.loading = true
+      const logs = await getLogsAllByToken({ token: global.token })
+      logs.forEach(handleLog)
+      mylog.listAll = logs
+      mylog.loading = false
+    },
+  })
+
+
+  return {
+    home,
+    mylog,
+  }
+})
+
+export default useLogStore
 
 /**
  * 处理单个Log，直接操作参数
@@ -27,30 +95,3 @@ export const toFileUrl = <T extends string | string[]>(file: T, prefix: string =
     return file
   }
 }
-
-/**
- * 这里定个标准, 后端回传的log, 除了location都不能为null
- * 数组没有值就是 [], 对象没有值就是 {}
- * 时间前端要做一个处理
- */
-export const useLogStore = defineStore('log', () => {
-  // 首页的logs，每时每刻都是完好的数据
-  const homeList = ref<Log[]>([])
-
-
-  const params = reactive({ skip: 0, limit: 5 })
-  const loading = ref(true)
-  const getLogsHome = async () => {
-    loading.value = true
-    const data = await getLogs(params)
-    data.forEach(handleLog)
-    homeList.value = data
-    loading.value = false
-  }
-
-
-
-  return { homeList, params, loading, getLogsHome }
-})
-
-export default useLogStore

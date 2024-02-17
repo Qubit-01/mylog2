@@ -5,8 +5,14 @@ import { deepMerge } from "@/utils"
 /**
  * 全局数据
  * 
- * user信息（不含token）
- * token
+ * global
+ *   user信息（不含token）
+ *   token
+ *   [计算]
+ *   isLogined 是否已登录
+ *   isDark 是否是暗黑模式
+ *   [方法]
+ *   logout 退出登录方法
  * 
  * 哪些信息需要存入token？
  * setting.pageSetting 这个页面会直接使用的
@@ -19,8 +25,6 @@ import { deepMerge } from "@/utils"
  */
 
 export const useGlobalStore = defineStore('global', () => {
-  const router = useRouter()
-
 
   // 当前默认用户数据
   const user = reactive<User>({
@@ -41,9 +45,10 @@ export const useGlobalStore = defineStore('global', () => {
 
   // 再去云端获取
   const token = ref(localStorage.getItem('token') || '')
+
   if (token.value) {
     getUserByToken({ token: token.value }).then(res => {
-      deepMerge(user, res)
+      if (res) deepMerge(user, res)
     })
   }
 

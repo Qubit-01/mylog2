@@ -1,11 +1,5 @@
 <!-- 
-  几个注意点
-  0. 首页展示和我的展示是否要一样? 待定
-      首页要展示用户名, 而我的不用
-      首页用发布时间排序, 我的用记录时间排序
-  1. 标题有才显示
-  2. 视频记录首帧, 展示在图片后面是最好的方式, 但工作量大
-      现在采用更多来下拉展示
+  MyLog和普通log有很多不同，但很多功能也要同步加入
  -->
 <script setup lang="ts">
 import type { Log } from '@/types'
@@ -37,17 +31,17 @@ const expand = () => {
     </div>
 
     <!-- 图片和视频放在一起 -->
-    <div class="block-media" v-if="log.imgs.length">
-      <ViewerImgs :files="log.imgs" />
-      <ViewerVideos :files="log.videos" /> <!-- v-if="isExpand" -->
+    <div class="block-media" v-if="log.imgs!.length">
+      <ViewerImgs :files="log.imgs!" />
+      <ViewerVideos v-if="isExpand" :files="log.videos!" /> <!-- v-if="isExpand" -->
     </div>
 
     <!-- 音频 和 文件 -->
     <template v-if="isExpand">
-      <div v-if="log.audios.length">
+      <div v-if="log.audios!.length">
         音频：{{ log.audios }}
       </div>
-      <div v-if="log.audios.length">
+      <div v-if="log.audios!.length">
         文件：{{ log.files }}
       </div>
     </template>
@@ -59,29 +53,26 @@ const expand = () => {
       <ElTag v-if="log.info.markdown" size="small">MarkDown</ElTag>
 
       <template v-if="!isExpand">
-        <span v-if="log.videos.length">🎬×{{ log.videos.length }}</span>
-        <span v-if="log.audios.length">🎙️×{{ log.audios.length }}</span>
-        <span v-if="log.files.length">📁×{{ log.files.length }}</span>
+        <span v-if="log.videos!.length">🎬{{ log.videos!.length }}</span>
+        <span v-if="log.audios!.length">🎙️{{ log.audios!.length }}</span>
+        <span v-if="log.files!.length">📁{{ log.files!.length }}</span>
+        <span v-if="log.location?.length">📍</span>
       </template>
     </div>
 
-    <div class="bottom">
+    <div v-if="isExpand" class="bottom">
       <div>{{ log.username }}</div>
       ·
       <el-tooltip effect="light" placement="top">
-        <div>{{ log.logtime.format("YYYY-MM-DD HH:mm") }}</div>
+        <div>{{ log.logtime!.format("YYYY-MM-DD HH:mm") }}</div>
         <template #content>
-          发送时间：{{ log.sendtime.format("YYYY-MM-DD HH:mm") }}<br />
-          记录时间：{{ log.logtime.format("YYYY-MM-DD HH:mm") }}
+          发送时间：{{ log.sendtime!.format("YYYY-MM-DD HH:mm") }}<br />
+          记录时间：{{ log.logtime!.format("YYYY-MM-DD HH:mm") }}
         </template>
       </el-tooltip>
 
-      <template v-if="log.location.length">
-        · <div>{{ log.location[1] }}</div>
-      </template>
-
-      <template v-if="log.info.link">
-        · <a :href="log.info.link" target="_blank">查看原文</a>
+      <template v-if="log.location!.length">
+        · <div>{{ log.location![1] }}</div>
       </template>
     </div>
 

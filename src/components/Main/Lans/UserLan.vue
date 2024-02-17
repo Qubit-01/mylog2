@@ -3,7 +3,7 @@ import useGlobalStore from '@/stores/global';
 const Global = useGlobalStore();
 const User = Global.user;
 </script>
-
+<!-- 可以加点数量统计 -->
 <template>
   <div class="user-lan" v-m>
     <template v-if="Global.isLogined">

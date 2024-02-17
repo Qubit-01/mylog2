@@ -27,9 +27,6 @@
   display: flex;
   justify-content: center;
 
-  // 两边栏宽度
-  --width-lan: 130px;
-
   .center {
     width: var(--center-width);
     display: flex;
@@ -45,12 +42,18 @@
 
     .left {
       order: 1;
-      width: var(--width-lan);
+      width: var(--lan-width);
+
+      // 栏固定
+      >div:nth-child(1) {
+        position: sticky;
+        top: calc(var(--header-height) + var(--gap));
+      }
     }
 
     .right {
       order: 3;
-      width: var(--width-lan);
+      width: var(--lan-width);
     }
 
     .left,

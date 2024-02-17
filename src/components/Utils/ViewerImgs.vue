@@ -1,8 +1,12 @@
 <!-- 
   如果是 用户log 就要有要有查看原图的功能
   但是爬虫数据不需要查看原图功能
+
+  主要用到 viewerjs， 相关文档：
+  https://blog.csdn.net/xingmeiok/article/details/127556464
  -->
 <script setup lang="ts">
+
 import Viewer from 'viewerjs'
 import "viewerjs/dist/viewer.css"
 import { toFileUrl } from '@/stores/log'
@@ -22,7 +26,8 @@ onMounted(() => {
   // 3句话，让viewer为我打工
   viewer.value = new Viewer(viewerDom.value!, {
     // button: false, //右上角关闭按钮
-    shown() { // 大图展示时，加入查看原图按钮
+    title: false, // 图片标题
+    shown(e) { // 大图展示时，加入查看原图按钮
       (viewer.value as any).toolbar.querySelector('ul').appendChild(rawBtuDom.value)
     },
   })
@@ -57,7 +62,7 @@ defineExpose({ vErrorRetry })
 </script>
 
 <template>
-  <div class="viewer-imgs" ref="viewerDom">
+  <div class="viewer-imgs" ref="viewerDom" @click.stop>
     <img v-for="img in imgs" :key="img" :src="img" alt="logimg" v-error-retry />
   </div>
 
@@ -86,7 +91,6 @@ defineExpose({ vErrorRetry })
   }
 }
 
-
 // 查看原图按钮
 .viewer-raw {
   color: #fff;
@@ -102,11 +106,6 @@ body {
 
   /* viewer的按钮设置: 由于viwer是直接生成新dom到根下，只能写在这里 */
   >.viewer-container>.viewer-footer {
-
-    /* 工具栏上的图片名和尺寸 */
-    .viewer-title {
-      display: none;
-    }
 
     /* 工具栏 */
     .viewer-toolbar {

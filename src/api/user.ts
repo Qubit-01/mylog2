@@ -15,7 +15,7 @@ export const loginPswd = (data: { name: string, pswd: string }): Promise<User> =
 }
 
 /**
- * 通过token获取用户信息
+ * 通过token获取用户信息，没找到返回null
  * 
  * @augments data { name: string, pswd: string }
  */

@@ -10,8 +10,8 @@ type EnvVar = {
 }
 
 export const Env: EnvVar = {
-  webURL: "https://mylog.cool",
-  // webURL: "https://localhost",
+  // webURL: "https://mylog.cool",
+  webURL: "https://localhost",
   baseURL: "",
   Bucket: "bit-1310383539", /* 存储桶 */
   Region: "ap-chengdu", /* 所在地域 */

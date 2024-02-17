@@ -16,7 +16,7 @@ const videoSrc = ref('')
 <template>
   <div class="viewer-videos">
 
-    <div v-for="video in videos" :key="video" class="video" @click="videoSrc = video">
+    <div v-for="video in videos" :key="video" class="video" @click.stop="videoSrc = video">
       <video>
         <source :src="video">
       </video>
