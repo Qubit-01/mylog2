@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import dayjs from 'dayjs'
 import type { Log } from '@/types'
-// import useGlobalStore from '@/stores/global'
+import useGlobalStore from '@/stores/global'
 import useLogStore from '@/stores/log'
 
-// const global = useGlobalStore() 
+const global = useGlobalStore()
 // release
 const logStore = useLogStore()
 const mylog = logStore.mylog
@@ -12,25 +13,44 @@ mylog.getLogs!()
 
 // 编辑的数据
 const logEdit = reactive<Log>({
+  userid: global.user.id,
+  username: global.user.name,
+  type: 'log',
+  sendtime: dayjs(),
+  logtime: dayjs(),
   content: '',
-  info: {}
+  tags: ["123", "456", "123", "456", "123", "456", "123", "456"],
+  imgs: [],
+  videos: [],
+  audios: [],
+  files: [],
+  location: [],
+  people: [],
+  info: {},
 })
 </script>
 
 <template>
   <div class="mylog-page">
 
-    <LogRelease :logEdit="logEdit" />
+    <LogRelease v-model="logEdit" />
 
     <div class="time-line">
       <ElTimeline v-infinite-scroll="mylog.addLogs!" :infinite-scroll-disabled="mylog.loading">
+
+        <!-- 编辑预览 -->
+        <ElTimelineItem v-if="logEdit.content" timestamp="编辑预览" placement="top">
+          <LogMylog :log="logEdit" />
+        </ElTimelineItem>
+
+        <!-- 时间线开始 -->
         <template v-for="(log, i) in mylog.list">
 
           <ElTimelineItem v-if="i != 0 && log.logtime!.year() !== mylog.list[i - 1].logtime!.year()"
             :timestamp="log.logtime!.year().toString()" type='primary' placement="top" />
 
           <ElTimelineItem :timestamp="log.logtime!.format('YYYY-MM-DD HH:mm')" placement="top">
-            <MyLog :log="log" />
+            <LogMylog :log="log" />
           </ElTimelineItem>
 
         </template>

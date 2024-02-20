@@ -62,6 +62,15 @@
         border-radius: var(--border-radius);
       }
     }
+
+    @media (max-width: 700px) {
+
+      .left,
+      .right {
+        display: none;
+      }
+    }
   }
+
 }
 </style>

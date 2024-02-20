@@ -2,21 +2,22 @@ import type dayjs from "dayjs"
 
 /**
  * Log的数据结构
+ * 都必须有，但是可以为空数组
  */
 export interface Log {
   id?: string
-  userid?: string
-  username?: string
-  type?: 'public' | 'log' | 'tag'
+  userid: string
+  username: string
+  type: 'public' | 'log' | 'tag'
   sendtime?: dayjs.Dayjs // 发送时间
-  logtime?: dayjs.Dayjs // 记录时间
+  logtime: dayjs.Dayjs // 记录时间
   content: string
-  tags?: string[]
-  imgs?: string[]
-  videos?: string[]
-  audios?: string[]
-  files?: string[]
-  location?: [[number, number], string]
+  tags: string[]
+  imgs: string[]
+  videos: string[]
+  audios: string[]
+  files: string[]
+  location: [[number, number], string] | []
   people?: string[]
   info: {
     title?: string // log的标题
@@ -30,7 +31,7 @@ export interface Log {
  * 用户数据结构
  */
 export interface User {
-  id: number
+  id: string
   name: string
   img?: string
   info?: {

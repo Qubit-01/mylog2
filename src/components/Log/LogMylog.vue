@@ -26,22 +26,21 @@ const expand = () => {
 
     <!-- 内容 -->
     <div class="text">
-      <!-- style="white-space: pre-wrap;display: inline;" -->
-      <span class="content" v-overflow-ellipsis="isExpand ? 0 : 3">{{ log.content }}</span>
+      <pre class="content" v-overflow-ellipsis="isExpand ? 0 : 3" v-text="log.content"></pre>
     </div>
 
     <!-- 图片和视频放在一起 -->
-    <div class="block-media" v-if="log.imgs!.length">
-      <ViewerImgs :files="log.imgs!" />
-      <ViewerVideos v-if="isExpand" :files="log.videos!" /> <!-- v-if="isExpand" -->
+    <div class="block-media" v-if="log.imgs.length">
+      <ViewerImgs :files="log.imgs" />
+      <ViewerVideos v-if="isExpand" :files="log.videos" /> <!-- v-if="isExpand" -->
     </div>
 
     <!-- 音频 和 文件 -->
     <template v-if="isExpand">
-      <div v-if="log.audios!.length">
+      <div v-if="log.audios.length">
         音频：{{ log.audios }}
       </div>
-      <div v-if="log.audios!.length">
+      <div v-if="log.audios.length">
         文件：{{ log.files }}
       </div>
     </template>
@@ -53,10 +52,10 @@ const expand = () => {
       <ElTag v-if="log.info.markdown" size="small">MarkDown</ElTag>
 
       <template v-if="!isExpand">
-        <span v-if="log.videos!.length">🎬{{ log.videos!.length }}</span>
-        <span v-if="log.audios!.length">🎙️{{ log.audios!.length }}</span>
-        <span v-if="log.files!.length">📁{{ log.files!.length }}</span>
-        <span v-if="log.location?.length">📍</span>
+        <span v-if="log.videos.length">🎬{{ log.videos.length }}</span>
+        <span v-if="log.audios.length">🎙️{{ log.audios.length }}</span>
+        <span v-if="log.files.length">📁{{ log.files.length }}</span>
+        <span v-if="log.location.length">📍</span>
       </template>
     </div>
 
@@ -69,10 +68,10 @@ const expand = () => {
           发送时间：{{ log.sendtime!.format("YYYY-MM-DD HH:mm") }}<br />
           记录时间：{{ log.logtime!.format("YYYY-MM-DD HH:mm") }}
         </template>
-      </el-tooltip>
+      </el-tooltip> 
 
-      <template v-if="log.location!.length">
-        · <div>{{ log.location![1] }}</div>
+      <template v-if="log?.location?.length">
+        · <div>{{ log.location[1] }}</div>
       </template>
     </div>
 
@@ -95,6 +94,9 @@ const expand = () => {
 
     .content {
       width: fit-content;
+      white-space: pre-wrap;
+      // 继承父元素的字体
+      font-family: unset;
     }
   }
 
