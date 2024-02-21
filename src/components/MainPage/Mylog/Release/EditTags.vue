@@ -1,6 +1,8 @@
 <script setup lang="ts">
 
-const tags = defineModel<string[]>({ required: true })
+const tags = defineModel<string[]>({ 
+  required: true,
+})
 
 const del = (tag: string) => {
   // tags.value = tags.value.filter((item) => item !== tag)
@@ -19,7 +21,7 @@ const showInput = () => {
   nextTick(() => { inputDom.value!.focus() })
 }
 // 输入框回车或者失去焦点
-const handleInputConfirm = () => {
+const inputConfirm = () => {
   if (inputValue.value) {
     tags.value.push(inputValue.value)
   }
@@ -34,10 +36,9 @@ const handleInputConfirm = () => {
       {{ tag }}
     </ElTag>
 
-
-    <ElInput v-if="inputVisible" ref="inputDom" v-model="inputValue" size="small" @keyup.enter="handleInputConfirm"
-      @blur="handleInputConfirm" style="width:90px;margin-right:5px;margin-bottom:5px" maxlength="20" />
-    <ElButton v-else size="small" @click="showInput" style="width:90px;margin-right:5px;margin-bottom:5px">
+    <ElInput v-if="inputVisible" ref="inputDom" v-model="inputValue" maxlength="20" size="small"
+      @keyup.enter="inputConfirm" @blur="inputConfirm" style="width:90px;" />
+    <ElButton v-else size="small" @click="showInput" style="width:90px;">
       + New Tag
     </ElButton>
   </div>
@@ -47,5 +48,6 @@ const handleInputConfirm = () => {
 .edit-tags {
   display: flex;
   gap: 4px;
+  flex-wrap: wrap;
 }
 </style>

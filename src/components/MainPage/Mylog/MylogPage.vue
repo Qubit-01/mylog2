@@ -1,46 +1,26 @@
 <script setup lang="ts">
-import dayjs from 'dayjs'
-import type { Log } from '@/types'
-import useGlobalStore from '@/stores/global'
 import useLogStore from '@/stores/log'
 
-const global = useGlobalStore()
-// release
 const logStore = useLogStore()
 const mylog = logStore.mylog
-mylog.getLogs!()
+mylog.getLogs!() // 进入页面再获取数据
 
 
-// 编辑的数据
-const logEdit = reactive<Log>({
-  userid: global.user.id,
-  username: global.user.name,
-  type: 'log',
-  sendtime: dayjs(),
-  logtime: dayjs(),
-  content: '',
-  tags: ["123", "456", "123", "456", "123", "456", "123", "456"],
-  imgs: [],
-  videos: [],
-  audios: [],
-  files: [],
-  location: [],
-  people: [],
-  info: {},
-})
+// 拿到编辑的数据
+const logReleaseDom = ref()
 </script>
 
 <template>
   <div class="mylog-page">
 
-    <LogRelease v-model="logEdit" />
+    <LogRelease ref="logReleaseDom" />
 
     <div class="time-line">
       <ElTimeline v-infinite-scroll="mylog.addLogs!" :infinite-scroll-disabled="mylog.loading">
 
         <!-- 编辑预览 -->
-        <ElTimelineItem v-if="logEdit.content" timestamp="编辑预览" placement="top">
-          <LogMylog :log="logEdit" />
+        <ElTimelineItem v-if="logReleaseDom?.logEdit.content" timestamp="编辑预览" placement="top">
+          <LogMylog :log="logReleaseDom?.logEdit" />
         </ElTimelineItem>
 
         <!-- 时间线开始 -->

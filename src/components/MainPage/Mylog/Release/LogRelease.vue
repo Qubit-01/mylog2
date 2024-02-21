@@ -1,36 +1,91 @@
 <script setup lang="ts">
+import dayjs from 'dayjs'
 import type { Log } from '@/types'
+import {
+  Clock,
+  PriceTag,
+  Picture,
+  VideoCamera,
+  Microphone,
+  FolderOpened,
+  Location,
+  User,
+  More,
+} from '@element-plus/icons-vue'
+import useGlobalStore from '@/stores/global'
+import type { UploadUserFile } from 'element-plus'
 
-const logEdit = defineModel<Log>({ required: true })
+const global = useGlobalStore()
+
+// 编辑的数据
+const logEdit = reactive<Log>({
+  userid: global.user.id,
+  username: global.user.name,
+  type: 'log',
+  sendtime: dayjs(),
+  logtime: dayjs(),
+  content: '',
+  tags: ['123', '456', '123', '456', '456'],
+  imgs: [],
+  videos: [],
+  audios: [],
+  files: [],
+  location: [],
+  people: [],
+  info: {},
+})
+
+// 保存上传的文件对象
+const logEditFiles = ref<UploadUserFile[]>([])
+
+// 编辑数据组件显示
+const editVisible = reactive({
+  logtime: false,
+  tags: false,
+  imgs: false,
+  videos: false,
+  audios: false,
+  files: false,
+  location: false,
+  people: false,
+  info: false,
+})
 
 const release = () => {
   console.log('发布', logEdit)
 }
 
-const add = (item: string) => {
+const add = (item: keyof typeof editVisible) => {
   console.log('添加', item)
+  editVisible[item] = !editVisible[item]
 }
 
-
+defineExpose({ logEdit }) // 暴露数据给父组件用
 </script>
 
 <template>
   <div class="log-release" v-m>
-    <!-- {{ editNote }} -->
     {{ logEdit }}
+    <hr />
+    {{ logEditFiles }}
 
-    <ElInput v-model="logEdit.content" :autosize="{ minRows: 3 }" type="textarea" placeholder="记录内容" />
+    <ElInput
+      v-model="logEdit.content"
+      :autosize="{ minRows: 3 }"
+      type="textarea"
+      placeholder="记录内容"
+    />
 
     <div class="icons">
-      <Clock class="icon" @click="add('logtime')" />
-      <PriceTag class="icon" @click="add('tags')" />
-      <Picture class="icon" @click="add('imgs')" />
-      <VideoCamera class="icon" @click="add('videos')" />
-      <Microphone class="icon" @click="add('audios')" />
-      <FolderOpened class="icon" @click="add('files')" />
-      <Location class="icon" @click="add('location')" />
-      <User class="icon" @click="add('people')" />
-      <More class="icon" @click="add('info')" />
+      <ElButton link :icon="Clock" @click="add('logtime')" />
+      <ElButton link :icon="PriceTag" @click="add('tags')" />
+      <ElButton link :icon="Picture" @click="add('imgs')" />
+      <ElButton link :icon="VideoCamera" @click="add('videos')" />
+      <ElButton link :icon="Microphone" @click="add('audios')" />
+      <ElButton link :icon="FolderOpened" @click="add('files')" />
+      <ElButton link :icon="Location" @click="add('location')" />
+      <ElButton link :icon="User" @click="add('people')" />
+      <ElButton link :icon="More" @click="add('info')" />
     </div>
 
     <div class="edits">
@@ -42,11 +97,12 @@ const add = (item: string) => {
         <EditTags v-model="logEdit.tags" />
       </div>
 
-
+      <div>
+        <EditImgs v-model="logEdit.imgs" v-model:files="logEditFiles" />
+      </div>
     </div>
 
     <div>
-
       <ElButton size="small" type="primary" @click="release">发布</ElButton>
     </div>
   </div>
@@ -61,14 +117,15 @@ const add = (item: string) => {
   flex-direction: column;
   gap: 8px;
 
-
   .icons {
     display: flex;
     gap: 4px;
 
-    .icon {
+    > * {
+      font-size: 24px;
       height: 24px;
-      cursor: pointer;
+      width: 24px;
+      margin: 0;
     }
   }
 
@@ -77,6 +134,5 @@ const add = (item: string) => {
     flex-direction: column;
     gap: 8px;
   }
-
 }
 </style>
