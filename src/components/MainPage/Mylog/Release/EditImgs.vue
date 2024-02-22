@@ -29,6 +29,11 @@ const index = ref(0) // 给图片计数，用于命名
 const count = ref(0) // 给图片计数，用于压缩时控制按钮
 // watchEffect(() => count ? props.setIsLoad(true) : props.setIsLoad(false)) // 要控制外层的加载状态
 
+interface LogImgRawFile extends File {
+  exifdata?: any // exif信息
+  iptcdata?: any // iptc信息
+}
+
 interface LogImgFile extends UploadFile {
   key?: string // 文件名，上传时间-序号-文件名
   compressImg?: ExifImgFile // 压缩文件

@@ -5,43 +5,56 @@ const logStore = useLogStore()
 const mylog = logStore.mylog
 mylog.getLogs!() // 进入页面再获取数据
 
-
 // 拿到编辑的数据
 const logReleaseDom = ref()
 </script>
 
 <template>
   <div class="mylog-page">
-
     <LogRelease ref="logReleaseDom" />
 
     <div class="time-line">
-      <ElTimeline v-infinite-scroll="mylog.addLogs!" :infinite-scroll-disabled="mylog.loading">
-
+      <ElTimeline
+        v-infinite-scroll="mylog.addLogs!"
+        :infinite-scroll-disabled="mylog.loading"
+      >
         <!-- 编辑预览 -->
-        <ElTimelineItem v-if="logReleaseDom?.logEdit.content" timestamp="编辑预览" placement="top">
+        <ElTimelineItem
+          v-if="logReleaseDom?.logEdit.content"
+          timestamp="编辑预览"
+          placement="top"
+        >
           <LogMylog :log="logReleaseDom?.logEdit" />
         </ElTimelineItem>
 
         <!-- 时间线开始 -->
         <template v-for="(log, i) in mylog.list">
+          <ElTimelineItem
+            v-if="i != 0 && log.logtime!.year() !== mylog.list[i - 1].logtime!.year()"
+            :timestamp="log.logtime!.year().toString()"
+            type="danger"
+            placement="top"
+          />
 
-          <ElTimelineItem v-if="i != 0 && log.logtime!.year() !== mylog.list[i - 1].logtime!.year()"
-            :timestamp="log.logtime!.year().toString()" type='primary' placement="top" />
-
-          <ElTimelineItem :timestamp="log.logtime!.format('YYYY-MM-DD HH:mm')" placement="top">
+          <ElTimelineItem
+            :timestamp="log.logtime!.format('YYYY-MM-DD HH:mm')"
+            :type="log.type === 'public' ? 'warning' : undefined"
+            placement="top"
+          >
             <LogMylog :log="log" />
           </ElTimelineItem>
-
         </template>
 
-        <ElTimelineItem v-if="mylog.loading" timestamp="loading..." placement="top">
+        <ElTimelineItem
+          v-if="mylog.loading"
+          timestamp="loading..."
+          placement="top"
+        >
           <LogLoading />
         </ElTimelineItem>
 
         <ElTimelineItem timestamp="origin" placement="top" />
       </ElTimeline>
-
     </div>
   </div>
 </template>
@@ -54,7 +67,6 @@ const logReleaseDom = ref()
   // background-color: var(--m-background-color);
 
   .time-line {
-
     .timeline-item {
       padding: var(--padding);
       border-radius: var(--border-radius);
@@ -74,9 +86,7 @@ const logReleaseDom = ref()
       .el-timeline-item {
         padding-bottom: 8px; // 节点到下边的距离
       }
-
     }
-
 
     // // 时间线时间文本
     // ::v-deep(.el-timeline-item__timestamp) {
@@ -84,6 +94,5 @@ const logReleaseDom = ref()
     //   margin-bottom: 5px;
     // }
   }
-
 }
 </style>

@@ -1,4 +1,5 @@
 import EXIF from 'exif-js'
+
 import type {
   UploadFile,
   UploadFiles,
