@@ -107,7 +107,6 @@ export interface ExifImgFile extends File {
   exifdata?: any // exif信息
   iptcdata?: any // iptc信息
 }
-
 /**
  *传入图片文件，返回图片EXIF信息
  *提取EXIF信息，写入文件属性中

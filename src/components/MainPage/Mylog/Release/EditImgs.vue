@@ -29,20 +29,15 @@ const index = ref(0) // 给图片计数，用于命名
 const count = ref(0) // 给图片计数，用于压缩时控制按钮
 // watchEffect(() => count ? props.setIsLoad(true) : props.setIsLoad(false)) // 要控制外层的加载状态
 
-interface LogImgRawFile extends UploadRawFile, File {
-  exifdata?: any // exif信息
-  iptcdata?: any // iptc信息
-}
-
 interface LogImgFile extends UploadFile {
   key?: string // 文件名，上传时间-序号-文件名
-  compressImg?: LogImgRawFile // 压缩文件
-  compressImg95?: LogImgRawFile // 95压缩文件
+  compressImg?: ExifImgFile // 压缩文件
+  compressImg95?: ExifImgFile // 95压缩文件
 }
 
 // :on-change 状态变化，添加文件、上传成功、失败
 const onChange = async (file: LogImgFile, files: UploadFiles) => {
-  const raw = file.raw! as LogImgRawFile
+  const raw = file.raw! as ExifImgFile
 
   // 判断是否是图片,判断大小
   if (types.indexOf(raw.type) < 0 || raw.size > SIZE) {
@@ -72,8 +67,6 @@ const onChange = async (file: LogImgFile, files: UploadFiles) => {
     file.compressImg95 = res
     count.value--
   })
-
-  console.log(file)
 }
 </script>
 
