@@ -32,18 +32,17 @@
     <!-- vue主程序 -->
     <script type="module" src="/src/main.ts"></script>
 
-    <!-- -->
+    <!-- 前置js -->
     <script type="text/javascript">
-      //高德地图
-      window._AMapSecurityConfig = {
-        serviceHost: 'https://mylog.cool/_AMapService',
-      }
-
       //去除谷歌浏览器的scroll、wheel等事件警告 https://blog.csdn.net/qq_63358859/article/details/134078025
       ;(function () {
         if (typeof EventTarget !== 'undefined') {
           let func = EventTarget.prototype.addEventListener
-          EventTarget.prototype.addEventListener = function (type, fn, capture) {
+          EventTarget.prototype.addEventListener = function (
+            type,
+            fn,
+            capture
+          ) {
             this.func = func
             if (typeof capture !== 'boolean') {
               capture = capture || {}
@@ -53,6 +52,11 @@
           }
         }
       })()
+
+      //高德地图
+      window._AMapSecurityConfig = {
+        serviceHost: 'https://mylog.cool/_AMapService',
+      }
     </script>
 
     <!-- 高德地图 -->

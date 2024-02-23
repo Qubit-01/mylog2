@@ -107,6 +107,10 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
           v-model:logEdit="logEdit"
         />
       </div>
+
+      <div>
+        <EditLocation v-model="logEdit.location" />
+      </div>
     </div>
 
     <div>
