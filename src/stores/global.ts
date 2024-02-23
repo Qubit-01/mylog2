@@ -28,7 +28,7 @@ export const useGlobalStore = defineStore('global', () => {
 
   // 当前默认用户数据
   const user = reactive<User>({
-    id: 0,
+    id: '0',
     name: '未登录',
     setting: {
       page: {
@@ -54,7 +54,7 @@ export const useGlobalStore = defineStore('global', () => {
 
   // 用户相关 ===============================
   // 是否已登录，判断
-  const isLogined = computed(() => user.id !== 0)
+  const isLogined = computed(() => user.id !== '0')
   // 退出登录，删除 token、pageSetting
   const logout = () => {
     localStorage.removeItem('token')
