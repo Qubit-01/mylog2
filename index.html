@@ -1,50 +1,58 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
 
-<head>
-  <meta charset="UTF-8">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <!-- 给爬虫看的 -->
+    <meta name="author" content="廖世强" />
+    <meta name="keywords" content="多元记,廖世强,bit,2928318801,四川农业大学" />
+    <meta name="description" content="一个为社交生活设计的网站。" />
+    <!-- 避免QQ空间图片直链请求不可引用提示: 有空看看是否能优化 -->
+    <meta name="referrer" content="never" />
 
-  <!-- 百度地图：使页面更好的在移动平台上展示 -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <!-- 给爬虫看的 -->
-  <meta name="author" content="廖世强">
-  <meta name="keywords" content="多元记,廖世强,bit,2928318801,四川农业大学">
-  <meta name="description" content="一个为社交生活设计的网站。">
-  <!-- 避免QQ空间图片直链请求不可引用提示: 有空看看是否能优化 -->
-  <meta name="referrer" content="never">
+    <!-- 忘记是干嘛的了 -->
+    <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
+    <!-- <meta name="referrer" content="strict-origin-when-cross-origin"> -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> -->
 
-  <!-- 忘记是干嘛的了 -->
-  <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
-  <!-- <meta name="referrer" content="strict-origin-when-cross-origin"> -->
-  <!-- <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> -->
+    <link
+      rel="icon"
+      href="https://bit-1310383539.cos.ap-chengdu.myqcloud.com/web-files/favicon.svg"
+    />
+    <title>多元记 - 把你写成书</title>
+  </head>
 
-  <link rel="icon" href="https://bit-1310383539.cos.ap-chengdu.myqcloud.com/web-files/favicon.svg">
-  <title>多元记 - 把你写成书</title>
-</head>
+  <body>
+    <div id="app"></div>
 
-<body>
-  <div id="app"></div>
+    <!-- vue主程序 -->
+    <script type="module" src="/src/main.ts"></script>
 
-  <!-- 百度统计 -->
-  <script>
-    var _hmt = _hmt || [];
-    (function () {
-      var hm = document.createElement("script");
-      hm.src = "https://hm.baidu.com/hm.js?61726611f7613c50b20b1a4df2c0b030";
-      var s = document.getElementsByTagName("script")[0];
-      s.parentNode.insertBefore(hm, s);
-    })();
-  </script>
-  <!-- 百度地图Api -->
-  <!-- <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=Asu3sNrpOfXxODcUpv7SaA8kS2lxQGdr"></script> -->
-  <!-- QQ登录要用: 有空看看是否能优化 -->
-  <!-- <script type="text/javascript" charset="utf-8" src="https://connect.qq.com/qc_jssdk.js" data-appid="102046486"
+    <!-- <script type="text/javascript">
+      window._AMapSecurityConfig = {
+        serviceHost: 'https://mylog.cool/_AMapService',
+      }
+    </script> -->
+    <!-- <script
+      type="text/javascript"
+      src="https://webapi.amap.com/maps?v=2.0&key=3e157c0915ab643cb42b74eb4c943cf5"
+    ></script> -->
+
+    <!-- QQ登录要用: 有空看看是否能优化 -->
+    <!-- <script type="text/javascript" charset="utf-8" src="https://connect.qq.com/qc_jssdk.js" data-appid="102046486"
     data-redirecturi="https://mylog.cool/#/qq-redirect"></script> -->
-  <!-- vue主程序 -->
-  <script type="module" src="/src/main.ts"></script>
-  <!-- 背景漂移粒子 -->
-  <script type="text/javascript" color="150,150,200" opacity="1" zindex="-2" count="70"
-    src="https://cdn.bootcss.com/canvas-nest.js/1.0.1/canvas-nest.min.js"></script>
-</body>
-
+    <!-- 背景漂移粒子 -->
+    <script
+      type="text/javascript"
+      color="150,150,200"
+      opacity="1"
+      zindex="-2"
+      count="70"
+      src="https://cdn.bootcss.com/canvas-nest.js/1.0.1/canvas-nest.min.js"
+    ></script>
+  </body>
 </html>
