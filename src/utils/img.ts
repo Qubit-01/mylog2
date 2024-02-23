@@ -1,12 +1,5 @@
 import EXIF from 'exif-js'
 
-import type {
-  UploadFile,
-  UploadFiles,
-  UploadUserFile,
-  UploadRawFile,
-} from 'element-plus'
-
 /**
  * 压缩图片
  * raw 6651136 6.35MB
@@ -17,6 +10,18 @@ import type {
  * @returns
  */
 export function compressImg(file: File, rate = 0.2): Promise<File> {
+  function dataURLtoFile(dataurl: string, fileName: string) {
+    let arr = dataurl.split(','),
+      mime = arr[0].match(/:(.*?);/)![1],
+      bstr = atob(arr[1]),
+      n = bstr.length,
+      u8arr = new Uint8Array(n)
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n)
+    }
+    return new File([u8arr], fileName, { type: mime })
+  }
+
   let disposeFile = file
 
   // 如果是gif图片，不压缩
@@ -34,7 +39,7 @@ export function compressImg(file: File, rate = 0.2): Promise<File> {
   read.readAsDataURL(disposeFile)
   return new Promise((resolve, reject) => {
     try {
-      read.onload = e => {
+      read.onload = (e) => {
         const img = new Image()
         img.src = e.target!.result as string
         img.onload = function () {
@@ -58,20 +63,6 @@ export function compressImg(file: File, rate = 0.2): Promise<File> {
     } catch (error) {
       reject(disposeFile)
     }
-  })
-}
-
-function dataURLtoFile(dataurl: string, fileName: string) {
-  let arr = dataurl.split(','),
-    mime = arr[0].match(/:(.*?);/)![1],
-    bstr = atob(arr[1]),
-    n = bstr.length,
-    u8arr = new Uint8Array(n)
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n)
-  }
-  return new File([u8arr], fileName, {
-    type: mime,
   })
 }
 
@@ -102,23 +93,22 @@ export function getFileByUrl(url: string, fileName?: string): Promise<File> {
   })
 }
 
-
-
 export interface ExifImgFile extends File {
   exifdata?: any // exif信息
   iptcdata?: any // iptc信息
 }
+
 /**
- *传入图片文件，返回图片EXIF信息
- *提取EXIF信息，写入文件属性中
+ *提取EXIF信息，写入文件属性中，并返回
  * @param file
- * @param fun
+ * @return Promise<图片EXIF信息>
  */
-export function getExifByFile(file: ExifImgFile) {
+export function getExifByFile(file: ExifImgFile): Promise<any> {
   return new Promise((resolve, reject) => {
     try {
       // @ts-ignore
       window.n = 0 // exif-js 自身的bug修复
+      // @ts-ignore
       EXIF.getData(file, () => {
         resolve(EXIF.getAllTags(file))
       })
@@ -131,36 +121,8 @@ export function getExifByFile(file: ExifImgFile) {
 // 传入URL，返回图片EXIF信息
 export function getExifFromURL(url: string) {
   return new Promise(() => {
-    getFileByUrl(url).then(file => {
+    getFileByUrl(url).then((file) => {
       return getExifByFile(file)
     })
   })
-}
-
-/**
- * Base64 编码/解码
- */
-export function Encode64(str: string) {
-  // 编码
-  return btoa(
-    encodeURIComponent(str).replace(
-      /%([0-9A-F]{2})/g,
-      function toSolidBytes(match, p1) {
-        // @ts-ignore
-        return String.fromCharCode('0x' + p1)
-      }
-    )
-  )
-}
-
-export function Decode64(str: string) {
-  // 解码
-  return decodeURIComponent(
-    atob(str)
-      .split('')
-      .map(function (c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-      })
-      .join('')
-  )
 }

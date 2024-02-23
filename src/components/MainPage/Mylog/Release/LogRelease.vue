@@ -13,7 +13,7 @@ import {
   More,
 } from '@element-plus/icons-vue'
 import useGlobalStore from '@/stores/global'
-import type { UploadUserFile } from 'element-plus'
+import type { LogImgFile } from './types'
 
 const global = useGlobalStore()
 
@@ -25,7 +25,7 @@ const logEdit = reactive<Log>({
   sendtime: dayjs(),
   logtime: dayjs(),
   content: '',
-  tags: ['123', '456', '123', '456', '456'],
+  tags: [],
   imgs: [],
   videos: [],
   audios: [],
@@ -36,7 +36,10 @@ const logEdit = reactive<Log>({
 })
 
 // 保存上传的文件对象
-const logEditFiles = ref<UploadUserFile[]>([])
+const logEditFiles = ref<{ imgs: LogImgFile[]; videos: LogImgFile[] }>({
+  imgs: [],
+  videos: [],
+})
 
 // 编辑数据组件显示
 const editVisible = reactive({
@@ -65,9 +68,9 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
 
 <template>
   <div class="log-release" v-m>
-    {{ logEdit }}
-    <hr />
-    {{ logEditFiles }}
+    <div v-m>logEdit: {{ logEdit }}</div>
+    <div v-m>imgs: {{ logEdit.imgs }}</div>
+    <div v-m>logEditFiles: {{ logEditFiles }}</div>
 
     <ElInput
       v-model="logEdit.content"
@@ -98,7 +101,11 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
       </div>
 
       <div>
-        <EditImgs v-model="logEdit.imgs" v-model:files="logEditFiles" />
+        <EditImgs
+          v-model="logEdit.imgs"
+          v-model:files="logEditFiles.imgs"
+          v-model:logEdit="logEdit"
+        />
       </div>
     </div>
 

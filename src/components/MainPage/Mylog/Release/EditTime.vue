@@ -12,15 +12,21 @@ const editTime = computed({
   },
   set(v) {
     time.value = dayjs(v)
-  }
+  },
 })
 
 time.value = dayjs()
 </script>
 
 <template>
-  <ElDatePicker v-model="editTime" type="datetime" :clearable='false' :editable="false" placeholder="记录时间"
-    format="YYYY-MM-DD HH:mm" />
+  <ElDatePicker
+    v-model="editTime"
+    type="datetime"
+    :clearable="false"
+    :editable="false"
+    placeholder="记录时间"
+    format="YYYY-MM-DD HH:mm"
+  />
 </template>
 
 <style scoped lang="less"></style>
