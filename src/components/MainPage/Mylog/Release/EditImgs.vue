@@ -15,14 +15,15 @@
 import dayjs from 'dayjs'
 import type { Log } from '@/types'
 import type { LogImgFile } from './types'
-import type { UploadFiles, UploadUserFile } from 'element-plus'
+import type { UploadFiles } from 'element-plus'
 import { getExifByFile, compressImg, type ExifImgFile } from '@/utils/img'
+import AMap from '@/utils/map'
 
 // 文件名
 const imgs = defineModel<string[]>({ required: true })
 // File对象列表
 const files = defineModel<LogImgFile[]>('files', { required: true })
-// File对象列表
+// logEdit 对象
 const logEdit = defineModel<Log>('logEdit', { required: true })
 
 const types = ['image/png', 'image/gif', 'image/jpeg', 'image/jpg']
@@ -71,46 +72,56 @@ const onChange = async (file: LogImgFile, files: UploadFiles) => {
 }
 
 // 自动用Exif信息补全
-// const useExif = () => {
-//   let exif = null,
-//     haveItems = [false, false]
-//   for (const img of files.value) {
-//     exif = img.raw!.exifdata
-//     if (JSON.stringify(exif) == '{}') continue
-//     if (!haveItems[0] && exif.DateTime) {
-//       // "2023:03:08 16:07:01" 转为 "2023-03-23 16:07:01"
-//       logEdit.value.logtime = exif.DateTime.replace(':', '-').replace(':', '-')
-//       haveItems[0] = true
-//     }
-//     if (!haveItems[1] && exif.GPSLongitude && exif.GPSLatitude) {
-//       let [lng, lat] = [exif.GPSLongitude, exif.GPSLatitude]
-//       lng = lng[0] + lng[1] / 60 + lng[2] / 3600
-//       lat = lat[0] + lat[1] / 60 + lat[2] / 3600
-//       let gpsPoint = new BMap.Point(lng, lat)
-//       // 图片里面是GPS坐标，要转为百度地图用的bd09ll
-//       new BMap.Convertor().translate([gpsPoint], 1, 5, (p) => {
-//         if (!props.editNote.noteLocation) props.editNote.noteLocation = []
-//         props.editNote.noteLocation[0] = [p.points[0].lng, p.points[0].lat]
-//       })
-//       haveItems[1] = true
-//     }
+const useExif = () => {
+  let exif = null
+  const flag = {
+    logtime: false,
+    location: false,
+  }
+  for (const img of files.value) {
+    exif = img.raw!.exifdata
+    if (!Object.keys(exif).length) continue
 
-//     let f = haveItems.reduce(
-//       (total, currentValue) => total && currentValue,
-//       true
-//     )
-//     if (f) return
-//     else continue
-//   }
+    if (!flag.logtime) {
+      let dateTime =
+        exif.DateTimeOriginal || // 照片在被拍下来的日期/时间，通常和DateTime一样
+        exif.DateTime || // 图像最后一次被修改时的日期/时间 "YYYY:MM:DD HH:MM:SS"
+        exif.DateTimeDigitized // 照片被数字化时的日期/时间
+      if (dateTime) {
+        // 'YYYY:MM:DD HH:MM:SS' 转为 'YYYY-MM-DD HH:mm:ss'
+        dateTime = dateTime.replace(':', '-').replace(':', '-')
+        console.log(dateTime)
+        logEdit.value.logtime = dayjs(dateTime)
+        console.log(dayjs(dateTime))
+        flag.logtime = true
+      }
+    }
 
-//   let f = haveItems.reduce(
-//     (total, currentValue) => total || currentValue,
-//     false
-//   )
-//   if (!f) ElMessage.error('没有提取到信息')
-// }
+    if (!flag.location) {
+      let [lng, lat] = [exif.GPSLongitude, exif.GPSLatitude]
+      if (lng && lat) {
+        lng = lng[0] + lng[1] / 60 + lng[2] / 3600
+        lat = lat[0] + lat[1] / 60 + lat[2] / 3600
+        // 图片里面是GPS坐标，要转
+        AMap.convertFrom([lng, lat], 'gps', (status: string, result: any) => {
+          // status：complete 查询成功，no_data 无结果，error 错误
+          // 查询成功时，result.locations 即为转换后的高德坐标系
+          if (status === 'complete' && result.info === 'ok') {
+            lng = result.locations[0].lng
+            lat = result.locations[0].lat
 
-// console.log(BMapGL)
+            logEdit.value.location = [[lng, lat], '']
+            flag.location = true
+          }
+        })
+      }
+    }
+
+    if (flag.logtime && flag.location) return
+  }
+
+  if (!flag.logtime && !flag.location) ElMessage.error('没有提取到信息')
+}
 </script>
 
 <template>
@@ -134,14 +145,9 @@ const onChange = async (file: LogImgFile, files: UploadFiles) => {
     >
       <ElIcon><Plus /></ElIcon>
     </ElUpload>
-    <!-- <ElButton
-      v-if="files.length"
-      @click="useExif"
-      size="small"
-      style="margin-right: 10px"
-    >
+    <ElButton :disabled="files.length === 0" @click="useExif" size="small">
       提取时间位置
-    </ElButton> -->
+    </ElButton>
     <!--
     <el-switch v-if="haveCover == ''" v-model="editNote.isCoverImgs" size="small" inline-prompt active-text="覆盖"
       inactive-text="添加" />

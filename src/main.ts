@@ -8,10 +8,17 @@ import * as Icons from '@element-plus/icons-vue' // element 图标
 import 'dayjs/locale/zh-cn' // element 用的dayjs要设置时区
 import App from './App.vue'
 import router from './router'
+import dayjs from 'dayjs'
+import 'dayjs/locale/zh-cn' // 导入本地化语言
+import customParseFormat from 'dayjs/plugin/customParseFormat' // 拓展 dayjs 支持自定义时间格式。
 
 import './assets/css/base.less' // 全局样式
 
-import 'default-passive-events' // 浏览器警告：解决移动端滚动卡顿问题
+// import 'default-passive-events' // 浏览器警告：解决移动端滚动卡顿问题
+
+dayjs.locale('zh-cn') // 使用本地化语言
+dayjs.extend(customParseFormat)
+
 
 const app = createApp(App)
 

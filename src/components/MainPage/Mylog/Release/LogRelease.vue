@@ -69,8 +69,8 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
 <template>
   <div class="log-release" v-m>
     <div v-m>logEdit: {{ logEdit }}</div>
-    <div v-m>imgs: {{ logEdit.imgs }}</div>
-    <div v-m>logEditFiles: {{ logEditFiles }}</div>
+    <!-- <div v-m>imgs: {{ logEdit.imgs }}</div> -->
+    <!-- <div v-m>logEditFiles: {{ logEditFiles }}</div> -->
 
     <ElInput
       v-model="logEdit.content"

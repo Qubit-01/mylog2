@@ -82,6 +82,7 @@
     "watchSyncEffect": true,
     "ElSwitch": true,
     "ElMessage": true,
-    "ElMessageessage": true
+    "ElMessageessage": true,
+    "ElMessagemessage": true
   }
 }
