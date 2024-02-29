@@ -1,15 +1,12 @@
 <script setup lang="ts">
-
-const tags = defineModel<string[]>({ 
+const tags = defineModel<string[]>({
   required: true,
 })
 
 const del = (tag: string) => {
   // tags.value = tags.value.filter((item) => item !== tag)
   tags.value.splice(tags.value.indexOf(tag), 1)
-
 }
-
 
 // 编辑
 const inputVisible = ref(false)
@@ -18,7 +15,9 @@ const inputDom = ref<HTMLInputElement>()
 // 单击添加标签
 const showInput = () => {
   inputVisible.value = true
-  nextTick(() => { inputDom.value!.focus() })
+  nextTick(() => {
+    inputDom.value!.focus()
+  })
 }
 // 输入框回车或者失去焦点
 const inputConfirm = () => {
@@ -28,6 +27,10 @@ const inputConfirm = () => {
   inputVisible.value = false
   inputValue.value = ''
 }
+
+onUnmounted(() => {
+  tags.value = []
+})
 </script>
 
 <template>
@@ -36,9 +39,17 @@ const inputConfirm = () => {
       {{ tag }}
     </ElTag>
 
-    <ElInput v-if="inputVisible" ref="inputDom" v-model="inputValue" maxlength="20" size="small"
-      @keyup.enter="inputConfirm" @blur="inputConfirm" style="width:90px;" />
-    <ElButton v-else size="small" @click="showInput" style="width:90px;">
+    <ElInput
+      v-if="inputVisible"
+      ref="inputDom"
+      v-model="inputValue"
+      maxlength="20"
+      size="small"
+      @keyup.enter="inputConfirm"
+      @blur="inputConfirm"
+      style="width: 90px"
+    />
+    <ElButton v-else size="small" @click="showInput" style="width: 90px">
       + New Tag
     </ElButton>
   </div>

@@ -13,18 +13,19 @@
 -->
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import type { Log } from '@/types'
-import type { LogImgFile } from './types'
+import type { LogImgFile, LogItem } from './types'
 import type { UploadFiles } from 'element-plus'
 import { getExifByFile, compressImg, type ExifImgFile } from '@/utils/img'
-import AMap from '@/utils/map'
+import AMap, { l2v } from '@/utils/map'
 
 // 文件名
 const imgs = defineModel<string[]>({ required: true })
+// add事件
+const emit = defineEmits<{
+  add: [item: LogItem, data: any]
+}>()
 // File对象列表
-const files = defineModel<LogImgFile[]>('files', { required: true })
-// logEdit 对象
-const logEdit = defineModel<Log>('logEdit', { required: true })
+const files = ref<LogImgFile[]>([])
 
 const types = ['image/png', 'image/gif', 'image/jpeg', 'image/jpg']
 const SIZE = 10 * 1024 * 1024 // 图片大小限制，字节
@@ -32,9 +33,11 @@ const index = ref(0) // 给图片计数，用于命名
 const count = ref(0) // 用于压缩时控制按钮
 // watchEffect(() => count ? props.setIsLoad(true) : props.setIsLoad(false)) // 要控制外层的加载状态
 
+defineExpose({ files })
+
 // 更新imgs文件名列表
 watchEffect(() => {
-  imgs.value = files.value.map((i) => i.key!)
+  imgs.value = files.value.map(i => i.key!)
 })
 
 // :on-change 状态变化，添加文件、上传成功、失败
@@ -54,7 +57,7 @@ const onChange = async (file: LogImgFile, files: UploadFiles) => {
   // exifdata 直接被写入了file.raw中
   await getExifByFile(raw)
 
-  // raw 是原始文件，compressImg是压缩文件，compressImg95是轻微压缩
+  // raw原始文件，compressImg压缩文件，compressImg95轻微压缩
   count.value++
   compressImg(raw).then((res: any) => {
     res.exifdata = raw.exifdata
@@ -90,9 +93,7 @@ const useExif = () => {
       if (dateTime) {
         // 'YYYY:MM:DD HH:MM:SS' 转为 'YYYY-MM-DD HH:mm:ss'
         dateTime = dateTime.replace(':', '-').replace(':', '-')
-        console.log(dateTime)
-        logEdit.value.logtime = dayjs(dateTime)
-        console.log(dayjs(dateTime))
+        emit('add', 'logtime', dayjs(dateTime))
         flag.logtime = true
       }
     }
@@ -107,10 +108,7 @@ const useExif = () => {
           // status：complete 查询成功，no_data 无结果，error 错误
           // 查询成功时，result.locations 即为转换后的高德坐标系
           if (status === 'complete' && result.info === 'ok') {
-            lng = result.locations[0].lng
-            lat = result.locations[0].lat
-
-            logEdit.value.location = [[lng, lat], '']
+            emit('add', 'location', [l2v(result.locations[0]), ''])
             flag.location = true
           }
         })
@@ -122,6 +120,10 @@ const useExif = () => {
 
   if (!flag.logtime && !flag.location) ElMessage.error('没有提取到信息')
 }
+
+onUnmounted(() => {
+  imgs.value = []
+})
 </script>
 
 <template>

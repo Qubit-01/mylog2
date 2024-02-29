@@ -13,9 +13,12 @@ import {
   More,
 } from '@element-plus/icons-vue'
 import useGlobalStore from '@/stores/global'
-import type { LogImgFile } from './types'
+import type { LogItem } from './types'
+import { releaseLog } from '@/api/log'
 
 const global = useGlobalStore()
+// 获取组件暴露的files，用于上传
+const editImgs = ref<HTMLDivElement>()
 
 // 编辑的数据
 const logEdit = reactive<Log>({
@@ -35,14 +38,9 @@ const logEdit = reactive<Log>({
   info: {},
 })
 
-// 保存上传的文件对象
-const logEditFiles = ref<{ imgs: LogImgFile[]; videos: LogImgFile[] }>({
-  imgs: [],
-  videos: [],
-})
-
 // 编辑数据组件显示
-const editVisible = reactive({
+const visible = reactive<{ [key in LogItem]: boolean }>({
+  content: true,
   logtime: false,
   tags: false,
   imgs: false,
@@ -56,11 +54,23 @@ const editVisible = reactive({
 
 const release = () => {
   console.log('发布', logEdit)
+  releaseLog({ log: JSON.stringify(logEdit) }).then(id => {
+    console.log('发布成功', id)
+  })
 }
 
-const add = (item: keyof typeof editVisible) => {
-  console.log('添加', item)
-  editVisible[item] = !editVisible[item]
+/**
+ * 新增且切换显示状态
+ * @param item 设置项
+ * @param data 如果不传入，则会切换显示状态，如果传入，则会设置数据
+ */
+const add = (item: LogItem, data: any = undefined) => {
+  if (data) {
+    logEdit[item] = data
+    visible[item] = true
+  } else {
+    visible[item] = !visible[item]
+  }
 }
 
 defineExpose({ logEdit }) // 暴露数据给父组件用
@@ -68,10 +78,6 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
 
 <template>
   <div class="log-release" v-m>
-    <div v-m>logEdit: {{ logEdit }}</div>
-    <!-- <div v-m>imgs: {{ logEdit.imgs }}</div> -->
-    <!-- <div v-m>logEditFiles: {{ logEditFiles }}</div> -->
-
     <ElInput
       v-model="logEdit.content"
       :autosize="{ minRows: 3 }"
@@ -80,42 +86,84 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
     />
 
     <div class="icons">
-      <ElButton link :icon="Clock" @click="add('logtime')" />
-      <ElButton link :icon="PriceTag" @click="add('tags')" />
-      <ElButton link :icon="Picture" @click="add('imgs')" />
-      <ElButton link :icon="VideoCamera" @click="add('videos')" />
-      <ElButton link :icon="Microphone" @click="add('audios')" />
-      <ElButton link :icon="FolderOpened" @click="add('files')" />
-      <ElButton link :icon="Location" @click="add('location')" />
-      <ElButton link :icon="User" @click="add('people')" />
-      <ElButton link :icon="More" @click="add('info')" />
+      <ElButton
+        link
+        :icon="Clock"
+        @click="add('logtime')"
+        :type="visible.logtime ? 'primary' : undefined"
+      />
+      <ElButton
+        link
+        :icon="PriceTag"
+        @click="add('tags')"
+        :type="visible.tags ? 'primary' : undefined"
+      />
+      <ElButton
+        link
+        :icon="Picture"
+        @click="add('imgs')"
+        :type="visible.imgs ? 'primary' : undefined"
+      />
+      <ElButton
+        link
+        :icon="VideoCamera"
+        @click="add('videos')"
+        :type="visible.videos ? 'primary' : undefined"
+      />
+      <ElButton
+        link
+        :icon="Microphone"
+        @click="add('audios')"
+        :type="visible.audios ? 'primary' : undefined"
+      />
+      <ElButton
+        link
+        :icon="FolderOpened"
+        @click="add('files')"
+        :type="visible.files ? 'primary' : undefined"
+      />
+      <ElButton
+        link
+        :icon="Location"
+        @click="add('location')"
+        :type="visible.location ? 'primary' : undefined"
+      />
+      <ElButton
+        link
+        :icon="User"
+        @click="add('people')"
+        :type="visible.people ? 'primary' : undefined"
+      />
+      <ElButton
+        link
+        :icon="More"
+        @click="add('info')"
+        :type="visible.info ? 'primary' : undefined"
+      />
     </div>
 
     <div class="edits">
-      <div>
+      <div v-if="visible.logtime">
         <EditTime v-model="logEdit.logtime" />
       </div>
 
-      <div>
+      <div v-if="visible.tags">
         <EditTags v-model="logEdit.tags" />
       </div>
 
-      <div>
-        <EditImgs
-          v-model="logEdit.imgs"
-          v-model:files="logEditFiles.imgs"
-          v-model:logEdit="logEdit"
-        />
+      <div v-if="visible.imgs">
+        <EditImgs ref="editImgs" v-model="logEdit.imgs" @add="add" />
       </div>
 
-      <div>
+      <div v-if="visible.location">
         <EditLocation v-model="logEdit.location" />
       </div>
-    </div>
 
-    <div>
-      <ElButton size="small" type="primary" @click="release">发布</ElButton>
+      <div>
+        <ElButton size="small" type="primary" @click="release">发布</ElButton>
+      </div>
     </div>
+    <div v-m>logEdit: {{ logEdit }}</div>
   </div>
 </template>
 

@@ -12,3 +12,16 @@ export interface LogImgFile extends UploadFile {
   compressImg?: ExifImgFile // 压缩文件
   compressImg95?: ExifImgFile // 95压缩文件
 }
+
+// 可以设置的项
+export type LogItem =
+  | 'content'
+  | 'info'
+  | 'logtime'
+  | 'tags'
+  | 'imgs'
+  | 'videos'
+  | 'audios'
+  | 'files'
+  | 'location'
+  | 'people'

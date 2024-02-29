@@ -7,15 +7,13 @@ import dayjs from 'dayjs'
 const time = defineModel<dayjs.Dayjs>({ required: true })
 
 const editTime = computed({
-  get() {
-    return time.value.toDate()
-  },
-  set(v) {
-    time.value = dayjs(v)
-  },
+  get: () => time.value.toDate(),
+  set: v => (time.value = dayjs(v)),
 })
 
-time.value = dayjs()
+onUnmounted(() => {
+  time.value = dayjs()
+})
 </script>
 
 <template>

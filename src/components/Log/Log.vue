@@ -38,7 +38,7 @@ const expand = () => {
 
     <!-- 图片和视频放在一起 -->
     <div class="block-media" v-if="log.imgs.length">
-      <ViewerImgs :files="log.imgs" />
+      <ViewerImgs :imgs="log.imgs" />
       <ViewerVideos :files="log.videos" /> <!-- v-if="isExpand" -->
     </div>
 

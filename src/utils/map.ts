@@ -1,6 +1,9 @@
 import useGlobalStore from '@/stores/global'
 import '@amap/amap-jsapi-types'
 
+const AMap: AMap = window.AMap
+export default AMap
+
 /**
  * 高德有个异步的加载器 @amap/amap-jsapi-loader
  * https://lbs.amap.com/api/javascript-api-v2/guide/abc/load#s2
@@ -8,11 +11,24 @@ import '@amap/amap-jsapi-types'
  */
 type AMapType = typeof globalThis.AMap
 interface AMap extends AMapType {
-  CitySearch?: any
-  Geolocation?: any
+  CitySearch?: any // IP定位
+  Geolocation?: any // 浏览器定位
+  Geocoder?: any // 地址解析
 }
-const AMap: AMap = window.AMap
-export default AMap
+
+// 定位当前位置的Promise
+const currentLocationPromise = getLocation()
+
+/**
+ * 同时IP和浏览器定位，优先选择浏览器定位结果
+ * @returns
+ */
+export async function getLocation(): Promise<AMap.LngLat> {
+  const res = await Promise.allSettled([geolocation(), citySearch()])
+  if (res[0].status === 'fulfilled') return res[0].value
+  if (res[1].status === 'fulfilled') return res[1].value
+  else return Promise.reject(res)
+}
 
 /**
  * 自定义高德地图hook
@@ -24,24 +40,25 @@ export default AMap
 export function useMap(
   domRef: globalThis.Ref<HTMLDivElement | undefined>,
   opts: any = {},
-  callback: (map: AMap.Map) => void = () => {}
+  callback: (map: AMap.Map, p: AMap.LngLat) => void = () => {}
 ) {
   const global = useGlobalStore()
+  let curLocation = ref<AMap.LngLat>()
   let map = shallowRef<AMap.Map>() // 地图对象
 
-  position().then((p) => {
-    map.value!.panTo(p)
-  })
-
   onMounted(() => {
-    // 会有 Canvas2D 警告
-    map.value = new AMap.Map(domRef.value!, {
-      zoom: 11, // 地图级别
-      // mapStyle: 'amap://styles/whitesmoke', // 设置地图的显示样式
-      ...opts,
-    })
+    currentLocationPromise.then(p => {
+      curLocation.value = p
+      // 会有 Canvas2D 警告
+      map.value = new AMap.Map(domRef.value!, {
+        zoom: 15, // 地图级别
+        center: p,
+        // mapStyle: 'amap://styles/whitesmoke', // 设置地图的显示样式
+        ...opts,
+      })
 
-    callback(map.value)
+      callback(map.value, p)
+    })
 
     // 监听全局主题变化，自动切换地图样式
     watch(
@@ -58,7 +75,7 @@ export function useMap(
     map.value!.destroy()
   })
 
-  return { map, currentPosition }
+  return { map, curLocation }
 }
 
 type LayerName = 'default' | 'tile' | 'satellite' | 'roadNet' | 'traffic'
@@ -105,24 +122,6 @@ export function createLayer(layerName: LayerName, opts: any = {}) {
 }
 
 /**
- * 同时IP和浏览器定位，优先选择浏览器定位结果
- * @returns
- */
-export function position(): Promise<any> {
-  return new Promise((resolve, reject) => {
-    geolocation()
-      .then((p: any) => {
-        resolve(p)
-      })
-      .catch(() => {
-        citySearch().then((p) => {
-          resolve(p)
-        })
-      })
-  })
-}
-
-/**
  * IP定位，获取当前城市
  * @returns Promise<>
  */
@@ -156,10 +155,51 @@ export function geolocation(): Promise<any> {
       })
 
       geolocation.getCurrentPosition((status: string, result: any) => {
-        console.log(status, result)
         if (status == 'complete') resolve(result.position)
         else reject([status, result])
       })
+    })
+  })
+}
+
+/**
+ * LngLat类型坐标转换为Vector2类型坐标
+ * @param p LngLat类型坐标
+ * @returns Vector2类型坐标
+ */
+export function l2v(p: AMap.LngLat): AMap.Vector2 {
+  return [p.lng, p.lat]
+}
+
+/**
+ * 地址解析
+ * @returns Promise<>
+ */
+export const geocoder: Promise<any> = new Promise((resolve, reject) => {
+  AMap.plugin('AMap.Geocoder', () => {
+    resolve(
+      new AMap.Geocoder({
+        // city: '',
+        // radius: 1000,
+        // batch: false,
+        // extensions: 'all',
+      })
+    )
+  })
+})
+
+/**
+ *
+ * @param p
+ * @returns Promise<string>
+ */
+export async function getAddress(p: AMap.Vector2): Promise<any> {
+  const gc = await geocoder
+  return new Promise((resolve, reject) => {
+    gc.getAddress(p, (status: string, res: any) => {
+      if (status === 'complete' && res.info === 'OK')
+        return resolve(res.regeocode)
+      else return reject([status, res])
     })
   })
 }

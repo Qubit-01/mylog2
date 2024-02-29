@@ -1,17 +1,18 @@
 import type { Log } from '@/types'
 import dayjs from 'dayjs'
-import { getLogsHome, getLogsAllByToken } from '@/api/log'
+import { getLogsHome, getLogsAllByToken, releaseLog } from '@/api/log'
 import Env from '@/stores/constant'
 import useGlobalStore from './global'
+const global = useGlobalStore()
 
 // 请求响应
 export type LogsResp = {
-  list: Log[],
-  params: { skip: number, limit: number },
-  loading: boolean,
-  addLogs?: () => Promise<void>, // 分页添加log
-  getLogs?: () => Promise<void>, // 获取全部log
-  [key: string]: any,
+  list: Log[]
+  params: { skip: number; limit: number }
+  loading: boolean
+  addLogs?: () => Promise<void> // 分页添加log
+  getLogs?: () => Promise<void> // 获取全部log
+  [key: string]: any
 }
 
 /**
@@ -19,8 +20,6 @@ export type LogsResp = {
  * 数组没有值就是 [], 对象没有值就是 {}
  */
 export const useLogStore = defineStore('log', () => {
-  const global = useGlobalStore()
-
   // 首页的logs，每时每刻都是完好的数据
   const home = reactive<LogsResp>({
     list: [],
@@ -33,9 +32,8 @@ export const useLogStore = defineStore('log', () => {
       home.list.push(...data)
       home.params.skip += home.params.limit
       home.loading = false
-    }
+    },
   })
-
 
   const mylog = reactive<LogsResp>({
     list: [],
@@ -47,21 +45,24 @@ export const useLogStore = defineStore('log', () => {
       // const data = await getLogsAllByToken({ token: global.token, ...mylog.params })
       // data.forEach(handleLog)
       // mylog.list.push(...data)
-      mylog.list.push(...mylog.listAll.slice(mylog.params.skip, mylog.params.skip + mylog.params.limit))
+      mylog.list.push(
+        ...mylog.listAll.slice(
+          mylog.params.skip,
+          mylog.params.skip + mylog.params.limit
+        )
+      )
       mylog.params.skip += mylog.params.limit
       mylog.loading = false
-    
     },
     // 获取所有mylog，要先清空数组
     getLogs: async () => {
       mylog.loading = true
-      const logs = await getLogsAllByToken({ token: global.token })
+      const logs = await getLogsAllByToken({})
       logs.forEach(handleLog)
       mylog.listAll = logs
       mylog.loading = false
     },
   })
-
 
   return {
     home,
@@ -86,11 +87,15 @@ export const handleLog = (log: any): void => {
  * 可以传入单个字符串，或者字符串数组
  * 全都要转为https，不改变log的源数据，只返回新的数组
  */
-export const toFileUrl = <T extends string | string[]>(file: T, prefix: string = ''): T => {
+export const toFileUrl = <T extends string | string[]>(
+  file: T,
+  prefix: string = ''
+): T => {
   if (Array.isArray(file)) {
     return file.map(f => toFileUrl(f, prefix)) as T
   } else {
-    if (file.indexOf('http') !== 0) file = `${Env.BucketURL}${prefix}/${file}` as T
+    if (file.indexOf('http') !== 0)
+      file = `${Env.BucketURL}${prefix}/${file}` as T
     else file.replace('http://', 'https://')
     return file
   }

@@ -27,10 +27,9 @@ html {
   --body-background-color: #ccc;
   --body-background-image: url(https://pic1.zhimg.com/v2-8a4275beeee5d3798a647db30b96e9d8_r.jpg);
 
-
   /* -m 模块 */
   // --m-background-color: #eee5;
-  --m-background-color: hsla(0, 0%, 100%, .3);
+  --m-background-color: hsla(0, 0%, 100%, 0.3);
   --m-border: 1px solid #1115;
   --m-shadow: var(--el-box-shadow-lighter);
   --m-hover-shadow: var(--el-box-shadow-light);
@@ -50,9 +49,7 @@ html.dark {
 /* 中间模块通用 */
 .-m {
   position: relative;
-  transition:
-    box-shadow 0.2s linear,
-    width 0.2s linear;
+  transition: box-shadow 0.2s linear, width 0.2s linear;
   background-color: var(--m-background-color);
   /* border: var(--m-border); */
   box-shadow: var(--m-shadow);
@@ -80,7 +77,13 @@ html.dark {
   -webkit-line-clamp: 3;
 }
 
-
+// 去除百度地图坐下角的信息
+.amap-container {
+  a.amap-logo,
+  div.amap-copyright {
+    display: none !important;
+  }
+}
 
 *,
 *::before,
@@ -101,22 +104,9 @@ body {
   background-attachment: fixed;
   min-height: 100%;
 
-  transition:
-    color 0.5s,
-    background-color 0.5s,
-    background-image 0.5s,
+  transition: color 0.5s, background-color 0.5s, background-image 0.5s,
     width 0.5s;
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Fira Sans',
-    'Droid Sans',
-    'Helvetica Neue',
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
 }

@@ -6,18 +6,17 @@
   https://blog.csdn.net/xingmeiok/article/details/127556464
  -->
 <script setup lang="ts">
-
 import Viewer from 'viewerjs'
-import "viewerjs/dist/viewer.css"
+import 'viewerjs/dist/viewer.css'
 import { toFileUrl } from '@/stores/log'
 
 /**
- * files是图片列表
+ * imgs是图片列表
  */
-const props = defineProps<{ files: string[] }>()
+const props = defineProps<{ imgs: string[] }>()
 
 // 传入的图片要处理，如果不是http开头，那么就加上OOS地址，否则直接用，而且要改为https
-const imgs = ref<string[]>(toFileUrl(props.files, 'compress-imgs'))
+const imgs = ref<string[]>(toFileUrl(props.imgs, 'compress-imgs'))
 const viewer = ref<Viewer>() // viewerjs对象
 const viewerDom = ref<HTMLElement>() // 用于装载用ref属性获取的Dom
 const rawBtuDom = ref<HTMLElement>() // 查看原图按钮的DOM
@@ -27,8 +26,11 @@ onMounted(() => {
   viewer.value = new Viewer(viewerDom.value!, {
     // button: false, //右上角关闭按钮
     title: false, // 图片标题
-    shown(e) { // 大图展示时，加入查看原图按钮
-      (viewer.value as any).toolbar.querySelector('ul').appendChild(rawBtuDom.value)
+    shown(e) {
+      // 大图展示时，加入查看原图按钮
+      ;(viewer.value as any).toolbar
+        .querySelector('ul')
+        .appendChild(rawBtuDom.value)
     },
   })
 })
@@ -37,7 +39,7 @@ onMounted(() => {
 const loadRaw = () => {
   console.log((viewer.value as any).index)
   const i = (viewer.value as any).index
-  imgs.value[i] = toFileUrl(props.files[i], 'note-imgs')
+  imgs.value[i] = toFileUrl(props.imgs[i], 'note-imgs')
   nextTick(() => viewer.value!.update().view(i))
 }
 
@@ -47,18 +49,20 @@ const loadRaw = () => {
  * 用于阿里云刚刚才存储图片，这边就开始访问
  */
 const vErrorRetry = {
-  created(imgDom: HTMLImageElement, { value = [3, 3000] }: { value: [number, number] }) {
+  created(
+    imgDom: HTMLImageElement,
+    { value = [3, 3000] }: { value: [number, number] }
+  ) {
     let errortime = 0
     imgDom.onerror = () => {
       if (errortime < value![0])
-        setTimeout(() => imgDom.src = imgDom.src, value![1])
+        setTimeout(() => (imgDom.src = imgDom.src), value![1])
       errortime++
     }
-  }
+  },
 }
 
 defineExpose({ vErrorRetry })
-
 </script>
 
 <template>
@@ -103,13 +107,10 @@ defineExpose({ vErrorRetry })
 
 <style lang="less">
 body {
-
   /* viewer的按钮设置: 由于viwer是直接生成新dom到根下，只能写在这里 */
-  >.viewer-container>.viewer-footer {
-
+  > .viewer-container > .viewer-footer {
     /* 工具栏 */
     .viewer-toolbar {
-
       // 放大
       .viewer-zoom-in,
       // 缩小

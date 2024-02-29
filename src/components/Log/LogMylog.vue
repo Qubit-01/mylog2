@@ -5,8 +5,6 @@
 import type { Log } from '@/types'
 
 const { log } = defineProps<{ log: Log }>()
-// console.log(log)
-
 
 // 双击log，展开和收起
 const isExpand = ref(false)
@@ -18,37 +16,44 @@ const expand = () => {
 
 <template>
   <div class="log" v-m @click="expand">
-
     <!-- 标题 -->
-    <div class="title" v-if="log.info?.title" v-overflow-ellipsis="isExpand ? 0 : 1">
+    <div
+      class="title"
+      v-if="log.info?.title"
+      v-overflow-ellipsis="isExpand ? 0 : 1"
+    >
       {{ log.info?.title }}
     </div>
 
     <!-- 内容 -->
     <div class="text">
-      <pre class="content" v-overflow-ellipsis="isExpand ? 0 : 3" v-text="log.content"></pre>
+      <pre
+        class="content"
+        v-overflow-ellipsis="isExpand ? 0 : 3"
+        v-text="log.content"
+      ></pre>
     </div>
 
     <!-- 图片和视频放在一起 -->
     <div class="block-media" v-if="log.imgs.length">
-      <ViewerImgs :files="log.imgs" />
-      <ViewerVideos v-if="isExpand" :files="log.videos" /> <!-- v-if="isExpand" -->
+      <!-- <ViewerImgs v-if="preview" :files="xxx" /> -->
+      <ViewerImgs :imgs="log.imgs" />
+      <ViewerVideos v-if="isExpand" :files="log.videos" />
+      <!-- v-if="isExpand" -->
     </div>
 
     <!-- 音频 和 文件 -->
     <template v-if="isExpand">
-      <div v-if="log.audios.length">
-        音频：{{ log.audios }}
-      </div>
-      <div v-if="log.audios.length">
-        文件：{{ log.files }}
-      </div>
+      <div v-if="log.audios.length">音频：{{ log.audios }}</div>
+      <div v-if="log.audios.length">文件：{{ log.files }}</div>
     </template>
 
     <div class="tags">
       <ElTag v-if="log.type != 'log'" size="small" type="warning">公开</ElTag>
       <ElTag v-for="p in log.people" :key="p" size="small">{{ p }}</ElTag>
-      <ElTag v-for="t in log.tags" :key="t" size="small" type="success">{{ t }}</ElTag>
+      <ElTag v-for="t in log.tags" :key="t" size="small" type="success">
+        {{ t }}
+      </ElTag>
       <ElTag v-if="log.info.markdown" size="small">MarkDown</ElTag>
 
       <template v-if="!isExpand">
@@ -63,18 +68,18 @@ const expand = () => {
       <div>{{ log.username }}</div>
       ·
       <el-tooltip effect="light" placement="top">
-        <div>{{ log.logtime!.format("YYYY-MM-DD HH:mm") }}</div>
+        <div>{{ log.logtime!.format('YYYY-MM-DD HH:mm') }}</div>
         <template #content>
-          发送时间：{{ log.sendtime!.format("YYYY-MM-DD HH:mm") }}<br />
-          记录时间：{{ log.logtime!.format("YYYY-MM-DD HH:mm") }}
+          发送时间：{{ log.sendtime!.format('YYYY-MM-DD HH:mm') }}<br />
+          记录时间：{{ log.logtime!.format('YYYY-MM-DD HH:mm') }}
         </template>
-      </el-tooltip> 
+      </el-tooltip>
 
       <template v-if="log?.location?.length">
-        · <div>{{ log.location[1] }}</div>
+        ·
+        <div>{{ log.location[1] }}</div>
       </template>
     </div>
-
   </div>
 </template>
 
