@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { BucketCDN } from '@/stores/constant'
 import useGlobalStore from '@/stores/global'
 const Global = useGlobalStore()
 const User = Global.user
@@ -11,13 +12,15 @@ const router = useRouter()
       <div class="center">
         <div class="left">
           <div class="logo" @click="router.push('/')">
-            <img src="https://bit-1310383539.cos.ap-chengdu.myqcloud.com/web-files/favicon.svg" />
+            <img :src="BucketCDN + 'web-files/favicon.svg'" />
             多元记
           </div>
         </div>
         <nav>
-          <RouterLink to="/logger">主页</RouterLink> <!-- 我的主页（别人看见的） -->
-          <RouterLink to="/mylog">记录</RouterLink> <!-- 我的记录（自己看见的） -->
+          <RouterLink to="/logger">主页</RouterLink>
+          <!-- 我的主页（别人看见的） -->
+          <RouterLink to="/mylog">记录</RouterLink>
+          <!-- 我的记录（自己看见的） -->
           <RouterLink to="/map">地图</RouterLink>
         </nav>
         <div class="right">
@@ -32,8 +35,6 @@ const router = useRouter()
 
 <style scoped lang="less">
 .header {
-
-
   header {
     position: fixed;
     z-index: 50;
@@ -46,24 +47,23 @@ const router = useRouter()
     border-left: 0;
     border-right: 0;
 
-    >.center {
+    > .center {
       width: var(--center-width);
-      transition:
-        width 0.5s;
+      transition: width 0.5s;
 
       display: flex;
       gap: var(--gap);
       justify-content: space-between;
       align-items: center;
 
-      >nav {
+      > nav {
         flex: 1;
         display: flex;
         justify-content: flex-start;
         font-size: 20px;
         height: var(--header-height);
 
-        >a {
+        > a {
           text-decoration: none;
           color: inherit;
           padding-left: 20px;
@@ -73,11 +73,9 @@ const router = useRouter()
             background: #ccc5;
           }
         }
-
       }
 
-      >.left {
-
+      > .left {
         .logo {
           position: relative;
           font-size: 22px;
@@ -88,7 +86,6 @@ const router = useRouter()
 
           display: flex;
           justify-content: center;
-
 
           &:hover {
             background: #aaa5;
@@ -104,7 +101,7 @@ const router = useRouter()
         }
       }
 
-      >.right {
+      > .right {
         display: flex;
         gap: 12px;
         align-items: center;

@@ -14,11 +14,13 @@ import {
 } from '@element-plus/icons-vue'
 import useGlobalStore from '@/stores/global'
 import type { LogItem } from './types'
+// import COS from '@/utils/cos'
 import { releaseLog } from '@/api/log'
 
 const global = useGlobalStore()
 // 获取组件暴露的files，用于上传
-const editImgs = ref<HTMLDivElement>()
+const editImgs = ref()
+
 
 // 编辑的数据
 const logEdit = reactive<Log>({
@@ -53,7 +55,11 @@ const visible = reactive<{ [key in LogItem]: boolean }>({
 })
 
 const release = () => {
-  console.log('发布', logEdit)
+  // console.dir(COS)
+
+  // 要先上传文件
+  // console.log('上传文件', editImgs.value.files)
+
   releaseLog({ log: JSON.stringify(logEdit) }).then(id => {
     console.log('发布成功', id)
   })

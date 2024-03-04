@@ -26,7 +26,7 @@ onMounted(() => {
   viewer.value = new Viewer(viewerDom.value!, {
     // button: false, //右上角关闭按钮
     title: false, // 图片标题
-    shown(e) {
+    shown() {
       // 大图展示时，加入查看原图按钮
       ;(viewer.value as any).toolbar
         .querySelector('ul')
@@ -37,10 +37,12 @@ onMounted(() => {
 
 // 点击加载原图
 const loadRaw = () => {
-  console.log((viewer.value as any).index)
   const i = (viewer.value as any).index
-  imgs.value[i] = toFileUrl(props.imgs[i], 'note-imgs')
-  nextTick(() => viewer.value!.update().view(i))
+  const newImg = toFileUrl(props.imgs[i], 'note-imgs')
+  if (imgs.value[i] !== newImg) {
+    imgs.value[i] = newImg
+    nextTick(() => viewer.value!.update()) // .view(i)
+  }
 }
 
 /**
@@ -63,11 +65,22 @@ const vErrorRetry = {
 }
 
 defineExpose({ vErrorRetry })
+// 判断字符串是否是http开头
+const isHttp = (str: string) => str.startsWith('http')
 </script>
 
 <template>
   <div class="viewer-imgs" ref="viewerDom" @click.stop>
-    <img v-for="img in imgs" :key="img" :src="img" alt="logimg" v-error-retry />
+    <template v-for="img in imgs" :key="img">
+      <!-- QQ图片要单独去除 referrer -->
+      <img
+        v-if="img.indexOf('photo.store.qq.com') === 15"
+        referrerPolicy="no-referrer"
+        :src="img"
+        alt="qqimg"
+      />
+      <img v-else :src="img" alt="logimg" v-error-retry />
+    </template>
   </div>
 
   <!-- 要插入viewer中的查看原图按钮 -->
