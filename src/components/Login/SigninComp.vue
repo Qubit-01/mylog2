@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { signin } from '@/api/user'
 import useGlobalStore from '@/stores/global'
-import Env from '@/stores/constant'
+import { baseURL } from '@/stores/constant'
 
 const Global = useGlobalStore()
 const User = Global.user
@@ -16,11 +16,11 @@ const login = reactive({
 })
 
 // 确认密码独立出来
-const pswd2 = ref("")
+const pswd2 = ref('')
 
 //刷新验证码
 const changeImg = () => {
-  captchaDom.value!.src = Env.baseURL + "/user/signin/captcha_img?" + Math.random();
+  captchaDom.value!.src = baseURL + '/user/signin/captcha_img?' + Math.random()
 }
 onMounted(changeImg)
 
@@ -50,13 +50,32 @@ const doSignin = async () => {
     <div class="title">注册</div>
 
     <div class="login">
-
       <form autocomplete="off">
-        <input v-model="login.name" placeholder="用户名" type="text" autocomplete="off" />
-        <input v-model="login.pswd" placeholder="密码" type="password" autocomplete="off" />
-        <input v-model="pswd2" placeholder="确认密码" type="password" autocomplete="off" />
+        <input
+          v-model="login.name"
+          placeholder="用户名"
+          type="text"
+          autocomplete="off"
+        />
+        <input
+          v-model="login.pswd"
+          placeholder="密码"
+          type="password"
+          autocomplete="off"
+        />
+        <input
+          v-model="pswd2"
+          placeholder="确认密码"
+          type="password"
+          autocomplete="off"
+        />
         <div class="captcha">
-          <input v-model="login.captcha" placeholder="验证码" type="text" autocomplete="off" />
+          <input
+            v-model="login.captcha"
+            placeholder="验证码"
+            type="text"
+            autocomplete="off"
+          />
           <img ref="captchaDom" alt="验证码看不清，换一张" @click="changeImg" />
         </div>
 
@@ -79,7 +98,6 @@ const doSignin = async () => {
           <img src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/qq.png" alt="QQ登录">
         </div>
       </div> -->
-
     </div>
   </StructLogin>
 </template>
@@ -94,11 +112,10 @@ const doSignin = async () => {
 .loged {
   margin-bottom: 20px;
 
-  >div:nth-child(1) {
+  > div:nth-child(1) {
     margin-bottom: 24px;
   }
 }
-
 
 .login {
   flex: 1;
@@ -106,7 +123,7 @@ const doSignin = async () => {
   flex-direction: column;
   justify-content: space-between;
 
-  >form {
+  > form {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -123,9 +140,7 @@ const doSignin = async () => {
 
       &:-webkit-autofill {
         -webkit-transition-delay: 111111s;
-        transition:
-          color 11111s ease-out,
-          background-color 111111s ease-out;
+        transition: color 11111s ease-out, background-color 111111s ease-out;
       }
 
       &:focus,
@@ -156,7 +171,7 @@ const doSignin = async () => {
   }
 
   // 选中最后一个div
-  >div:last-child {
+  > div:last-child {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -166,11 +181,11 @@ const doSignin = async () => {
       align-items: center;
       opacity: 0.6;
 
-      >span {
+      > span {
         margin: 0 20px;
       }
 
-      >div {
+      > div {
         display: inline-block;
         height: 0;
         flex: 1;

@@ -25,7 +25,7 @@ const emit = defineEmits<{
   add: [item: LogItem, data: any]
 }>()
 // File对象列表
-const files = ref<LogImgFile[]>([])
+const files = shallowRef<LogImgFile[]>([])
 
 const types = ['image/png', 'image/gif', 'image/jpeg', 'image/jpg']
 const SIZE = 10 * 1024 * 1024 // 图片大小限制，字节

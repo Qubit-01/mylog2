@@ -1,7 +1,7 @@
 import type { Log } from '@/types'
 import dayjs from 'dayjs'
 import { getLogsHome, getLogsAllByToken, releaseLog } from '@/api/log'
-import Env from '@/stores/constant'
+import { BucketCDN } from '@/stores/constant'
 import useGlobalStore from './global'
 const global = useGlobalStore()
 
@@ -94,8 +94,7 @@ export const toFileUrl = <T extends string | string[]>(
   if (Array.isArray(file)) {
     return file.map(f => toFileUrl(f, prefix)) as T
   } else {
-    if (file.indexOf('http') !== 0)
-      file = `${Env.BucketURL}${prefix}/${file}` as T
+    if (file.indexOf('http') !== 0) file = `${BucketCDN}${prefix}/${file}` as T
     else file.replace('http://', 'https://')
     return file
   }

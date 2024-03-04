@@ -1,23 +1,7 @@
-/**
- * 环境变量
- */
-type EnvVar = {
-  webURL: string
-  baseURL: string
-  Bucket: string
-  Region: string
-  BucketURL: string
-}
-
-export const Env: EnvVar = {
-  // webURL: "https://mylog.cool",
-  webURL: "https://localhost",
-  baseURL: "",
-  Bucket: "bit-1310383539", /* 存储桶 */
-  Region: "ap-chengdu", /* 所在地域 */
-  BucketURL: ""
-}
-Env.baseURL = Env.webURL + ":8081"
-Env.BucketURL = "https://" + Env.Bucket + ".cos." + Env.Region + ".myqcloud.com/"
-
-export default Env
+// export const webURL = "https://mylog.cool"
+export const webURL = "https://localhost"
+export const baseURL = webURL + ":8081"
+export const Bucket = "bit-1310383539" /* 存储桶 */
+export const Region = "ap-chengdu" /* 所在地域 */
+export const BucketURL = "https://" + Bucket + ".cos." + Region + ".myqcloud.com/"
+export const BucketCDN = "https://cos.mylog.cool/" // CDN加速域名
