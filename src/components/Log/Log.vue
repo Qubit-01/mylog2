@@ -71,7 +71,7 @@ const expand = () => {
       <el-tooltip effect="light" placement="top">
         <div>{{ log.logtime.format("YYYY-MM-DD HH:mm") }}</div>
         <template #content>
-          发送时间：{{ log.sendtime.format("YYYY-MM-DD HH:mm") }}<br />
+          发送时间：{{ log.sendtime!.format("YYYY-MM-DD HH:mm") }}<br />
           记录时间：{{ log.logtime.format("YYYY-MM-DD HH:mm") }}
         </template>
       </el-tooltip>
