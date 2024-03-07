@@ -12,15 +12,15 @@ import {
   User,
   More,
 } from '@element-plus/icons-vue'
+import cos from '@/utils/cos'
+import { Bucket, Region, BucketURL } from '@/stores/constant'
 import useGlobalStore from '@/stores/global'
 import type { LogItem } from './types'
-// import COS from '@/utils/cos'
 import { releaseLog } from '@/api/log'
 
 const global = useGlobalStore()
 // 获取组件暴露的files，用于上传
 const editImgs = ref()
-
 
 // 编辑的数据
 const logEdit = reactive<Log>({
@@ -54,15 +54,54 @@ const visible = reactive<{ [key in LogItem]: boolean }>({
   info: false,
 })
 
-const release = () => {
-  // console.dir(COS)
+// let a: any[] = []
 
+// cos.getBucket(
+//   {
+//     Bucket,
+//     Region,
+//     Prefix: 'note-imgs/',
+//     Marker: 'note-imgs/230513_0143-26-BIT08355.jpg',
+//     // note-imgs/1666848767959-1.jpg
+//     // note-imgs/230513_0143-26-BIT08355.jpg
+    
+//   },
+//   function (err, data) {
+//     a = data.Contents.map(i => i.Key)
+//     console.log(a)
+//   }
+// )
+
+const release = () => {
+  // console.log(a)
+  /* 把a/1.jpg复制一份到b/1.jpg */
+
+  // for (let CopySource of a) {
+    
+  //   cos.putObjectCopy(
+  //     {
+  //       Bucket,
+  //       Region,
+  //       Key: 'users/1/mylog/imgs/' + CopySource.split('/')[1],
+  //       // https://bit-1310383539.cos.ap-chengdu.myqcloud.com/web-files/README.md
+  //       // CopySource:
+  //       //   'bit-1310383539.cos.ap-chengdu.myqcloud.com/' + CopySource, // note-imgs/1666848261375-0.jpg
+  //       /* CopySource中的Key含中文时，需要自行转义 */
+  //       CopySource: `bit-1310383539.cos.ap-chengdu.myqcloud.com/${encodeURIComponent(CopySource)}`,
+  //     },
+  //     function (err, data) {
+  //       console.log(CopySource)
+  //       console.log(err || data)
+  //     }
+  //   )
+  // }
+
+  // console.dir(COS)
   // 要先上传文件
   // console.log('上传文件', editImgs.value.files)
-
-  releaseLog({ log: JSON.stringify(logEdit) }).then(id => {
-    console.log('发布成功', id)
-  })
+  // releaseLog({ log: JSON.stringify(logEdit) }).then(id => {
+  //   console.log('发布成功', id)
+  // })
 }
 
 /**

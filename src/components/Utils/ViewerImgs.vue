@@ -9,6 +9,10 @@
 import Viewer from 'viewerjs'
 import 'viewerjs/dist/viewer.css'
 import { toFileUrl } from '@/stores/log'
+import type { Log } from '@/types'
+
+// 从父组件拿到log，主要是获取userId
+const log: Log = inject('log')!
 
 /**
  * imgs是图片列表
@@ -16,7 +20,9 @@ import { toFileUrl } from '@/stores/log'
 const props = defineProps<{ imgs: string[] }>()
 
 // 传入的图片要处理，如果不是http开头，那么就加上OOS地址，否则直接用，而且要改为https
-const imgs = ref<string[]>(toFileUrl(props.imgs, 'compress-imgs'))
+const imgs = ref<string[]>(
+  toFileUrl(props.imgs, `${log.userid}/mylog/compress-imgs`)
+)
 const viewer = ref<Viewer>() // viewerjs对象
 const viewerDom = ref<HTMLElement>() // 用于装载用ref属性获取的Dom
 const rawBtuDom = ref<HTMLElement>() // 查看原图按钮的DOM
@@ -38,7 +44,7 @@ onMounted(() => {
 // 点击加载原图
 const loadRaw = () => {
   const i = (viewer.value as any).index
-  const newImg = toFileUrl(props.imgs[i], 'note-imgs')
+  const newImg = toFileUrl(props.imgs[i], `${log.userid}/mylog/imgs`)
   if (imgs.value[i] !== newImg) {
     imgs.value[i] = newImg
     nextTick(() => viewer.value!.update()) // .view(i)
@@ -65,8 +71,6 @@ const vErrorRetry = {
 }
 
 defineExpose({ vErrorRetry })
-// 判断字符串是否是http开头
-const isHttp = (str: string) => str.startsWith('http')
 </script>
 
 <template>

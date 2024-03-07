@@ -5,6 +5,7 @@
 import type { Log } from '@/types'
 
 const { log } = defineProps<{ log: Log }>()
+provide('log', log)
 
 // 双击log，展开和收起
 const isExpand = ref(false)

@@ -94,7 +94,8 @@ export const toFileUrl = <T extends string | string[]>(
   if (Array.isArray(file)) {
     return file.map(f => toFileUrl(f, prefix)) as T
   } else {
-    if (file.indexOf('http') !== 0) file = `${BucketCDN}${prefix}/${file}` as T
+    if (file.indexOf('http') !== 0)
+      file = `${BucketCDN}users/${prefix}/${file}` as T
     else file.replace('http://', 'https://')
     return file
   }

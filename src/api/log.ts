@@ -65,7 +65,7 @@ export const getLogById = (params: { id: number }): Promise<Log> => {
 }
 
 /**
- * 
+ *
  * @param data log要是json字符串
  * @returns 新建log的id
  */
@@ -76,6 +76,6 @@ export const releaseLog = (data: {
   return request({
     url: 'log/release_log',
     method: 'post',
-    data: {token: global.token, ...data},
+    data: { token: global.token, ...data },
   })
 }

@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { toFileUrl } from '@/stores/log'
+import type { Log } from '@/types'
+
+// 从父组件拿到log，主要是获取userId
+const log: Log = inject('log')!
 
 /**
  * files是视频列表
@@ -7,7 +11,9 @@ import { toFileUrl } from '@/stores/log'
 const props = defineProps<{ files: string[] }>()
 
 // 传入的文件要处理，如果不是http开头，那么就加上OOS地址，否则直接用，而且要改为https
-const videos = ref<string[]>(toFileUrl(props.files, 'note-videos'))
+const videos = ref<string[]>(
+  toFileUrl(props.files, `${log.userid}/mylog/videos`)
+)
 
 // 当前播放的是视频地址
 const videoSrc = ref('')
@@ -15,14 +21,17 @@ const videoSrc = ref('')
 
 <template>
   <div class="viewer-videos">
-
-    <div v-for="video in videos" :key="video" class="video" @click.stop="videoSrc = video">
+    <div
+      v-for="video in videos"
+      :key="video"
+      class="video"
+      @click.stop="videoSrc = video"
+    >
       <video>
-        <source :src="video">
+        <source :src="video" />
       </video>
       <VideoPlay class="video-icon" />
     </div>
-
   </div>
 
   <!-- 真正用来播放的 -->
@@ -36,7 +45,7 @@ const videoSrc = ref('')
         auto:根据实际情况动态决定
       -->
     <video class="video-play" controls autoplay ref="videoDom">
-      <source :src="videoSrc" type="video/mp4">
+      <source :src="videoSrc" type="video/mp4" />
     </video>
   </TeleportBody>
 </template>

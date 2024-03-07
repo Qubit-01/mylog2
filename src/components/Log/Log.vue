@@ -10,9 +10,9 @@
 <script setup lang="ts">
 import type { Log } from '@/types'
 
-const { log } = defineProps<{ log: Log }>()
-// console.log(log)
 
+const { log } = defineProps<{ log: Log }>()
+provide('log', log) // 暴露给子组件
 
 // 双击log，展开和收起
 const isExpand = ref(false)
