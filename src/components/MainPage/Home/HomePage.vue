@@ -3,6 +3,7 @@ import useLogStore from '@/stores/log';
 
 const logStore = useLogStore()
 const home = logStore.home
+home.addLogs!()
 </script>
 
 <template>

@@ -3,6 +3,7 @@
  -->
 <script setup lang="ts">
 import type { Log } from '@/types'
+import { delLog } from '@/stores/log'
 
 const { log } = defineProps<{ log: Log }>()
 provide('log', log)
@@ -81,6 +82,10 @@ const expand = () => {
         <div>{{ log.location[1] }}</div>
       </template>
     </div>
+
+    <div v-if="isExpand" class="button">
+      <ElButton size="small" @click="delLog(log)">删除</ElButton>
+    </div>
   </div>
 </template>
 
@@ -126,6 +131,12 @@ const expand = () => {
   .bottom {
     display: flex;
     gap: 4px;
+  }
+
+  .button {
+    position: absolute;
+    top: var(--padding);
+    right: var(--padding);
   }
 }
 </style>

@@ -65,16 +65,32 @@ export const getLogById = (params: { id: number }): Promise<Log> => {
 }
 
 /**
- *
+ * 新建log
  * @param data log要是json字符串
  * @returns 新建log的id
  */
 export const releaseLog = (data: {
   token?: string
   log: string
-}): Promise<number> => {
+}): Promise<string> => {
   return request({
     url: 'log/release_log',
+    method: 'post',
+    data: { token: global.token, ...data },
+  })
+}
+
+/**
+ * 删除log
+ * @param data log要是json字符串
+ * @returns 删除的条数
+ */
+export const deleteLog = (data: {
+  token?: string
+  id: string
+}): Promise<number> => {
+  return request({
+    url: 'log/delete_log',
     method: 'post',
     data: { token: global.token, ...data },
   })

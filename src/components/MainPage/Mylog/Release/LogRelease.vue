@@ -12,20 +12,19 @@ import {
   User,
   More,
 } from '@element-plus/icons-vue'
-import cos from '@/utils/cos'
 import { Bucket, Region, BucketURL } from '@/stores/constant'
 import useGlobalStore from '@/stores/global'
 import type { LogItem } from './types'
-import { releaseLog } from '@/api/log'
+import { rlsLog } from '@/stores/log'
+import { cloneDeep } from 'lodash'
 
 const global = useGlobalStore()
 // 获取组件暴露的files，用于上传
 const editImgs = ref()
 
-// 编辑的数据
-const logEdit = reactive<Log>({
-  userid: global.user.id,
-  username: global.user.name,
+const logInit = (): Log => ({
+  userid: '',
+  username: '',
   type: 'log',
   sendtime: dayjs(),
   logtime: dayjs(),
@@ -40,8 +39,10 @@ const logEdit = reactive<Log>({
   info: {},
 })
 
-// 编辑数据组件显示
-const visible = reactive<{ [key in LogItem]: boolean }>({
+// 编辑的数据
+const logEdit = reactive<Log>(logInit())
+
+const visibleInit = () => ({
   content: true,
   logtime: false,
   tags: false,
@@ -53,55 +54,37 @@ const visible = reactive<{ [key in LogItem]: boolean }>({
   people: false,
   info: false,
 })
-
-// let a: any[] = []
-
-// cos.getBucket(
-//   {
-//     Bucket,
-//     Region,
-//     Prefix: 'note-imgs/',
-//     Marker: 'note-imgs/230513_0143-26-BIT08355.jpg',
-//     // note-imgs/1666848767959-1.jpg
-//     // note-imgs/230513_0143-26-BIT08355.jpg
-    
-//   },
-//   function (err, data) {
-//     a = data.Contents.map(i => i.Key)
-//     console.log(a)
-//   }
-// )
+// 编辑数据组件显示
+const visible = reactive<{ [key in LogItem]: boolean }>(visibleInit())
 
 const release = () => {
-  // console.log(a)
-  /* 把a/1.jpg复制一份到b/1.jpg */
+  // 大压缩图、95压缩图、原图。大压缩图必发，95压缩图和原图选择性发送
+  // 目前先实现发 大压缩图＋原图
+  const files = []
+  if (editImgs?.value?.files) {
+    // 有文件才用
+    for (const file of editImgs.value.files) {
+      files.push({
+        // 大压缩图
+        Bucket,
+        Region,
+        Key: `users/${global.user.id}/mylog/compress-imgs/${file.key}`,
+        Body: file.compressImg,
+      })
+      files.push({
+        // 原图
+        Bucket,
+        Region,
+        Key: `users/${global.user.id}/mylog/imgs/${file.key}`,
+        Body: file.raw,
+      })
+    }
+  }
 
-  // for (let CopySource of a) {
-    
-  //   cos.putObjectCopy(
-  //     {
-  //       Bucket,
-  //       Region,
-  //       Key: 'users/1/mylog/imgs/' + CopySource.split('/')[1],
-  //       // https://bit-1310383539.cos.ap-chengdu.myqcloud.com/web-files/README.md
-  //       // CopySource:
-  //       //   'bit-1310383539.cos.ap-chengdu.myqcloud.com/' + CopySource, // note-imgs/1666848261375-0.jpg
-  //       /* CopySource中的Key含中文时，需要自行转义 */
-  //       CopySource: `bit-1310383539.cos.ap-chengdu.myqcloud.com/${encodeURIComponent(CopySource)}`,
-  //     },
-  //     function (err, data) {
-  //       console.log(CopySource)
-  //       console.log(err || data)
-  //     }
-  //   )
-  // }
-
-  // console.dir(COS)
-  // 要先上传文件
-  // console.log('上传文件', editImgs.value.files)
-  // releaseLog({ log: JSON.stringify(logEdit) }).then(id => {
-  //   console.log('发布成功', id)
-  // })
+  rlsLog(cloneDeep(logEdit), { files }).then(log => {
+    Object.assign(logEdit, logInit())
+    Object.assign(visible, visibleInit())
+  })
 }
 
 /**
@@ -130,61 +113,67 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
       placeholder="记录内容"
     />
 
-    <div class="icons">
-      <ElButton
-        link
-        :icon="Clock"
-        @click="add('logtime')"
-        :type="visible.logtime ? 'primary' : undefined"
-      />
-      <ElButton
-        link
-        :icon="PriceTag"
-        @click="add('tags')"
-        :type="visible.tags ? 'primary' : undefined"
-      />
-      <ElButton
-        link
-        :icon="Picture"
-        @click="add('imgs')"
-        :type="visible.imgs ? 'primary' : undefined"
-      />
-      <ElButton
-        link
-        :icon="VideoCamera"
-        @click="add('videos')"
-        :type="visible.videos ? 'primary' : undefined"
-      />
-      <ElButton
-        link
-        :icon="Microphone"
-        @click="add('audios')"
-        :type="visible.audios ? 'primary' : undefined"
-      />
-      <ElButton
-        link
-        :icon="FolderOpened"
-        @click="add('files')"
-        :type="visible.files ? 'primary' : undefined"
-      />
-      <ElButton
-        link
-        :icon="Location"
-        @click="add('location')"
-        :type="visible.location ? 'primary' : undefined"
-      />
-      <ElButton
-        link
-        :icon="User"
-        @click="add('people')"
-        :type="visible.people ? 'primary' : undefined"
-      />
-      <ElButton
-        link
-        :icon="More"
-        @click="add('info')"
-        :type="visible.info ? 'primary' : undefined"
-      />
+    <div class="control">
+      <div class="icons">
+        <ElButton
+          link
+          :icon="Clock"
+          @click="add('logtime')"
+          :type="visible.logtime ? 'primary' : undefined"
+        />
+        <ElButton
+          link
+          :icon="PriceTag"
+          @click="add('tags')"
+          :type="visible.tags ? 'primary' : undefined"
+        />
+        <ElButton
+          link
+          :icon="Picture"
+          @click="add('imgs')"
+          :type="visible.imgs ? 'primary' : undefined"
+        />
+        <ElButton
+          link
+          :icon="VideoCamera"
+          @click="add('videos')"
+          :type="visible.videos ? 'primary' : undefined"
+        />
+        <ElButton
+          link
+          :icon="Microphone"
+          @click="add('audios')"
+          :type="visible.audios ? 'primary' : undefined"
+        />
+        <ElButton
+          link
+          :icon="FolderOpened"
+          @click="add('files')"
+          :type="visible.files ? 'primary' : undefined"
+        />
+        <ElButton
+          link
+          :icon="Location"
+          @click="add('location')"
+          :type="visible.location ? 'primary' : undefined"
+        />
+        <ElButton
+          link
+          :icon="User"
+          @click="add('people')"
+          :type="visible.people ? 'primary' : undefined"
+        />
+        <ElButton
+          link
+          :icon="More"
+          @click="add('info')"
+          :type="visible.info ? 'primary' : undefined"
+        />
+      </div>
+
+      <div class="rls-btn">
+        <ElButton size="small" type="primary" @click="release">发布</ElButton>
+      </div>
     </div>
 
     <div class="edits">
@@ -203,12 +192,8 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
       <div v-if="visible.location">
         <EditLocation v-model="logEdit.location" />
       </div>
-
-      <div>
-        <ElButton size="small" type="primary" @click="release">发布</ElButton>
-      </div>
     </div>
-    <div v-m>logEdit: {{ logEdit }}</div>
+    <!-- <div v-m>logEdit: {{ logEdit }}</div> -->
   </div>
 </template>
 
@@ -221,15 +206,24 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
   flex-direction: column;
   gap: 8px;
 
-  .icons {
-    display: flex;
-    gap: 4px;
+  position: sticky;
+  top: var(--header-top);
+  z-index: 20;
 
-    > * {
-      font-size: 24px;
-      height: 24px;
-      width: 24px;
-      margin: 0;
+  .control {
+    display: flex;
+    justify-content: space-between;
+
+    .icons {
+      display: flex;
+      gap: 4px;
+
+      > * {
+        font-size: 24px;
+        height: 24px;
+        width: 24px;
+        margin: 0;
+      }
     }
   }
 

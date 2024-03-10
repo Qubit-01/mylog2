@@ -19,16 +19,16 @@ const logReleaseDom = ref()
         :infinite-scroll-disabled="mylog.loading"
       >
         <!-- 编辑预览 -->
-        <ElTimelineItem
+        <!-- <ElTimelineItem
           v-if="logReleaseDom?.logEdit.content"
           timestamp="编辑预览"
           placement="top"
         >
           <LogMylog :log="logReleaseDom?.logEdit" />
-        </ElTimelineItem>
+        </ElTimelineItem> -->
 
         <!-- 时间线开始 -->
-        <template v-for="(log, i) in mylog.list">
+        <template v-for="(log, i) in mylog.list" :key="log.id">
           <ElTimelineItem
             v-if="i != 0 && log.logtime!.year() !== mylog.list[i - 1].logtime!.year()"
             :timestamp="log.logtime!.year().toString()"

@@ -18,7 +18,7 @@ const layers = {
   roadNet: createLayer('roadNet'),
 }
 
-const { map, currentPosition } = useMap(
+const { map, curLocation } = useMap(
   mapDom,
   {
     layers: [
@@ -88,7 +88,7 @@ const setMarker = () => {
 
 <template>
   <div class="map-page" v-m>
-    {{ currentPosition }}
+    {{ curLocation }}
     <div class="lnglat-input">
       <ElInput v-model="setting.location[0]" placeholder="lng经度" />
       <ElInput v-model="setting.location[1]" placeholder="lat纬度" />

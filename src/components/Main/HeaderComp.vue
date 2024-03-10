@@ -52,15 +52,16 @@ const router = useRouter()
       transition: width 0.5s;
 
       display: flex;
-      gap: var(--gap);
+      column-gap: var(--gap);
       justify-content: space-between;
       align-items: center;
 
       > nav {
         flex: 1;
         display: flex;
-        justify-content: flex-start;
-        font-size: 20px;
+        justify-content: center;
+        // justify-content: flex-start;
+        font-size: 1.1rem;
         height: var(--header-height);
 
         > a {
@@ -105,6 +106,7 @@ const router = useRouter()
         display: flex;
         gap: 12px;
         align-items: center;
+        justify-content: flex-end;
 
         .theme-switch {
           --el-switch-on-color: #2c2c2c;
@@ -112,12 +114,26 @@ const router = useRouter()
           --color: #333;
         }
       }
+
+      @media (max-width: 700px) {
+        flex-wrap: wrap;
+        > .left {
+          width: 45%;
+        }
+        > .right {
+          width: 45%;
+        }
+
+        > nav {
+          order: 2;
+        }
+      }
     }
   }
 
   // 占位
   .placeholder {
-    height: calc(var(--header-height) + var(--gap));
+    height: var(--header-top);
   }
 }
 </style>

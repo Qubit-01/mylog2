@@ -16,10 +16,17 @@
   --header-height: 50px;
   /* 两边栏宽度 */
   --lan-width: 130px;
+  /* 主体内容的上边距 */
+  --header-top: calc(var(--header-height) + var(--gap));
 
   @media (max-width: 1024px) {
     /* 页面宽度在小挡位时的宽度 */
     --center-width: 95%;
+  }
+
+  @media (max-width: 700px) {
+    /* 主体内容的上边距 */
+    --header-top: calc((var(--header-height) * 2) + var(--gap));
   }
 }
 
@@ -37,7 +44,7 @@ html {
 
 html.dark {
   --body-background-color: #333;
-  --body-background-image: url(https://bit-1310383539.cos.ap-chengdu.myqcloud.com/note-imgs/1666594529103-6.jpg);
+  --body-background-image: url(https://cos.mylog.cool/web-files/1666594529103-6.jpg);
 
   /* -m 模块 */
   --m-background-color: #4444;

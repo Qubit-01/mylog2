@@ -31,7 +31,7 @@ onMounted(() => {
   // 3句话，让viewer为我打工
   viewer.value = new Viewer(viewerDom.value!, {
     // button: false, //右上角关闭按钮
-    title: false, // 图片标题
+    // title: false, // 图片标题
     shown() {
       // 大图展示时，加入查看原图按钮
       ;(viewer.value as any).toolbar
@@ -83,7 +83,7 @@ defineExpose({ vErrorRetry })
         :src="img"
         alt="qqimg"
       />
-      <img v-else :src="img" alt="logimg" v-error-retry />
+      <img v-else :src="img" :alt="img.split('/').at(-1)" v-error-retry />
     </template>
   </div>
 

@@ -9,16 +9,16 @@ import { BucketCDN } from '@/stores/constant'
   <div class="top-log" v-m>
     <ElCarousel height="270px" class="carousel">
       <ElCarouselItem>
-        <img :src="BucketCDN + 'note-imgs/1675152910243-0.jpg'" />
+        <img :src="BucketCDN + 'web-files/1675152910243-0.jpg'" />
       </ElCarouselItem>
       <ElCarouselItem>
-        <img :src="BucketCDN + 'note-imgs/1666594529103-1.jpg'" />
+        <img :src="BucketCDN + 'web-files/1666594529103-1.jpg'" />
       </ElCarouselItem>
       <ElCarouselItem>
-        <img :src="BucketCDN + 'note-imgs/1666594529103-6.jpg'" />
+        <img :src="BucketCDN + 'web-files/1666594529103-6.jpg'" />
       </ElCarouselItem>
       <ElCarouselItem>
-        <img :src="BucketCDN + 'note-imgs/1674922554694-0.jpg'" />
+        <img :src="BucketCDN + 'web-files/1674922554694-0.jpg'" />
       </ElCarouselItem>
       <div class="title">✨多元记2.0 全新亮相 ~</div>
     </ElCarousel>

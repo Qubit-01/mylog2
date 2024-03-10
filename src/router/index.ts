@@ -1,10 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import MainView from '../views/MainView.vue'
 
-// 下面写路径太繁琐了，这里加个前缀
-const getMainPage = (name: string) =>
-  `../components/MainPage/${name}/${name}Page.vue`
-
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
@@ -15,22 +11,22 @@ const router = createRouter({
         {
           path: '',
           name: 'home', // 主页
-          component: () => import(getMainPage('Home')),
+          component: () => import("../components/MainPage/Home/HomePage.vue"),
         },
         {
           path: 'logger',
           name: 'logger', // 我的主页（别人看的）
-          component: () => import(getMainPage('Logger')),
+          component: () => import('../components/MainPage/Logger/LoggerPage.vue'),
         },
         {
           path: 'mylog',
           name: 'mylog', // 我的记录（自己看的）
-          component: () => import(getMainPage('Mylog')),
+          component: () => import('../components/MainPage/Mylog/MylogPage.vue'),
         },
         {
           path: 'map',
           name: 'map',
-          component: () => import(getMainPage('Map')),
+          component: () => import('../components/MainPage/Map/MapPage.vue'),
         },
       ],
     },

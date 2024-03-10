@@ -89,11 +89,14 @@ html.dark { // 里面的样式自己覆盖
 }
 ```
 
-# COS
+# COS 文件存储服务
+
+- 加入了CDN加速，现在读取图片、视频、文件等更加快速
+- 更新了文件存储结构，现在每个用户的有自己的文件域，更便于管理
+- 加入了权限控制，文件只能在本网站并通过CDN读取，用户只能写操作自己的文件域，文件存储更安全
 
 文件结构：[用户 id]/[项目]/不同类型文件夹/时间戳-源文件名
-不同类型文件夹：compress-imgs, note-audios, note-files, note-imgs, note-videos, recycle, web-files
+不同类型文件夹：compress-imgs, imgs, audios, files, videos, recycle
 
 users/1/mylog/compress-imgs/1666071890799-0.jpg
 
-读取：配置了 CDN，现在读取文件只能通过 CDN，只能通过 mylog.cool 读取。并且没有对权限进行限制
