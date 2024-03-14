@@ -6,7 +6,7 @@ import { deepMerge } from "@/utils"
  * 全局数据
  * 
  * global
- *   user信息（不含token）
+ *   user信息（不含token）就是User数据，里面没有方法
  *   token
  *   [计算]
  *   isLogined 是否已登录
@@ -29,7 +29,7 @@ export const useGlobalStore = defineStore('global', () => {
   // 当前默认用户数据
   const user = reactive<User>({
     id: '0',
-    name: '未登录',
+    name: '',
     setting: {
       page: {
         theme: 'light',
@@ -59,6 +59,7 @@ export const useGlobalStore = defineStore('global', () => {
   const logout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('pageSetting')
+    location.reload()
   }
 
 

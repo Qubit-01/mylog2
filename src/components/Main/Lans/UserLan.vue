@@ -1,20 +1,21 @@
 <script setup lang="ts">
-import useGlobalStore from '@/stores/global';
-const Global = useGlobalStore();
-const User = Global.user;
+import useGlobalStore from '@/stores/global'
+const Global = useGlobalStore()
+const User = Global.user
 </script>
 <!-- 可以加点数量统计 -->
 <template>
   <div class="user-lan" v-m>
     <template v-if="Global.isLogined">
       <div class="img">
-        <img :src="User.img" alt="用户头像">
+        <img :src="User.img" alt="用户头像" />
       </div>
       <div class="name">
         {{ User.name }}
       </div>
       <div>我的主页</div>
       <div>发个 Log</div>
+      <div @click="Global.logout">退出</div>
     </template>
     <template v-else>
       <div>

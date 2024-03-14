@@ -28,7 +28,7 @@ const logReleaseDom = ref()
         </ElTimelineItem> -->
 
         <!-- 时间线开始 -->
-        <template v-for="(log, i) in mylog.list" :key="log.id">
+        <template v-for="(log, i) in mylog.list">
           <ElTimelineItem
             v-if="i != 0 && log.logtime!.year() !== mylog.list[i - 1].logtime!.year()"
             :timestamp="log.logtime!.year().toString()"
@@ -41,7 +41,7 @@ const logReleaseDom = ref()
             :type="log.type === 'public' ? 'warning' : undefined"
             placement="top"
           >
-            <LogMylog :log="log" />
+            <LogMylog :log="log" :key="log.id" />
           </ElTimelineItem>
         </template>
 

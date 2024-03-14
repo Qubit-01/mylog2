@@ -24,7 +24,8 @@ const router = useRouter()
           <RouterLink to="/map">地图</RouterLink>
         </nav>
         <div class="right">
-          <div class="user">{{ User.name }}</div>
+          <div v-if="Global.isLogined" class="user">{{ User.name }}</div>
+          <RouterLink v-else to="/login">去登录</RouterLink>
           <ThemeSwitch />
         </div>
       </div>
