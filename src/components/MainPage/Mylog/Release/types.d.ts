@@ -6,8 +6,11 @@ import { ExifImgFile } from '@/utils/img'
  */
 export interface ExifUploadRawFile extends UploadRawFile, ExifImgFile {}
 
-export interface LogImgFile extends UploadFile {
+export interface LogFile extends UploadFile {
   key?: string // 文件名，上传时间-序号-文件名
+}
+
+export interface LogImgFile extends LogFile {
   raw?: ExifUploadRawFile
   compressImg?: ExifImgFile // 压缩文件
   compressImg95?: ExifImgFile // 95压缩文件

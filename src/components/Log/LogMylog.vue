@@ -4,6 +4,7 @@
 <script setup lang="ts">
 import type { Log } from '@/types'
 import { delLog } from '@/stores/log'
+import { Delete, Edit, Share } from '@element-plus/icons-vue'
 
 const { log } = defineProps<{ log: Log }>()
 provide('log', log)
@@ -37,10 +38,10 @@ const expand = () => {
     </div>
 
     <!-- 图片和视频放在一起 -->
-    <div class="block-media" v-if="log.imgs.length">
+    <div class="block-media">
       <!-- <ViewerImgs v-if="preview" :files="xxx" /> -->
-      <ViewerImgs :imgs="log.imgs" />
-      <ViewerVideos v-if="isExpand" :files="log.videos" />
+      <ViewerImgs v-if="log.imgs.length" :imgs="log.imgs" />
+      <ViewerVideos v-if="log.videos.length && isExpand" :files="log.videos" />
       <!-- v-if="isExpand" -->
     </div>
 
@@ -84,7 +85,11 @@ const expand = () => {
     </div>
 
     <div v-if="isExpand" class="button">
-      <ElButton size="small" @click="delLog(log)">删除</ElButton>
+      <ElButtonGroup>
+        <ElButton :icon="Edit" />
+        <ElButton :icon="Share" />
+        <ElButton :icon="Delete" @click.stop="delLog(log)" />
+      </ElButtonGroup>
     </div>
   </div>
 </template>
@@ -135,7 +140,7 @@ const expand = () => {
 
   .button {
     position: absolute;
-    top: var(--padding);
+    top: -20px;
     right: var(--padding);
   }
 }

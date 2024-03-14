@@ -51,7 +51,7 @@ const onChange = async (file: LogImgFile, files: UploadFiles) => {
     return
   }
 
-  // 文件名，并给noteImgs 赋值文件名
+  // 文件名
   file.key = `${dayjs().format('YYMMDD_HHmm')}-${index.value++}-${file.name}`
 
   // exifdata 直接被写入了file.raw中
@@ -137,11 +137,11 @@ onUnmounted(() => {
       :on-remove="handleRemove"
      -->
     <ElUpload
+      v-model:file-list="files"
       class="edit-imgs-upload"
       list-type="picture-card"
       multiple
       drag
-      v-model:file-list="files"
       :on-change="onChange"
       :auto-upload="false"
     >

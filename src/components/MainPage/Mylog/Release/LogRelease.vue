@@ -21,6 +21,11 @@ import { cloneDeep } from 'lodash'
 const global = useGlobalStore()
 // 获取组件暴露的files，用于上传
 const editImgs = ref()
+const editVideos = ref()
+const upload = reactive({
+  percent: -1, // 上传进度
+  speed: 0, // 上传速度 MB/s
+})
 
 const logInit = (): Log => ({
   userid: '',
@@ -58,6 +63,7 @@ const visibleInit = () => ({
 const visible = reactive<{ [key in LogItem]: boolean }>(visibleInit())
 
 const release = () => {
+  upload.percent = 0
   // 大压缩图、95压缩图、原图。大压缩图必发，95压缩图和原图选择性发送
   // 目前先实现发 大压缩图＋原图
   const files = []
@@ -81,9 +87,28 @@ const release = () => {
     }
   }
 
-  rlsLog(cloneDeep(logEdit), { files }).then(log => {
+  if (editVideos?.value?.files) {
+    for (const file of editVideos.value.files) {
+      files.push({
+        Bucket,
+        Region,
+        Key: `users/${global.user.id}/mylog/videos/${file.key}`,
+        Body: file.raw,
+      })
+    }
+  }
+
+  rlsLog(cloneDeep(logEdit), {
+    files,
+    onProgress: info => {
+      upload.percent = Math.floor(info.percent * 100)
+      upload.speed = +(info.speed / 1024 / 1024).toFixed(2)
+    },
+  }).then(log => {
     Object.assign(logEdit, logInit())
     Object.assign(visible, visibleInit())
+    upload.percent = -1
+    upload.speed = 0
   })
 }
 
@@ -105,7 +130,22 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
 </script>
 
 <template>
-  <div class="log-release" v-m>
+  <div
+    class="log-release"
+    v-m
+    :class="{ disabled: upload.percent > -1 }"
+    @click.stop
+  >
+    <ElProgress
+      v-if="upload.percent > -1"
+      :percentage="upload.percent"
+      :text-inside="true"
+      :stroke-width="20"
+      striped
+    >
+      {{ upload.percent }}% {{ upload.speed }}MB/s
+    </ElProgress>
+
     <ElInput
       v-model="logEdit.content"
       :autosize="{ minRows: 3 }"
@@ -176,23 +216,27 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
       </div>
     </div>
 
-    <div class="edits">
-      <div v-if="visible.logtime">
-        <EditTime v-model="logEdit.logtime" />
-      </div>
-
-      <div v-if="visible.tags">
-        <EditTags v-model="logEdit.tags" />
-      </div>
-
-      <div v-if="visible.imgs">
-        <EditImgs ref="editImgs" v-model="logEdit.imgs" @add="add" />
-      </div>
-
-      <div v-if="visible.location">
-        <EditLocation v-model="logEdit.location" />
-      </div>
+    <!-- <div class="edits"> -->
+    <div v-if="visible.logtime">
+      <EditTime v-model="logEdit.logtime" />
     </div>
+
+    <div v-if="visible.tags">
+      <EditTags v-model="logEdit.tags" />
+    </div>
+
+    <div v-if="visible.imgs">
+      <EditImgs ref="editImgs" v-model="logEdit.imgs" @add="add" />
+    </div>
+
+    <div v-if="visible.videos">
+      <EditVideos ref="editVideos" v-model="logEdit.videos" />
+    </div>
+
+    <div v-if="visible.location">
+      <EditLocation v-model="logEdit.location" />
+    </div>
+    <!-- </div> -->
     <!-- <div v-m>logEdit: {{ logEdit }}</div> -->
   </div>
 </template>
@@ -232,5 +276,10 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
     flex-direction: column;
     gap: 8px;
   }
+}
+
+// 编辑不可操作时，如上传中
+.disabled {
+  pointer-events: none;
 }
 </style>
