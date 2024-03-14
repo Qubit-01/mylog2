@@ -11,7 +11,9 @@
       <div class="middle">
         <RouterView />
       </div>
-      <div class="left">左栏</div>
+      <div class="left">
+        <UserLan />
+      </div>
       <div class="right">
         <OneSentence />
       </div>
@@ -25,9 +27,6 @@
   display: flex;
   justify-content: center;
 
-  // 两边栏宽度
-  --width-lan: 130px;
-
   .center {
     width: var(--center-width);
     display: flex;
@@ -36,31 +35,42 @@
       width 0.5s;
 
     .middle {
+      width: 0;
       order: 2;
       flex: 1;
-      overflow: auto;
     }
 
     .left {
       order: 1;
-      width: var(--width-lan);
+      width: var(--lan-width);
+
+      // 栏固定
+      >div:nth-child(1) {
+        position: sticky;
+        top: calc(var(--header-height) + var(--gap));
+      }
     }
 
     .right {
       order: 3;
-      width: var(--width-lan);
+      width: var(--lan-width);
     }
 
     .left,
     .right {
-      >div {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+      >* {
         border-radius: var(--border-radius);
-        padding: var(--border-radius);
+      }
+    }
+
+    @media (max-width: 700px) {
+
+      .left,
+      .right {
+        display: none;
       }
     }
   }
+
 }
 </style>

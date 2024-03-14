@@ -1,6 +1,3 @@
-import './assets/css/themes/dark.css'
-import './assets/css/base.css'
-
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
@@ -11,11 +8,17 @@ import * as Icons from '@element-plus/icons-vue' // element 图标
 import 'dayjs/locale/zh-cn' // element 用的dayjs要设置时区
 import App from './App.vue'
 import router from './router'
-import axios from 'axios'
-axios.defaults.baseURL = 'https://localhost:8081'
-// axios.defaults.baseURL = 'https://mylog.cool:8081'
-// axios 默认json，但是后端要加注解，麻烦
-axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
+import dayjs from 'dayjs'
+import 'dayjs/locale/zh-cn' // 导入本地化语言
+import customParseFormat from 'dayjs/plugin/customParseFormat' // 拓展 dayjs 支持自定义时间格式。
+
+import './assets/css/base.less' // 全局样式
+
+// import 'default-passive-events' // 浏览器警告：解决移动端滚动卡顿问题
+
+dayjs.locale('zh-cn') // 使用本地化语言
+dayjs.extend(customParseFormat)
+
 
 const app = createApp(App)
 
@@ -25,7 +28,22 @@ app.use(router)
 // 注册所有element图标组件
 for (const [k, c] of Object.entries(Icons)) app.component(k, c)
 // 注册指令：给元素加-m的class
-app.directive('m', dom => dom.classList.add('-m'))
-
+app.directive('m', (dom) => dom.classList.add('-m'))
+// 注册指令：超出省略号，传入行数，默认一行，0就啥都不干
+app.directive('overflowEllipsis', (el, { value = 1 }) => {
+  if (value === 0) {
+    // 删除样式
+    el.classList.remove('-overflow-ellipsis-s', '-overflow-ellipsis-m')
+    el.style.webkitLineClamp = 'revert'
+  } else if (value === 1) {
+    el.classList.add('-overflow-ellipsis-s')
+    el.classList.remove('-overflow-ellipsis-m')
+    el.style.webkitLineClamp = 'revert'
+  } else {
+    el.classList.remove('-overflow-ellipsis-s')
+    el.classList.add('-overflow-ellipsis-m')
+    el.style.webkitLineClamp = value
+  }
+})
 
 app.mount('#app')
