@@ -18,7 +18,7 @@ import type { LogItem } from './types'
 import { rlsLog } from '@/stores/log'
 import { cloneDeep } from 'lodash'
 
-const global = useGlobalStore()
+const Global = useGlobalStore()
 // 获取组件暴露的files，用于上传
 const editImgs = ref()
 const editVideos = ref()
@@ -74,14 +74,14 @@ const release = () => {
         // 大压缩图
         Bucket,
         Region,
-        Key: `users/${global.user.id}/mylog/compress-imgs/${file.key}`,
+        Key: `${Global.cosPath}compress-imgs/${file.key}`,
         Body: file.compressImg,
       })
       files.push({
         // 原图
         Bucket,
         Region,
-        Key: `users/${global.user.id}/mylog/imgs/${file.key}`,
+        Key: `${Global.cosPath}imgs/${file.key}`,
         Body: file.raw,
       })
     }
@@ -92,7 +92,7 @@ const release = () => {
       files.push({
         Bucket,
         Region,
-        Key: `users/${global.user.id}/mylog/videos/${file.key}`,
+        Key: `${Global.cosPath}videos/${file.key}`,
         Body: file.raw,
       })
     }

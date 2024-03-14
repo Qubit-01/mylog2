@@ -11,7 +11,7 @@ import {
 import { BucketCDN } from '@/stores/constant'
 import useGlobalStore from './global'
 import type { id } from 'element-plus/es/locales.mjs'
-const global = useGlobalStore()
+const Global = useGlobalStore()
 
 // 请求响应
 export type LogsResp = {
@@ -112,8 +112,7 @@ export const toFileUrl = <T extends string | string[]>(
   if (Array.isArray(file)) {
     return file.map(f => toFileUrl(f, prefix)) as T
   } else {
-    if (file.indexOf('http') !== 0)
-      file = `${BucketCDN}users/${prefix}/${file}` as T
+    if (file.indexOf('http') !== 0) file = `${BucketCDN}/${prefix}${file}` as T
     else file.replace('http://', 'https://')
     return file
   }
@@ -128,8 +127,8 @@ export const rlsLog = (
   log: Log,
   params: COS.UploadFilesParams
 ): Promise<Log> => {
-  log.userid = global.user.id
-  log.username = global.user.name
+  log.userid = Global.user.id
+  log.username = Global.user.name
   return new Promise((resolve, reject) => {
     myUploadFiles(params).then(data => {
       releaseLog({ log: JSON.stringify(log) }).then(id => {
@@ -144,8 +143,8 @@ export const rlsLog = (
 }
 
 /**
- *
- * @param log 删除log
+ * 删除Log，先删文件，再删log
+ * @param log 删除的Log对象
  * @returns 参一为null，既成功
  */
 export const delLog = (log: Log): Promise<[any, Log]> => {
@@ -159,10 +158,11 @@ export const delLog = (log: Log): Promise<[any, Log]> => {
         // 先删文件，再删log
         const objects: { Key: string }[] = []
         log.imgs.forEach(i => {
-          objects.push({ Key: `users/${global.user.id}/mylog/imgs/${i}` })
-          objects.push({
-            Key: `users/${global.user.id}/mylog/compress-imgs/${i}`,
-          })
+          objects.push({ Key: `${Global.cosPath}imgs/${i}` })
+          objects.push({ Key: `${Global.cosPath}compress-imgs/${i}` })
+        })
+        log.videos.forEach(v => {
+          objects.push({ Key: `${Global.cosPath}videos/${v}` })
         })
         myDeleteFiles(objects).then(data => {
           deleteLog({ id: log.id! }).then(count => {

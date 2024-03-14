@@ -15,6 +15,13 @@ const expand = () => {
   isExpand.value = !isExpand.value
   // console.log(log)
 }
+
+// 点击编辑按钮
+const isEdit = ref(false)
+
+const edit = () => {
+
+}
 </script>
 
 <template>
@@ -86,7 +93,7 @@ const expand = () => {
 
     <div v-if="isExpand" class="button">
       <ElButtonGroup>
-        <ElButton :icon="Edit" />
+        <ElButton :icon="Edit" @click.stop="isEdit = true" />
         <ElButton :icon="Share" />
         <ElButton :icon="Delete" @click.stop="delLog(log)" />
       </ElButtonGroup>
