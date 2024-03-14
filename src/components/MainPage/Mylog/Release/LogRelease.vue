@@ -107,8 +107,7 @@ const release = () => {
   }).then(log => {
     Object.assign(logEdit, logInit())
     Object.assign(visible, visibleInit())
-    upload.percent = -1
-    upload.speed = 0
+    Object.assign(upload, { persent: -1, speed: 0 })
   })
 }
 
