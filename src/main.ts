@@ -7,7 +7,7 @@ import zhCn from 'element-plus/dist/locale/zh-cn.mjs' // element 国际化
 import * as Icons from '@element-plus/icons-vue' // element 图标
 import 'dayjs/locale/zh-cn' // element 用的dayjs要设置时区
 import App from './App.vue'
-import router from './router'
+import router from './views/router'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn' // 导入本地化语言
 import customParseFormat from 'dayjs/plugin/customParseFormat' // 拓展 dayjs 支持自定义时间格式。

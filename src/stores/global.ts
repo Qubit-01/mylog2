@@ -3,29 +3,38 @@ import type { User } from '@/types'
 import { deepMerge } from '@/utils'
 
 /**
- * 全局数据
- *
- * global
- *   user信息（不含token）就是User数据，里面没有方法
- *   token
- *   [计算]
- *   cosPath cos路径
- *   isLogined 是否已登录
- *   isDark 是否是暗黑模式
- *   [方法]
- *   logout 退出登录方法
- *
- * 哪些信息需要存入token？
- * setting.pageSetting 这个页面会直接使用的
+ * 哪些信息需要存入本地？
+ * 1. token
+ * 2. setting.pageSetting 这个页面会直接使用的
  *
  * 流程：
  * 默认值 》 本地存储 》 云端获取
- *
- *
- *
  */
 
-export const useGlobalStore = defineStore('global', () => {
+/**
+ * Global 全局数据的类型
+ */
+interface Global {
+  /**
+   * 信息（不含token）就是User数据，里面没有方法
+   */
+  user: User
+  token: string
+  /**
+   * 是否已登录（计算属性）
+   */
+  isLogined: boolean
+  /**
+   * 是否是暗黑模式（计算属性）
+   */
+  isDark: boolean
+  /**
+   * 退出登录方法
+   */
+  logout: () => void
+}
+
+export const useGlobalStore: () => Global = defineStore('global', () => {
   // 当前默认用户数据
   const user = reactive<User>({
     id: '0',
@@ -47,7 +56,7 @@ export const useGlobalStore = defineStore('global', () => {
   const token = ref(localStorage.getItem('token') || '')
 
   if (token.value) {
-    getUserByToken({ token: token.value }).then(res => {
+    getUserByToken({ token: token.value }).then((res) => {
       if (res) deepMerge(user, res)
     })
   }
@@ -83,7 +92,6 @@ export const useGlobalStore = defineStore('global', () => {
     user,
     token,
     isLogined,
-    cosPath,
     logout,
     isDark,
   }

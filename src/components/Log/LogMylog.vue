@@ -19,9 +19,7 @@ const expand = () => {
 // 点击编辑按钮
 const isEdit = ref(false)
 
-const edit = () => {
-
-}
+const edit = () => {}
 </script>
 
 <template>
@@ -90,6 +88,9 @@ const edit = () => {
         <div>{{ log.location[1] }}</div>
       </template>
     </div>
+
+    <!-- 编辑模块 -->
+    <div>编辑</div>
 
     <div v-if="isExpand" class="button">
       <ElButtonGroup>

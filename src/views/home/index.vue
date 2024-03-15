@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import useLogStore from '@/stores/log';
+import useLogStore from '@/stores/log'
 
 const logStore = useLogStore()
 const home = logStore.home

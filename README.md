@@ -1,29 +1,53 @@
 # MyLog 2
 
-使用 Vue3 + TS + Pinia + Element Plus 重构 Mylog 项目。
+使用 Vue3 + TS + Pinia + Element Plus 重构 Mylog 项目。推荐用 `pnpm` 运行。
 
 网站名称待定： My Multi Media Log 万象录 多元记 知行台
 网站域名待定： pro(已被注册)、ink、pub、run、plus
 
-# 架构
 
-```js
-// 主题css，暂时不开发
-./assets/css/themes/dark.css
-// 基础css，定义了全局css变量、明暗主题、m模块的样式
-./assets/css/base.less
-// 里面就一个RouterView，整个页面的路由，其中的js部分是加载页面后必须执行的
-// 如 User 请求，主题设置
-App.vue
-
-```
-
-旧项目的缺陷：
+## 旧项目的缺陷
 
 - 不断开发功能，导致项目结构没有构思，乱。
 - blog 和 note 功能其实可以合成为一个功能，因为他们的功能和数据结构大致是相同的，note 比 blog 更“大”，可以直接合成为一个功能，减少开发压力。
 - 分享功能的 id 数组是明文的显示在 url 参数中，导致其他用户修改 url 参数中的 id 即可访问用户其他公开的 log
 - 点赞功能不好高性能得实现，2 中采用空间换时间的方式，在两张表里面加入数据。
+- 旧项目中，COS没有做权限限制，全开的公有读私有写，一直在破产边缘徘徊。并且文件结构不科学，不好统计用户占用空间，对后期开发和扩展不友好。
+
+下面对旧项目每个痛点描述解决方案。
+
+
+## 项目文件组织结构
+src下的源代码结构
+- api 项目接口，全是Promise，用到 utils/request.ts
+- assets
+  - markdown 后期MD文档的主题样式文件
+  - themes 主题css，目前只有明暗主题。todo: 后期定义好变量名后可以由用户自定义
+- components
+  - Log log模块的相关组件
+  - MainView 页面主要架构的相关组件
+  - Pages 一级页面要使用的组件，且几乎只有这个页面才用得到，否则不应放在此目录下
+  - Utils 工具类组件
+- stores
+  - constant.ts 整个项目使用的常量，不依赖于其他任何文件和变量
+  - global.ts 全局store，包含了用户信息，页面明暗主题等
+  - log.ts LogStore，包含了Home页和Mylog页的Log列表和Log的相关方法（发布、删除、编辑等）
+- utils
+  - cos.ts COS对象和相关封装的方法
+  - img.ts 目前是图片压缩要用的相关方法
+  - index.ts 离散的零碎的工具方法
+  - map.ts 高德地图的实例对象和相关封装方法
+  - request.ts 封装的Axios请求方法
+- views 一级页面
+  - 404 路由找不到，全部重定向到这个页面
+  - home 主页
+  - logger 我的主页，用户页。这个页面只展示用户公开的log
+  - login 登陆、注册页
+  - map 大地图页
+  - mylog 编辑、展示log页，会展示全部log的页面
+- App.vue
+
+
 
 ## 合并 note 表和 blog 表
 
@@ -78,7 +102,23 @@ todo: 废弃，以前是待办事项，应该加进 log 的 tags 中
 - 现在 type 不会为空，type 默认都是 log，爬虫的数据默认为 public
 - 现在首页展示 public
 
-## 一些 element 的操作
+
+
+## COS 文件存储服务
+
+- 加入了CDN加速，现在读取图片、视频、文件等更加快速
+- 更新了文件存储结构，现在每个用户的有自己的文件域，更便于管理
+- 加入了权限控制，文件只能在本网站并通过CDN读取，用户只能写操作自己的文件域，文件存储更安全
+
+文件结构：`users/[用户 id]/[项目]/[文件类型]/[YYMMDD_HHmm]-[编号]-源文件名`  
+不同类型文件夹：compress-imgs, imgs, audios, files, videos, recycle  
+如：users/1/mylog/compress-imgs/1666071890799-0.jpg
+
+
+
+## 下面写的是作者怕忘记的东西
+
+### 一些 element 的操作
 
 ```js
 // main.ts 自定义主题css
@@ -88,15 +128,3 @@ html.dark { // 里面的样式自己覆盖
   --el-bg-color: #626aef; /* 自定义深色背景颜色 */
 }
 ```
-
-# COS 文件存储服务
-
-- 加入了CDN加速，现在读取图片、视频、文件等更加快速
-- 更新了文件存储结构，现在每个用户的有自己的文件域，更便于管理
-- 加入了权限控制，文件只能在本网站并通过CDN读取，用户只能写操作自己的文件域，文件存储更安全
-
-文件结构：[用户 id]/[项目]/不同类型文件夹/时间戳-源文件名
-不同类型文件夹：compress-imgs, imgs, audios, files, videos, recycle
-
-users/1/mylog/compress-imgs/1666071890799-0.jpg
-

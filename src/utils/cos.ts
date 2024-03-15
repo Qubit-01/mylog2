@@ -3,7 +3,7 @@ import request from '@/utils/request'
 import { Bucket, Region, BucketCDN } from '@/stores/constant'
 import useGlobalStore from '@/stores/global'
 
-const global = useGlobalStore()
+const Global = useGlobalStore()
 
 /**
  * 获取临时密钥接口 API
@@ -14,7 +14,7 @@ const getCredential = (data?: { token?: string }): Promise<any> => {
   return request({
     url: 'cos/get_credential',
     method: 'post',
-    data: { token: global.token, ...data },
+    data: { token: Global.token, ...data },
   })
 }
 
@@ -26,7 +26,7 @@ const cos = new COS({
    * @param callback
    */
   getAuthorization: function (options, callback) {
-    getCredential().then(data => {
+    getCredential().then((data) => {
       if (!data) {
         console.error('credentials invalid:\n' + JSON.stringify(data, null, 2))
         return
@@ -46,9 +46,13 @@ const cos = new COS({
 
 export default cos
 
-
-  // 用户的cos路径方便后续使用
-  const cosPath = computed(() => `users/${user.id}/mylog/`)
+/**
+ * 返回如 users/[userid]/mylog/ 
+ * @param userid 要插入其中的用户id，如果不传用当前用户id
+ * @returns 返回链接字符串
+ */
+export const cosPath = (userid: string | undefined = undefined) =>
+  `users/${userid || Global.user.id}/mylog/`
 
 /**
  * 处理imgs地址，如果是http开头就直接用，否则加上OOS地址
@@ -62,18 +66,13 @@ export const toFileUrl = <T extends string | string[]>(
   prefix: string = ''
 ): T => {
   if (Array.isArray(file)) {
-    return file.map(f => toFileUrl(f, prefix)) as T
+    return file.map((f) => toFileUrl(f, prefix)) as T
   } else {
     if (file.indexOf('http') !== 0) file = `${BucketCDN}${prefix}${file}` as T
     else file.replace('http://', 'https://')
     return file
   }
 }
-
-
-
-
-
 
 // 获取文件列表
 // cos.getBucket(
@@ -150,6 +149,7 @@ export const myDeleteFiles = (
   Objects: { Key: string }[]
 ): Promise<[COS.CosError, COS.DeleteMultipleObjectResult]> => {
   return new Promise((resolve, reject) => {
+    // 没有文件直接返回成功
     if (Objects.length === 0) return resolve([null, { Deleted: [], Error: [] }])
     cos.deleteMultipleObject(
       {

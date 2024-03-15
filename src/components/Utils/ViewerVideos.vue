@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import useGlobalStore from '@/stores/global'
-import { toFileUrl } from '@/utils/cos'
+import { toFileUrl, cosPath } from '@/utils/cos'
 import type { Log } from '@/types'
 
 const Global = useGlobalStore()
@@ -15,7 +15,7 @@ const props = defineProps<{ files: string[] }>()
 
 // 传入的文件要处理，如果不是http开头，那么就加上OOS地址，否则直接用，而且要改为https
 const videos = ref<string[]>(
-  toFileUrl(props.files, `${Global.cosPath}videos/`)
+  toFileUrl(props.files, `${cosPath(log.userid)}videos/`)
 )
 
 // 当前播放的是视频地址

@@ -1,6 +1,6 @@
 import type { Log } from '@/types'
 import COS from 'cos-js-sdk-v5'
-import { myUploadFiles, myDeleteFiles } from '@/utils/cos'
+import { myUploadFiles, myDeleteFiles, cosPath } from '@/utils/cos'
 import dayjs from 'dayjs'
 import {
   getLogsHome,
@@ -77,7 +77,7 @@ export const useLogStore = defineStore('log', () => {
     },
     // 删除单个log
     delLog: (id: string) => {
-      mylog.listAll = mylog.listAll.filter(log => log.id !== id)
+      mylog.listAll = mylog.listAll.filter((log) => log.id !== id)
     },
   })
 
@@ -88,6 +88,17 @@ export const useLogStore = defineStore('log', () => {
 })
 
 export default useLogStore
+
+/**
+ * log中代表文件的项，需要和COS交互的属性
+ * 方便一些方法循环
+ */
+export const logFileType: ['imgs', 'videos', 'audios', 'files'] = [
+  'imgs',
+  'videos',
+  'audios',
+  'files',
+]
 
 /**
  * 处理单个Log，直接操作参数
@@ -111,9 +122,8 @@ export const rlsLog = (
   log.userid = Global.user.id
   log.username = Global.user.name
   return new Promise((resolve, reject) => {
-    myUploadFiles(params).then(data => {
-      console.log(JSON.stringify(log))
-      releaseLog({ logJson: JSON.stringify(log) }).then(id => {
+    myUploadFiles(params).then((data) => {
+      releaseLog({ logJson: JSON.stringify(log) }).then((id) => {
         log.id = id
         const logStore = useLogStore()
         logStore.mylog.addLog(log)
@@ -126,15 +136,18 @@ export const rlsLog = (
 
 /**
  * 编辑Log，先看文件，再编辑log
- * @param log 删除的Log对象 
- * @param params 多个了isAdd字段，表示是要追加还是覆盖
+ * 传入新旧log，新log只传入要修改的项，然后和旧log对比（只有文件需要对比，要区分哪些文件需要删除和上传）
+ * @param log 编辑的Log对象，这个里面的属性是log要最终成为的样子，不分添加或覆盖
+ * @param params 主要用来传入文件
  * @returns 参一为null，既成功
  */
 export const editLog = (
-  log: Log,
-  params: COS.UploadFilesParams & { }
+  log: Partial<Log>,
+  params: COS.UploadFilesParams,
+  oldLog: Log
 ): Promise<[any, Log]> => {
   return new Promise((resolve, reject) => {
+    console.log('🐤', log, params, oldLog)
     // ElMessageBox.confirm('确定编辑吗？', '编辑Log', {
     //   confirmButtonText: '编辑',
     //   cancelButtonText: '取消',
@@ -142,25 +155,34 @@ export const editLog = (
     // })
     //   .then(() => {
 
-    // 先对比文件，有哪些是要加，哪些是要删
-    // 目前先沿用之前的逻辑，只能追加或覆盖
-    const objects: { Key: string }[] = []
-    log.imgs.forEach(i => {
-      objects.push({ Key: `${Global.cosPath}imgs/${i}` })
-      objects.push({ Key: `${Global.cosPath}compress-imgs/${i}` })
+    // 筛选要删除的文件对象
+    const delObjs: { Key: string }[] = []
+    logFileType.forEach((type) => {
+      log[type]
+        ?.filter((i) => !oldLog.imgs.includes(i)) // 找old里面没有的
+        .forEach((i) => {
+          delObjs.push({ Key: `${cosPath()}${type}/${i}` })
+          if (type === 'imgs')
+            delObjs.push({ Key: `${cosPath()}compress-imgs/${i}` })
+        })
     })
-    log.videos.forEach(v => {
-      objects.push({ Key: `${Global.cosPath}videos/${v}` })
-    })
-    myDeleteFiles(objects).then(data => {
-      deleteLog({ id: log.id! }).then(count => {
-        ElMessage({ message: '删除成功', type: 'success' })
-        const logStore = useLogStore()
-        logStore.mylog.delLog(log.id)
 
-        resolve([null, log])
-      })
+    console.log('🐤', log, params, oldLog, delObjs)
+    return new Promise((resolve, reject) => {
+      // Promise.all([myDeleteFiles(delObjs), myUploadFiles(params)]).then(
+      //   (data) => {}
+      // )
     })
+    // myDeleteFiles(objects).then((data) => {
+    //   deleteLog({ id: log.id! }).then((count) => {
+    //     ElMessage({ message: '删除成功', type: 'success' })
+    //     const logStore = useLogStore()
+    //     logStore.mylog.delLog(log.id)
+
+    //     resolve([null, log])
+    //   })
+    // })
+
     // })
     // .catch(() => {
     //   reject()
@@ -183,15 +205,15 @@ export const delLog = (log: Log): Promise<[any, Log]> => {
       .then(() => {
         // 先删文件，再删log
         const objects: { Key: string }[] = []
-        log.imgs.forEach(i => {
-          objects.push({ Key: `${Global.cosPath}imgs/${i}` })
-          objects.push({ Key: `${Global.cosPath}compress-imgs/${i}` })
+        logFileType.forEach((type) => {
+          log[type].forEach((i) => {
+            objects.push({ Key: `${cosPath()}${type}/${i}` })
+            if (type === 'imgs')
+              objects.push({ Key: `${cosPath()}compress-imgs/${i}` })
+          })
         })
-        log.videos.forEach(v => {
-          objects.push({ Key: `${Global.cosPath}videos/${v}` })
-        })
-        myDeleteFiles(objects).then(data => {
-          deleteLog({ id: log.id! }).then(count => {
+        myDeleteFiles(objects).then((data) => {
+          deleteLog({ id: log.id! }).then((count) => {
             ElMessage({ message: '删除成功', type: 'success' })
             const logStore = useLogStore()
             logStore.mylog.delLog(log.id)
