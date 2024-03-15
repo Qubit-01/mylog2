@@ -1,7 +1,6 @@
 import COS from 'cos-js-sdk-v5'
 import request from '@/utils/request'
-import { Bucket, Region } from '@/stores/constant'
-// import { baseURL, Bucket, Region } from '@/stores/constant'
+import { Bucket, Region, BucketCDN } from '@/stores/constant'
 import useGlobalStore from '@/stores/global'
 
 const global = useGlobalStore()
@@ -46,6 +45,35 @@ const cos = new COS({
 })
 
 export default cos
+
+
+  // 用户的cos路径方便后续使用
+  const cosPath = computed(() => `users/${user.id}/mylog/`)
+
+/**
+ * 处理imgs地址，如果是http开头就直接用，否则加上OOS地址
+ * 可以传入单个字符串，或者字符串数组
+ * 全都要转为https，不改变log的源数据，只返回新的数组
+ * @param file 文件名或文件对象
+ * @param prefix CDN域名 prefix 文件名
+ */
+export const toFileUrl = <T extends string | string[]>(
+  file: T,
+  prefix: string = ''
+): T => {
+  if (Array.isArray(file)) {
+    return file.map(f => toFileUrl(f, prefix)) as T
+  } else {
+    if (file.indexOf('http') !== 0) file = `${BucketCDN}${prefix}${file}` as T
+    else file.replace('http://', 'https://')
+    return file
+  }
+}
+
+
+
+
+
 
 // 获取文件列表
 // cos.getBucket(

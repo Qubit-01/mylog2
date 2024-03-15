@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import useGlobalStore from '@/stores/global';
-import { toFileUrl } from '@/stores/log'
+import useGlobalStore from '@/stores/global'
+import { toFileUrl } from '@/utils/cos'
 import type { Log } from '@/types'
 
 const Global = useGlobalStore()

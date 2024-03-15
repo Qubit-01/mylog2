@@ -55,8 +55,6 @@ export const useGlobalStore = defineStore('global', () => {
   // 用户相关 ===============================
   // 是否已登录，判断
   const isLogined = computed(() => user.id !== '0')
-  // 用户的cos路径方便后续使用
-  const cosPath = computed(() => `users/${user.id}/mylog/`)
   // 退出登录，删除 token、pageSetting
   const logout = () => {
     localStorage.removeItem('token')

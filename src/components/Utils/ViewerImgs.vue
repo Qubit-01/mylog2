@@ -8,7 +8,7 @@
 <script setup lang="ts">
 import Viewer from 'viewerjs'
 import 'viewerjs/dist/viewer.css'
-import { toFileUrl } from '@/stores/log'
+import { toFileUrl } from '@/utils/cos'
 import type { Log } from '@/types'
 import useGlobalStore from '@/stores/global'
 

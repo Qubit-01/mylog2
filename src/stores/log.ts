@@ -8,9 +8,8 @@ import {
   releaseLog,
   deleteLog,
 } from '@/api/log'
-import { BucketCDN } from '@/stores/constant'
 import useGlobalStore from './global'
-import type { id } from 'element-plus/es/locales.mjs'
+
 const Global = useGlobalStore()
 
 // 请求响应
@@ -98,24 +97,6 @@ export default useLogStore
 export const handleLog = (log: any): void => {
   log.logtime = dayjs(log.logtime)
   log.sendtime = dayjs(log.sendtime)
-}
-
-/**
- * 处理imgs地址，如果是http开头就直接用，否则加上OOS地址
- * 可以传入单个字符串，或者字符串数组
- * 全都要转为https，不改变log的源数据，只返回新的数组
- */
-export const toFileUrl = <T extends string | string[]>(
-  file: T,
-  prefix: string = ''
-): T => {
-  if (Array.isArray(file)) {
-    return file.map(f => toFileUrl(f, prefix)) as T
-  } else {
-    if (file.indexOf('http') !== 0) file = `${BucketCDN}/${prefix}${file}` as T
-    else file.replace('http://', 'https://')
-    return file
-  }
 }
 
 /**
