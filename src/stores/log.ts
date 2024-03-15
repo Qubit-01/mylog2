@@ -131,7 +131,8 @@ export const rlsLog = (
   log.username = Global.user.name
   return new Promise((resolve, reject) => {
     myUploadFiles(params).then(data => {
-      releaseLog({ log: JSON.stringify(log) }).then(id => {
+      console.log(JSON.stringify(log))
+      releaseLog({ logJson: JSON.stringify(log) }).then(id => {
         log.id = id
         const logStore = useLogStore()
         logStore.mylog.addLog(log)
@@ -139,6 +140,50 @@ export const rlsLog = (
         resolve(log)
       })
     })
+  })
+}
+
+/**
+ * 编辑Log，先看文件，再编辑log
+ * @param log 删除的Log对象 
+ * @param params 多个了isAdd字段，表示是要追加还是覆盖
+ * @returns 参一为null，既成功
+ */
+export const editLog = (
+  log: Log,
+  params: COS.UploadFilesParams & { }
+): Promise<[any, Log]> => {
+  return new Promise((resolve, reject) => {
+    // ElMessageBox.confirm('确定编辑吗？', '编辑Log', {
+    //   confirmButtonText: '编辑',
+    //   cancelButtonText: '取消',
+    //   type: 'warning',
+    // })
+    //   .then(() => {
+
+    // 先对比文件，有哪些是要加，哪些是要删
+    // 目前先沿用之前的逻辑，只能追加或覆盖
+    const objects: { Key: string }[] = []
+    log.imgs.forEach(i => {
+      objects.push({ Key: `${Global.cosPath}imgs/${i}` })
+      objects.push({ Key: `${Global.cosPath}compress-imgs/${i}` })
+    })
+    log.videos.forEach(v => {
+      objects.push({ Key: `${Global.cosPath}videos/${v}` })
+    })
+    myDeleteFiles(objects).then(data => {
+      deleteLog({ id: log.id! }).then(count => {
+        ElMessage({ message: '删除成功', type: 'success' })
+        const logStore = useLogStore()
+        logStore.mylog.delLog(log.id)
+
+        resolve([null, log])
+      })
+    })
+    // })
+    // .catch(() => {
+    //   reject()
+    // })
   })
 }
 

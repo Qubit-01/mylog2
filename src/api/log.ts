@@ -71,10 +71,26 @@ export const getLogById = (params: { id: number }): Promise<Log> => {
  */
 export const releaseLog = (data: {
   token?: string
-  log: string
+  logJson: string
 }): Promise<string> => {
   return request({
     url: 'log/release_log',
+    method: 'post',
+    data: { token: global.token, ...data },
+  })
+}
+
+/**
+ * 编辑log
+ * @param data log要是json字符串
+ * @returns 编辑的条数
+ */
+export const editLog = (data: {
+  token?: string
+  logJson: string
+}): Promise<number> => {
+  return request({
+    url: 'log/edit_log',
     method: 'post',
     data: { token: global.token, ...data },
   })
