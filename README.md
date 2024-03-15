@@ -2,7 +2,7 @@
 
 使用 Vue3 + TS + Pinia + Element Plus 重构 Mylog 项目。推荐用 `pnpm` 运行。
 
-网站名称待定： My Multi Media Log 万象录 多元记 知行台
+网站名称待定： My Multi Media Log 万象录 多元记 知行台  
 网站域名待定： pro(已被注册)、ink、pub、run、plus
 
 
@@ -116,7 +116,7 @@ todo: 废弃，以前是待办事项，应该加进 log 的 tags 中
 
 
 
-## 下面写的是作者怕忘记的东西
+## 下面写一些作者的心得和怕忘记的东西
 
 ### 一些 element 的操作
 
