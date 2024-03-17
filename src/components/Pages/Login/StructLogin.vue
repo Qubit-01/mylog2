@@ -30,6 +30,7 @@ const logout = () => {
 
       <div v-if="Global.isLogined" class="loged">
         <div>检测到您已经登录了，是否要</div>
+        <ElButton @click="router.push('/')" type="primary">进入首页</ElButton>
         <ElButton @click="logout">退出登录</ElButton>
       </div>
 

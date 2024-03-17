@@ -1,24 +1,12 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import type { Log } from '@/types'
-import {
-  Clock,
-  PriceTag,
-  Picture,
-  VideoCamera,
-  Microphone,
-  FolderOpened,
-  Location,
-  User,
-  More,
-} from '@element-plus/icons-vue'
-import { Bucket, Region, BucketURL } from '@/stores/constant'
-import useGlobalStore from '@/stores/global'
-import type { LogItem } from './types'
+import { Bucket, Region } from '@/stores/constant'
+import type { LogItem } from '../types'
 import { rlsLog } from '@/stores/log'
 import { cloneDeep } from 'lodash'
+import { cosPath } from '@/utils/cos'
 
-const Global = useGlobalStore()
 // 获取组件暴露的files，用于上传
 const editImgs = ref()
 const editVideos = ref()
@@ -27,6 +15,7 @@ const upload = reactive({
   speed: 0, // 上传速度 MB/s
 })
 
+// 编辑的数据
 const logInit = (): Log => ({
   userid: '',
   username: '',
@@ -43,12 +32,10 @@ const logInit = (): Log => ({
   people: [],
   info: {},
 })
-
-// 编辑的数据
 const logEdit = reactive<Log>(logInit())
 
+// 编辑数据组件显示
 const visibleInit = () => ({
-  content: true,
   logtime: false,
   tags: false,
   imgs: false,
@@ -59,29 +46,28 @@ const visibleInit = () => ({
   people: false,
   info: false,
 })
-// 编辑数据组件显示
-const visible = reactive<{ [key in LogItem]: boolean }>(visibleInit())
+const visible = reactive<{ [key in LogItem]?: boolean }>(visibleInit())
 
 const release = () => {
   upload.percent = 0
   // 大压缩图、95压缩图、原图。大压缩图必发，95压缩图和原图选择性发送
   // 目前先实现发 大压缩图＋原图
   const files = []
+
   if (editImgs?.value?.files) {
-    // 有文件才用
     for (const file of editImgs.value.files) {
       files.push({
         // 大压缩图
         Bucket,
         Region,
-        Key: `${Global.cosPath}compress-imgs/${file.key}`,
+        Key: `${cosPath()}compress-imgs/${file.key}`,
         Body: file.compressImg,
       })
       files.push({
         // 原图
         Bucket,
         Region,
-        Key: `${Global.cosPath}imgs/${file.key}`,
+        Key: `${cosPath()}imgs/${file.key}`,
         Body: file.raw,
       })
     }
@@ -92,7 +78,7 @@ const release = () => {
       files.push({
         Bucket,
         Region,
-        Key: `${Global.cosPath}videos/${file.key}`,
+        Key: `${cosPath()}videos/${file.key}`,
         Body: file.raw,
       })
     }
@@ -105,18 +91,19 @@ const release = () => {
       upload.speed = +(info.speed / 1024 / 1024).toFixed(2)
     },
   }).then(log => {
+    console.log(log)
     Object.assign(logEdit, logInit())
     Object.assign(visible, visibleInit())
-    Object.assign(upload, { persent: -1, speed: 0 })
+    Object.assign(upload, { percent: -1, speed: 0 })
   })
 }
 
 /**
- * 新增且切换显示状态
+ * 新增且切换显示状态，这里不用考虑数据重置，因为组件在卸载钩子中会自动重置
  * @param item 设置项
  * @param data 如果不传入，则会切换显示状态，如果传入，则会设置数据
  */
-const add = (item: LogItem, data: any = undefined) => {
+const add = <T extends LogItem>(item: T, data?: Log[T]) => {
   if (data) {
     logEdit[item] = data
     visible[item] = true
@@ -135,6 +122,13 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
     :class="{ disabled: upload.percent > -1 }"
     @click.stop
   >
+    <ElInput
+      v-model="logEdit.content"
+      :autosize="{ minRows: 3 }"
+      type="textarea"
+      placeholder="记录内容"
+    />
+
     <ElProgress
       v-if="upload.percent > -1"
       :percentage="upload.percent"
@@ -145,77 +139,13 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
       {{ upload.percent }}% {{ upload.speed }}MB/s
     </ElProgress>
 
-    <ElInput
-      v-model="logEdit.content"
-      :autosize="{ minRows: 3 }"
-      type="textarea"
-      placeholder="记录内容"
-    />
-
-    <div class="control">
-      <div class="icons">
-        <ElButton
-          link
-          :icon="Clock"
-          @click="add('logtime')"
-          :type="visible.logtime ? 'primary' : undefined"
-        />
-        <ElButton
-          link
-          :icon="PriceTag"
-          @click="add('tags')"
-          :type="visible.tags ? 'primary' : undefined"
-        />
-        <ElButton
-          link
-          :icon="Picture"
-          @click="add('imgs')"
-          :type="visible.imgs ? 'primary' : undefined"
-        />
-        <ElButton
-          link
-          :icon="VideoCamera"
-          @click="add('videos')"
-          :type="visible.videos ? 'primary' : undefined"
-        />
-        <ElButton
-          link
-          :icon="Microphone"
-          @click="add('audios')"
-          :type="visible.audios ? 'primary' : undefined"
-        />
-        <ElButton
-          link
-          :icon="FolderOpened"
-          @click="add('files')"
-          :type="visible.files ? 'primary' : undefined"
-        />
-        <ElButton
-          link
-          :icon="Location"
-          @click="add('location')"
-          :type="visible.location ? 'primary' : undefined"
-        />
-        <ElButton
-          link
-          :icon="User"
-          @click="add('people')"
-          :type="visible.people ? 'primary' : undefined"
-        />
-        <ElButton
-          link
-          :icon="More"
-          @click="add('info')"
-          :type="visible.info ? 'primary' : undefined"
-        />
-      </div>
-
+    <div v-else class="control">
+      <ControlIcons :visible :add />
       <div class="rls-btn">
         <ElButton size="small" type="primary" @click="release">发布</ElButton>
       </div>
     </div>
 
-    <!-- <div class="edits"> -->
     <div v-if="visible.logtime">
       <EditTime v-model="logEdit.logtime" />
     </div>
@@ -225,7 +155,7 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
     </div>
 
     <div v-if="visible.imgs">
-      <EditImgs ref="editImgs" v-model="logEdit.imgs" @add="add" />
+      <EditImgs ref="editImgs" v-model="logEdit.imgs" :add />
     </div>
 
     <div v-if="visible.videos">
@@ -235,8 +165,9 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
     <div v-if="visible.location">
       <EditLocation v-model="logEdit.location" />
     </div>
-    <!-- </div> -->
-    <!-- <div v-m>logEdit: {{ logEdit }}</div> -->
+
+    <!-- <div v-m>logEdit: {{ logEdit }}</div>
+    <div v-m>upload: {{ upload }}</div> -->
   </div>
 </template>
 
@@ -256,24 +187,6 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
   .control {
     display: flex;
     justify-content: space-between;
-
-    .icons {
-      display: flex;
-      gap: 4px;
-
-      > * {
-        font-size: 24px;
-        height: 24px;
-        width: 24px;
-        margin: 0;
-      }
-    }
-  }
-
-  .edits {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
   }
 }
 

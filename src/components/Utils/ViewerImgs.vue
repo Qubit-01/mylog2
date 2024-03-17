@@ -8,11 +8,8 @@
 <script setup lang="ts">
 import Viewer from 'viewerjs'
 import 'viewerjs/dist/viewer.css'
-import { toFileUrl, cosPath } from '@/utils/cos'
+import { toFileUrl } from '@/utils/cos'
 import type { Log } from '@/types'
-import useGlobalStore from '@/stores/global'
-
-const Global = useGlobalStore()
 
 // 从父组件拿到log，主要是获取userId
 const log: Log = inject('log')!
@@ -23,9 +20,7 @@ const log: Log = inject('log')!
 const props = defineProps<{ imgs: string[] }>()
 
 // 传入的图片要处理，如果不是http开头，那么就加上OOS地址，否则直接用，而且要改为https
-const imgs = ref<string[]>(
-  toFileUrl(props.imgs, `${cosPath(log.userid)}compress-imgs/`)
-)
+const imgs = ref<string[]>(toFileUrl(props.imgs, 'compress-imgs/', log.userid))
 const viewer = ref<Viewer>() // viewerjs对象
 const viewerDom = ref<HTMLElement>() // 用于装载用ref属性获取的Dom
 const rawBtuDom = ref<HTMLElement>() // 查看原图按钮的DOM
@@ -47,7 +42,7 @@ onMounted(() => {
 // 点击加载原图
 const loadRaw = () => {
   const i = (viewer.value as any).index
-  const newImg = toFileUrl(props.imgs[i], `${cosPath(log.userid)}imgs/`)
+  const newImg = toFileUrl(props.imgs[i], 'imgs/', log.userid)
   if (imgs.value[i] !== newImg) {
     imgs.value[i] = newImg
     nextTick(() => viewer.value!.update()) // .view(i)

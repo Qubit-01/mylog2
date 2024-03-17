@@ -82,15 +82,15 @@ export const releaseLog = (data: {
 
 /**
  * 编辑log
- * @param data log要是json字符串
+ * @param data log要是json字符串，必须要传入logid
  * @returns 编辑的条数
  */
-export const editLog = (data: {
+export const updateLog = (data: {
   token?: string
   logJson: string
 }): Promise<number> => {
   return request({
-    url: 'log/edit_log',
+    url: 'log/update_log',
     method: 'post',
     data: { token: global.token, ...data },
   })

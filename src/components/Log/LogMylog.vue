@@ -13,13 +13,10 @@ provide('log', log)
 const isExpand = ref(false)
 const expand = () => {
   isExpand.value = !isExpand.value
-  // console.log(log)
 }
 
 // 点击编辑按钮
 const isEdit = ref(false)
-
-const edit = () => {}
 </script>
 
 <template>
@@ -82,23 +79,26 @@ const edit = () => {}
           记录时间：{{ log.logtime!.format('YYYY-MM-DD HH:mm') }}
         </template>
       </el-tooltip>
-
-      <template v-if="log?.location?.length">
+      <template v-if="log?.location[1]">
         ·
         <div>{{ log.location[1] }}</div>
       </template>
+      ·
+      <div>{{ log.id }}</div>
     </div>
 
     <!-- 编辑模块 -->
-    <div>编辑</div>
+    <LogEdit v-if="isEdit" @suc="isEdit = false" />
 
     <div v-if="isExpand" class="button">
       <ElButtonGroup>
-        <ElButton :icon="Edit" @click.stop="isEdit = true" />
+        <ElButton :icon="Edit" @click.stop="isEdit = !isEdit" />
         <ElButton :icon="Share" />
         <ElButton :icon="Delete" @click.stop="delLog(log)" />
       </ElButtonGroup>
     </div>
+
+    <!-- <div>log: {{ log }}</div> -->
   </div>
 </template>
 
@@ -106,6 +106,15 @@ const edit = () => {}
 .log {
   border-radius: var(--border-radius);
   padding: var(--padding);
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  // 空div应该不占用gap
+  > div:empty {
+    display: none;
+  }
 
   .title {
     font-size: 1.2rem;
@@ -137,7 +146,6 @@ const edit = () => {}
   .tags {
     display: flex;
     gap: 4px;
-    margin-top: 4px;
     flex-wrap: wrap;
   }
 

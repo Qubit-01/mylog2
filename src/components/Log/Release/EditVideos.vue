@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import type { UploadFiles } from 'element-plus'
-import type { LogFile } from './types'
+import type { LogFile } from '../types'
 
 // 文件名列表
 const videos = defineModel<string[]>({ required: true })
+const { edit } = defineProps<{
+  edit?: boolean
+}>()
 // File对象列表
 const files = shallowRef<LogFile[]>([])
 
@@ -36,12 +39,17 @@ const onChange = async (file: LogFile, files: UploadFiles) => {
 }
 
 onUnmounted(() => {
-  videos.value = []
+  if (!edit) videos.value = []
 })
 </script>
 <template>
   <div class="edit-videos">
-    <ElUpload multiple v-model:file-list="files" :on-change="onChange" :auto-upload="false">
+    <ElUpload
+      multiple
+      v-model:file-list="files"
+      :on-change="onChange"
+      :auto-upload="false"
+    >
       <ElButton type="primary">上传视频</ElButton>
     </ElUpload>
   </div>

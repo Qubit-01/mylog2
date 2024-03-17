@@ -13,17 +13,23 @@
 -->
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import type { LogImgFile, LogItem } from './types'
+import type { Log } from '@/types'
+import type { LogImgFile, LogItem } from '../types'
 import type { UploadFiles } from 'element-plus'
 import { getExifByFile, compressImg, type ExifImgFile } from '@/utils/img'
 import AMap, { l2v } from '@/utils/map'
+import { toFileUrl } from '@/utils/cos'
 
-// 文件名
+// 文件名: 首次传入的数据会被imgsOld记录，然后立即被watch修改
 const imgs = defineModel<string[]>({ required: true })
-// add事件
-const emit = defineEmits<{
-  add: [item: LogItem, data: any]
+// 原有文件：编辑模块要传入一些图片进来
+const imgsOld = ref([...imgs.value])
+const { add, edit } = defineProps<{
+  // 添加项目
+  add: <T extends LogItem>(item: T, data?: Log[T]) => void
+  edit?: boolean
 }>()
+
 // File对象列表
 const files = shallowRef<LogImgFile[]>([])
 
@@ -36,8 +42,8 @@ const count = ref(0) // 用于压缩时控制按钮
 defineExpose({ files })
 
 // 更新imgs文件名列表
-watchEffect(() => {
-  imgs.value = files.value.map(i => i.key!)
+watch([imgsOld, () => files.value.length], () => {
+  imgs.value = [...imgsOld.value, ...files.value.map(i => i.key!)]
 })
 
 // :on-change 状态变化，添加文件、上传成功、失败
@@ -93,7 +99,7 @@ const useExif = () => {
       if (dateTime) {
         // 'YYYY:MM:DD HH:MM:SS' 转为 'YYYY-MM-DD HH:mm:ss'
         dateTime = dateTime.replace(':', '-').replace(':', '-')
-        emit('add', 'logtime', dayjs(dateTime))
+        add('logtime', dayjs(dateTime))
         flag.logtime = true
       }
     }
@@ -108,7 +114,7 @@ const useExif = () => {
           // status：complete 查询成功，no_data 无结果，error 错误
           // 查询成功时，result.locations 即为转换后的高德坐标系
           if (status === 'complete' && result.info === 'ok') {
-            emit('add', 'location', [l2v(result.locations[0]), ''])
+            add('location', [l2v(result.locations[0]), ''])
             flag.location = true
           }
         })
@@ -121,13 +127,20 @@ const useExif = () => {
   if (!flag.logtime && !flag.location) ElMessage.error('没有提取到信息')
 }
 
+const delImgOld = (img: string) => {
+  imgsOld.value = imgsOld.value.filter(i => i !== img)
+}
+
 onUnmounted(() => {
-  imgs.value = []
+  if (!edit) imgs.value = []
 })
 </script>
 
 <template>
   <div class="edit-imgs">
+    <!-- <div>imgs: {{ imgs }}</div>
+    <div>imgsOld: {{ imgsOld }}</div>
+    <div>files: {{ files }}</div> -->
     <!-- 
       multiple 支持多选文件
       drag 启用拖拽上传	(有样式bug)
@@ -136,23 +149,37 @@ onUnmounted(() => {
       亲测on-change可能因为禁用了自动上传，只有这个起作用
       :on-remove="handleRemove"
      -->
-    <ElUpload
-      v-model:file-list="files"
-      class="edit-imgs-upload"
-      list-type="picture-card"
-      multiple
-      drag
-      :on-change="onChange"
-      :auto-upload="false"
-    >
-      <ElIcon><Plus /></ElIcon>
-    </ElUpload>
-    <ElButton :disabled="files.length === 0" @click="useExif" size="small">
-      提取时间位置
-    </ElButton>
+    <div class="all-imgs">
+      <div class="viewer-imgs">
+        <div v-for="img in imgsOld" :key="img">
+          <img :src="toFileUrl(img, 'compress-imgs/')" />
+          <span class="actions">
+            <ElIcon size="20" color="#fff" @click="delImgOld(img)">
+              <Delete />
+            </ElIcon>
+          </span>
+        </div>
+      </div>
+
+      <ElUpload
+        v-model:file-list="files"
+        class="edit-imgs-upload"
+        list-type="picture-card"
+        multiple
+        drag
+        :on-change="onChange"
+        :auto-upload="false"
+      >
+        <ElIcon><Plus /></ElIcon>
+      </ElUpload>
+    </div>
+    <div>
+      <ElButton :disabled="files.length === 0" @click="useExif" size="small">
+        提取时间位置
+      </ElButton>
+    </div>
+
     <!--
-    <el-switch v-if="haveCover == ''" v-model="editNote.isCoverImgs" size="small" inline-prompt active-text="覆盖"
-      inactive-text="添加" />
     <el-switch v-if="editNote.noteImgs" v-model="editNote.isRawImgs" size="small" inline-prompt active-text="原图"
       inactive-text="高清" />
     <span style="font-size: 12px;color:var(--mini-text-color)">图片小于{{ SIZE }}MB</span>
@@ -165,48 +192,102 @@ onUnmounted(() => {
   --block-width: 100px;
   --block-gap: 2px;
 
-  .edit-imgs-upload {
-    max-width: 100%;
-    overflow: auto;
-    justify-content: flex-start;
+  .all-imgs {
+    display: flex;
+    gap: var(--block-gap);
 
-    :deep(ul.el-upload-list) {
-      flex-wrap: nowrap;
+    .viewer-imgs {
+      white-space: nowrap;
+      overflow-y: hidden;
+      width: fit-content;
+      max-width: 100%;
+
+      display: flex;
       gap: var(--block-gap);
 
-      > * {
-        width: var(--block-width);
+      > div {
+        border: 1px solid var(--el-border-color);
+        border-radius: 6px;
         height: var(--block-height);
-        margin: 0;
-      }
+        width: var(--block-height);
+        overflow: hidden;
+        position: relative;
 
-      li.el-upload-list__item {
-        order: 2;
-
-        // 图片
-        .el-upload-list__item-thumbnail {
+        img {
+          flex-shrink: 0;
           object-fit: cover;
+          width: 100%;
+          height: 100%;
         }
 
-        // 隐藏预览按钮
-        .el-upload-list__item-preview {
-          display: none;
-        }
+        .actions {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: var(--el-overlay-color-lighter);
 
-        // 居中删除按钮
-        .el-upload-list__item-delete {
+          display: inline-flex;
+          justify-content: center;
+          align-items: center;
+          opacity: 0;
+          transition: opacity var(--el-transition-duration);
+
+          > .el-icon {
+            cursor: pointer;
+          }
+
+          &:hover {
+            opacity: 1;
+          }
+        }
+      }
+    }
+
+    .edit-imgs-upload {
+      max-width: 100%;
+      overflow: auto;
+      justify-content: flex-start;
+
+      :deep(ul.el-upload-list) {
+        flex-wrap: nowrap;
+        gap: var(--block-gap);
+
+        > * {
+          width: var(--block-width);
+          height: var(--block-height);
           margin: 0;
         }
-      }
 
-      // 添加按钮
-      div.el-upload.el-upload--picture-card {
-        order: 1;
-        border: 0;
+        li.el-upload-list__item {
+          order: 2;
 
-        .el-upload-dragger {
-          // width: 100%;
-          height: 100%;
+          // 图片
+          .el-upload-list__item-thumbnail {
+            object-fit: cover;
+          }
+
+          // 隐藏预览按钮
+          .el-upload-list__item-preview {
+            display: none;
+          }
+
+          // 居中删除按钮
+          .el-upload-list__item-delete {
+            margin: 0;
+          }
+        }
+
+        // 添加按钮
+        div.el-upload.el-upload--picture-card {
+          order: 1;
+          border: 0;
+
+          .el-upload-dragger {
+            // width: 100%;
+            height: 100%;
+          }
         }
       }
     }

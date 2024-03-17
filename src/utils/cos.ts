@@ -55,20 +55,23 @@ export const cosPath = (userid: string | undefined = undefined) =>
   `users/${userid || Global.user.id}/mylog/`
 
 /**
- * 处理imgs地址，如果是http开头就直接用，否则加上OOS地址
- * 可以传入单个字符串，或者字符串数组
- * 全都要转为https，不改变log的源数据，只返回新的数组
- * @param file 文件名或文件对象
- * @param prefix CDN域名 prefix 文件名
+ * 处理文件地址
+ * 若是http开头，就转https然后直接用
+ * 否则加上OOS地址 `${BucketCDN}${cosPath(userid)}${prefix}${file}`
+ * @param file 可以传入单个字符串，或者字符串数组
+ * @param prefix 一般是文件类型 如 img/
+ * @returns 不改变log的源数据，只返回新的数组
  */
 export const toFileUrl = <T extends string | string[]>(
   file: T,
-  prefix: string = ''
+  prefix: string = '',
+  userid?: string
 ): T => {
   if (Array.isArray(file)) {
     return file.map((f) => toFileUrl(f, prefix)) as T
   } else {
-    if (file.indexOf('http') !== 0) file = `${BucketCDN}${prefix}${file}` as T
+    // 处理单个字符串的逻辑
+    if (file.indexOf('http') !== 0) file = `${BucketCDN}${cosPath(userid)}${prefix}${file}` as T
     else file.replace('http://', 'https://')
     return file
   }
@@ -113,8 +116,8 @@ export const toFileUrl = <T extends string | string[]>(
 /**
  * 自己封装的文件上传方法
  * 如果传入空files，就直接返回一个成功的Promise
- * @param params 文件上传参数
- * @returns Promise
+ * @param params 文件上传参数，{files[]文件对象列表，SliceSize? 触发分块的大小，onProgress? 进度条方法}
+ * @returns Promise 所有文件上传完成调用then
  */
 export const myUploadFiles = (
   params: COS.UploadFilesParams

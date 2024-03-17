@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import useGlobalStore from '@/stores/global'
-import { toFileUrl, cosPath } from '@/utils/cos'
+import { toFileUrl } from '@/utils/cos'
 import type { Log } from '@/types'
-
-const Global = useGlobalStore()
 
 // 从父组件拿到log，主要是获取userId
 const log: Log = inject('log')!
@@ -14,9 +11,7 @@ const log: Log = inject('log')!
 const props = defineProps<{ files: string[] }>()
 
 // 传入的文件要处理，如果不是http开头，那么就加上OOS地址，否则直接用，而且要改为https
-const videos = ref<string[]>(
-  toFileUrl(props.files, `${cosPath(log.userid)}videos/`)
-)
+const videos = ref<string[]>(toFileUrl(props.files, 'videos/', log.userid))
 
 // 当前播放的是视频地址
 const videoSrc = ref('')
