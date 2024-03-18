@@ -5,6 +5,8 @@ import type { LogFile } from '../types'
 
 // 文件名列表
 const videos = defineModel<string[]>({ required: true })
+// 原有文件：编辑模块要传入一些图片进来
+const videosOld = ref([...videos.value])
 const { edit } = defineProps<{
   edit?: boolean
 }>()
@@ -20,7 +22,7 @@ defineExpose({ files })
 
 // 更新imgs文件名列表
 watchEffect(() => {
-  videos.value = files.value.map(i => i.key!)
+  videos.value = files.value.map((i) => i.key!)
 })
 
 // :on-change 状态变化，添加文件、上传成功、失败
@@ -44,6 +46,20 @@ onUnmounted(() => {
 </script>
 <template>
   <div class="edit-videos">
+    <div class="viewer-videos">
+      <ul class="el-upload-list el-upload-list--text">
+        <li
+          v-for="video in videosOld"
+          :key="video"
+          class="el-upload-list__item is-success"
+        >
+          <div class="el-upload-list__item-info" v-overflow-ellipsis>
+            {{ video }}
+          </div>
+          <ElIcon><Close /></ElIcon>
+        </li>
+      </ul>
+    </div>
     <ElUpload
       multiple
       v-model:file-list="files"

@@ -19,6 +19,9 @@
   /* 主体内容的上边距 */
   --header-top: calc(var(--header-height) + var(--gap));
 
+  /* 滚动条粗细 */
+  --scrollbar-weight: 6px;
+
   @media (max-width: 1024px) {
     /* 页面宽度在小挡位时的宽度 */
     --center-width: 95%;
@@ -37,9 +40,14 @@ html {
   /* -m 模块 */
   // --m-background-color: #eee5;
   --m-background-color: hsla(0, 0%, 100%, 0.3);
-  --m-border: 1px solid #1115;
+  --m-border: 1px solid #fff5;
   --m-shadow: var(--el-box-shadow-lighter);
   --m-hover-shadow: var(--el-box-shadow-light);
+
+  /* 滚动槽颜色 */
+  --scrollbar-background: #9995;
+  /* 滚动滑块颜色 */
+  --scrollbar-thumb-background: #999a;
 }
 
 html.dark {
@@ -48,9 +56,14 @@ html.dark {
 
   /* -m 模块 */
   --m-background-color: #4444;
-  --m-border: 1px solid #fff5;
+  --m-border: 1px solid #8885;
   --m-shadow: var(--el-box-shadow-lighter);
   --m-hover-shadow: var(--el-box-shadow-light);
+
+  /* 滚动槽颜色 */
+  --scrollbar-background: #3335;
+  /* 滚动滑块颜色 */
+  --scrollbar-thumb-background: #333a;
 }
 
 /* 中间模块通用 */
@@ -58,7 +71,9 @@ html.dark {
   position: relative;
   transition: box-shadow 0.2s linear, width 0.2s linear;
   background-color: var(--m-background-color);
-  /* border: var(--m-border); */
+
+  border: var(--m-border);
+
   box-shadow: var(--m-shadow);
   backdrop-filter: blur(8px);
 
@@ -90,6 +105,23 @@ html.dark {
   div.amap-copyright {
     display: none !important;
   }
+}
+
+
+// 整个滚动条。
+*::-webkit-scrollbar {
+  width: var(--scrollbar-weight); // 纵向滚动条的粗细
+  height: var(--scrollbar-weight); // 横向滚动条的粗细
+}
+// 滚动条上的滚动滑块。
+*::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: var(--scrollbar-thumb-background);
+}
+// 滚动条轨道。
+*::-webkit-scrollbar-track {
+  border-radius: 4px;
+  background: var(--scrollbar-background);
 }
 
 *,

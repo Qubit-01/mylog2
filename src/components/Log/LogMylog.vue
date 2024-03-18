@@ -41,10 +41,8 @@ const isEdit = ref(false)
 
     <!-- 图片和视频放在一起 -->
     <div class="block-media">
-      <!-- <ViewerImgs v-if="preview" :files="xxx" /> -->
       <ViewerImgs v-if="log.imgs.length" :imgs="log.imgs" />
       <ViewerVideos v-if="log.videos.length && isExpand" :files="log.videos" />
-      <!-- v-if="isExpand" -->
     </div>
 
     <!-- 音频 和 文件 -->
@@ -72,13 +70,13 @@ const isEdit = ref(false)
     <div v-if="isExpand" class="bottom">
       <div>{{ log.username }}</div>
       ·
-      <el-tooltip effect="light" placement="top">
+      <ElTooltip effect="light" placement="top">
         <div>{{ log.logtime!.format('YYYY-MM-DD HH:mm') }}</div>
         <template #content>
           发送时间：{{ log.sendtime!.format('YYYY-MM-DD HH:mm') }}<br />
           记录时间：{{ log.logtime!.format('YYYY-MM-DD HH:mm') }}
         </template>
-      </el-tooltip>
+      </ElTooltip>
       <template v-if="log?.location[1]">
         ·
         <div>{{ log.location[1] }}</div>
@@ -90,7 +88,7 @@ const isEdit = ref(false)
     <!-- 编辑模块 -->
     <LogEdit v-if="isEdit" @suc="isEdit = false" />
 
-    <div v-if="isExpand" class="button">
+    <div v-if="isExpand" class="buttons">
       <ElButtonGroup>
         <ElButton :icon="Edit" @click.stop="isEdit = !isEdit" />
         <ElButton :icon="Share" />
@@ -154,7 +152,7 @@ const isEdit = ref(false)
     gap: 4px;
   }
 
-  .button {
+  .buttons {
     position: absolute;
     top: -20px;
     right: var(--padding);

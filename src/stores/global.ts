@@ -26,6 +26,8 @@ interface Global {
   isLogined: boolean
   /**
    * 是否是暗黑模式（计算属性）
+   * 监视 user.setting.page.theme 变化
+   * 改变 html class属性
    */
   isDark: boolean
   /**
@@ -41,7 +43,7 @@ export const useGlobalStore: () => Global = defineStore('global', () => {
     name: '',
     setting: {
       page: {
-        theme: 'light',
+        theme: localStorage.getItem('theme') || 'light',
       },
     },
   })
@@ -74,18 +76,16 @@ export const useGlobalStore: () => Global = defineStore('global', () => {
   // 主题相关 ===============================
 
   // 是否是暗黑模式
-  const isDark = computed({
+  const isDark = computed<boolean>({
     get: () => user.setting.page.theme === 'dark',
-    set: (val: boolean) => {
-      user.setting.page.theme = val ? 'dark' : 'light'
-    },
+    set: (v) => (user.setting.page.theme = v ? 'dark' : 'light'),
   })
 
   // 主题切换
   const html = document.getElementsByTagName('html')[0]
   watchEffect(() => {
-    if (isDark.value) html.classList.add('dark')
-    else html.classList.remove('dark')
+    localStorage.setItem('theme', user.setting.page.theme!)
+    html.className = user.setting.page.theme!
   })
 
   return {

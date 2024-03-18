@@ -12,26 +12,24 @@ export default defineConfig({
     vue(),
     AutoImport({
       // vue 常见函数
-      imports: ["vue", "vue-router", "pinia"],
+      imports: ['vue', 'vue-router', 'pinia'],
       resolvers: [
         // element 相关函数
-        ElementPlusResolver()
+        ElementPlusResolver(),
       ],
       // 导入的函数给编辑器看的类型文件
       dts: 'src/auto-imports.d.ts',
       eslintrc: { enabled: true },
     }),
     Components({
-      resolvers: [
-        ElementPlusResolver()
-      ],
-      dts: 'src/components.d.ts'
+      resolvers: [ElementPlusResolver()],
+      dts: 'src/components.d.ts',
     }),
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
   },
   server: {
     host: '0.0.0.0', //显示当前局域网地址

@@ -68,7 +68,7 @@ export const toFileUrl = <T extends string | string[]>(
   userid?: string
 ): T => {
   if (Array.isArray(file)) {
-    return file.map((f) => toFileUrl(f, prefix)) as T
+    return file.map((f) => toFileUrl(f, prefix, userid)) as T
   } else {
     // 处理单个字符串的逻辑
     if (file.indexOf('http') !== 0) file = `${BucketCDN}${cosPath(userid)}${prefix}${file}` as T

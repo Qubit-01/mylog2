@@ -43,7 +43,7 @@ defineExpose({ files })
 
 // 更新imgs文件名列表
 watch([imgsOld, () => files.value.length], () => {
-  imgs.value = [...imgsOld.value, ...files.value.map(i => i.key!)]
+  imgs.value = [...imgsOld.value, ...files.value.map((i) => i.key!)]
 })
 
 // :on-change 状态变化，添加文件、上传成功、失败
@@ -128,7 +128,7 @@ const useExif = () => {
 }
 
 const delImgOld = (img: string) => {
-  imgsOld.value = imgsOld.value.filter(i => i !== img)
+  imgsOld.value = imgsOld.value.filter((i) => i !== img)
 }
 
 onUnmounted(() => {
@@ -151,19 +151,27 @@ onUnmounted(() => {
      -->
     <div class="all-imgs">
       <div class="viewer-imgs">
-        <div v-for="img in imgsOld" :key="img">
-          <img :src="toFileUrl(img, 'compress-imgs/')" />
-          <span class="actions">
-            <ElIcon size="20" color="#fff" @click="delImgOld(img)">
-              <Delete />
-            </ElIcon>
-          </span>
-        </div>
+        <!-- 模仿element upload组件的卡片 -->
+        <ul class="el-upload-list el-upload-list--picture-card">
+          <li
+            v-for="img in imgsOld"
+            :key="img"
+            class="el-upload-list__item is-ready"
+          >
+            <img :src="toFileUrl(img, 'compress-imgs/')" />
+            <span class="el-upload-list__item-actions">
+              <ElIcon size="20" color="#fff" @click="delImgOld(img)">
+                <Delete />
+              </ElIcon>
+            </span>
+          </li>
+        </ul>
       </div>
 
+      <!-- 真正上传的 -->
       <ElUpload
         v-model:file-list="files"
-        class="edit-imgs-upload"
+        class="upload-imgs"
         list-type="picture-card"
         multiple
         drag
@@ -192,64 +200,18 @@ onUnmounted(() => {
   --block-width: 100px;
   --block-gap: 2px;
 
+  display: flex;
+  flex-direction: column;
+  gap: var(--block-gap);
+
   .all-imgs {
+    max-width: 100%;
     display: flex;
     gap: var(--block-gap);
+    overflow: auto;
 
-    .viewer-imgs {
-      white-space: nowrap;
-      overflow-y: hidden;
-      width: fit-content;
-      max-width: 100%;
-
-      display: flex;
-      gap: var(--block-gap);
-
-      > div {
-        border: 1px solid var(--el-border-color);
-        border-radius: 6px;
-        height: var(--block-height);
-        width: var(--block-height);
-        overflow: hidden;
-        position: relative;
-
-        img {
-          flex-shrink: 0;
-          object-fit: cover;
-          width: 100%;
-          height: 100%;
-        }
-
-        .actions {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: var(--el-overlay-color-lighter);
-
-          display: inline-flex;
-          justify-content: center;
-          align-items: center;
-          opacity: 0;
-          transition: opacity var(--el-transition-duration);
-
-          > .el-icon {
-            cursor: pointer;
-          }
-
-          &:hover {
-            opacity: 1;
-          }
-        }
-      }
-    }
-
-    .edit-imgs-upload {
-      max-width: 100%;
-      overflow: auto;
-      justify-content: flex-start;
-
+    .viewer-imgs,
+    .upload-imgs {
       :deep(ul.el-upload-list) {
         flex-wrap: nowrap;
         gap: var(--block-gap);
@@ -258,21 +220,31 @@ onUnmounted(() => {
           width: var(--block-width);
           height: var(--block-height);
           margin: 0;
-        }
 
-        li.el-upload-list__item {
-          order: 2;
-
-          // 图片
-          .el-upload-list__item-thumbnail {
+          img {
             object-fit: cover;
+            width: 100%;
+            height: 100%;
           }
 
+          &:empty {
+            display: none;
+          }
+        }
+      }
+    }
+
+    // 待上传的图片
+    .upload-imgs {
+      justify-content: flex-start;
+
+      :deep(ul.el-upload-list) {
+        li.el-upload-list__item {
+          // order: 2;
           // 隐藏预览按钮
           .el-upload-list__item-preview {
             display: none;
           }
-
           // 居中删除按钮
           .el-upload-list__item-delete {
             margin: 0;
@@ -281,11 +253,11 @@ onUnmounted(() => {
 
         // 添加按钮
         div.el-upload.el-upload--picture-card {
-          order: 1;
-          border: 0;
+          // order: 1;
 
           .el-upload-dragger {
-            // width: 100%;
+            border: none;
+            width: 100%;
             height: 100%;
           }
         }
