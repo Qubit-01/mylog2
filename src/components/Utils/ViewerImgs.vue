@@ -21,6 +21,11 @@ const props = defineProps<{ imgs: string[] }>()
 
 // 传入的图片要处理，如果不是http开头，那么就加上OOS地址，否则直接用，而且要改为https
 const imgs = ref<string[]>(toFileUrl(props.imgs, 'compress-imgs/', log.userid))
+
+watchEffect(()=>{
+  console.log('🐤i change', imgs.value)
+})
+
 const viewer = ref<Viewer>() // viewerjs对象
 const viewerDom = ref<HTMLElement>() // 用于装载用ref属性获取的Dom
 const rawBtuDom = ref<HTMLElement>() // 查看原图按钮的DOM

@@ -8,10 +8,14 @@ const log: Log = inject('log')!
 /**
  * files是视频列表
  */
-const props = defineProps<{ files: string[] }>()
+const props = defineProps<{ videos: string[] }>()
 
 // 传入的文件要处理，如果不是http开头，那么就加上OOS地址，否则直接用，而且要改为https
-const videos = ref<string[]>(toFileUrl(props.files, 'videos/', log.userid))
+const videos = ref<string[]>(toFileUrl(props.videos, 'videos/', log.userid))
+
+watchEffect(()=>{
+  console.log('🐤v change', videos.value)
+})
 
 // 当前播放的是视频地址
 const videoSrc = ref('')
