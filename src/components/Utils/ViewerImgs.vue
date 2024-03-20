@@ -17,14 +17,14 @@ const log: Log = inject('log')!
 /**
  * imgs是图片列表
  */
-const props = defineProps<{ imgs: string[] }>()
+const props = defineProps<{ imgs?: string[] }>()
+// 计算从哪里取属性
+const imgs = computed(() => props.imgs || log.imgs)
 
 // 传入的图片要处理，如果不是http开头，那么就加上OOS地址，否则直接用，而且要改为https
-const imgs = ref<string[]>(toFileUrl(props.imgs, 'compress-imgs/', log.userid))
-
-watchEffect(()=>{
-  console.log('🐤i change', imgs.value)
-})
+const imgUrls = ref<string[]>(
+  toFileUrl(imgs.value, 'compress-imgs/', log.userid)
+)
 
 const viewer = ref<Viewer>() // viewerjs对象
 const viewerDom = ref<HTMLElement>() // 用于装载用ref属性获取的Dom
@@ -44,12 +44,17 @@ onMounted(() => {
   })
 })
 
+watch([imgs, () => log.imgs], () => {
+  imgUrls.value = toFileUrl(imgs.value, 'compress-imgs/', log.userid)
+  nextTick(() => viewer.value!.update())
+})
+
 // 点击加载原图
 const loadRaw = () => {
   const i = (viewer.value as any).index
-  const newImg = toFileUrl(props.imgs[i], 'imgs/', log.userid)
-  if (imgs.value[i] !== newImg) {
-    imgs.value[i] = newImg
+  const newImg = toFileUrl(imgs.value[i], 'imgs/', log.userid)
+  if (imgUrls.value[i] !== newImg) {
+    imgUrls.value[i] = newImg
     nextTick(() => viewer.value!.update()) // .view(i)
   }
 }
@@ -78,7 +83,7 @@ defineExpose({ vErrorRetry })
 
 <template>
   <div class="viewer-imgs" ref="viewerDom" @click.stop>
-    <template v-for="img in imgs" :key="img">
+    <template v-for="img in imgUrls" :key="img">
       <!-- QQ图片要单独去除 referrer -->
       <img
         v-if="img.indexOf('photo.store.qq.com') === 15"

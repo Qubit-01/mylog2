@@ -41,8 +41,8 @@ const isEdit = ref(false)
 
     <!-- 图片和视频放在一起 -->
     <div class="block-media">
-      <ViewerImgs v-if="log.imgs.length" :imgs="log.imgs" />
-      <ViewerVideos v-if="log.videos.length && isExpand" :videos="log.videos" />
+      <ViewerImgs v-if="log.imgs.length" />
+      <ViewerVideos v-if="log.videos.length && isExpand" />
     </div>
 
     <!-- 音频 和 文件 -->
@@ -86,7 +86,7 @@ const isEdit = ref(false)
     </div>
 
     <!-- 编辑模块 -->
-    <LogEdit v-if="isEdit" @suc="isEdit = false" />
+    <LogEdit v-if="isEdit" @onSuccess="isEdit = false" />
 
     <div v-if="isExpand" class="buttons">
       <ElButtonGroup>

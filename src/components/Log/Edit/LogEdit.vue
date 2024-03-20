@@ -6,7 +6,7 @@ import { Bucket, Region } from '@/stores/constant'
 import { cosPath } from '@/utils/cos'
 import { cloneDeep } from 'lodash'
 
-const emit = defineEmits(['suc'])
+const emit = defineEmits(['onSuccess'])
 
 // 获取组件暴露的files，用于上传
 const editImgs = ref()
@@ -92,15 +92,13 @@ const edit = () => {
     logEdit,
     {
       files,
-      onProgress: (info) => {
+      onProgress: info => {
         upload.percent = Math.floor(info.percent * 100)
         upload.speed = +(info.speed / 1024 / 1024).toFixed(2)
       },
     },
     log
-  ).then((count) => {
-    if (count === 1) emit('suc')
-  })
+  ).then(count => emit('onSuccess'))
 }
 </script>
 

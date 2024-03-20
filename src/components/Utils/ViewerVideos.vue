@@ -1,3 +1,8 @@
+<!-- 
+  props 优先级比 log 高
+  如果传入了props，那么就用props，否则用log
+  传入的imgs一个数组对象，所有不能对log.imgs的地址进行修改
+ -->
 <script setup lang="ts">
 import { toFileUrl } from '@/utils/cos'
 import type { Log } from '@/types'
@@ -6,25 +11,27 @@ import type { Log } from '@/types'
 const log: Log = inject('log')!
 
 /**
- * files是视频列表
+ * files是视频列表，不传就用父组件注入的log.videos
  */
-const props = defineProps<{ videos: string[] }>()
+const props = defineProps<{ videos?: string[] }>()
+// 计算从哪里取属性
+const videos = computed(() => props.videos || log.videos)
 
 // 传入的文件要处理，如果不是http开头，那么就加上OOS地址，否则直接用，而且要改为https
-const videos = ref<string[]>(toFileUrl(props.videos, 'videos/', log.userid))
-
-watchEffect(()=>{
-  console.log('🐤v change', videos.value)
-})
+const videoUrls = ref<string[]>(toFileUrl(videos.value, 'videos/', log.userid))
 
 // 当前播放的是视频地址
 const videoSrc = ref('')
+
+watch(videos, () => {
+  videoUrls.value = toFileUrl(videos.value, 'videos/', log.userid)
+})
 </script>
 
 <template>
   <div class="viewer-videos">
     <div
-      v-for="video in videos"
+      v-for="video in videoUrls"
       :key="video"
       class="video"
       @click.stop="videoSrc = video"
@@ -37,15 +44,15 @@ const videoSrc = ref('')
   </div>
 
   <!-- 真正用来播放的 -->
+  <!--
+      autoplay 自动开始播放 controls 显示播放器控件
+      poster 视频封面 loop 循环播放
+      muted 默认静音 preload 页面加载时加载，并预备播放
+      none:播放前不会预先下载视频资源，用户不点击播放时会省宽带；
+      metadata:播放前不会下载视频资源，但是会获取资源的元数据；
+      auto:根据实际情况动态决定
+    -->
   <TeleportBody v-if="videoSrc" @close="videoSrc = ''">
-    <!--
-        autoplay 自动开始播放 controls 显示播放器控件
-        poster 视频封面 loop 循环播放
-        muted 默认静音 preload 页面加载时加载，并预备播放
-        none:播放前不会预先下载视频资源，用户不点击播放时会省宽带；
-        metadata:播放前不会下载视频资源，但是会获取资源的元数据；
-        auto:根据实际情况动态决定
-      -->
     <video class="video-play" controls autoplay ref="videoDom">
       <source :src="videoSrc" type="video/mp4" />
     </video>
