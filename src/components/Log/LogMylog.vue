@@ -42,7 +42,7 @@ const isEdit = ref(false)
     <!-- 图片和视频放在一起 -->
     <div class="block-media">
       <ViewerImgs v-if="log.imgs.length" :imgs="log.imgs" />
-      <ViewerVideos v-if="log.videos.length && isExpand" :files="log.videos" />
+      <ViewerVideos v-if="log.videos.length && isExpand" :videos="log.videos" />
     </div>
 
     <!-- 音频 和 文件 -->
