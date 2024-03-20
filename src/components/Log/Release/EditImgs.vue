@@ -80,6 +80,14 @@ const onChange = async (file: LogImgFile, files: UploadFiles) => {
   })
 }
 
+const delImgOld = (img: string) => {
+  imgsOld.value = imgsOld.value.filter((i) => i !== img)
+}
+
+onUnmounted(() => {
+  if (!edit) imgs.value = []
+})
+
 // 自动用Exif信息补全
 const useExif = () => {
   let exif = null
@@ -126,14 +134,6 @@ const useExif = () => {
 
   if (!flag.logtime && !flag.location) ElMessage.error('没有提取到信息')
 }
-
-const delImgOld = (img: string) => {
-  imgsOld.value = imgsOld.value.filter((i) => i !== img)
-}
-
-onUnmounted(() => {
-  if (!edit) imgs.value = []
-})
 </script>
 
 <template>
@@ -240,7 +240,6 @@ onUnmounted(() => {
 
       :deep(ul.el-upload-list) {
         li.el-upload-list__item {
-          // order: 2;
           // 隐藏预览按钮
           .el-upload-list__item-preview {
             display: none;
@@ -253,8 +252,6 @@ onUnmounted(() => {
 
         // 添加按钮
         div.el-upload.el-upload--picture-card {
-          // order: 1;
-
           .el-upload-dragger {
             border: none;
             width: 100%;

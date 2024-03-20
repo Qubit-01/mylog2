@@ -11,13 +11,13 @@ const emit = defineEmits(['suc'])
 // 获取组件暴露的files，用于上传
 const editImgs = ref()
 const editVideos = ref()
+
+const log = inject<Log>('log')!
+const logEdit = reactive<Partial<Log>>({})
 const upload = reactive({
   percent: -1, // 上传进度
   speed: 0, // 上传速度 MB/s
 })
-
-const log = inject<Log>('log')!
-const logEdit = reactive<Partial<Log>>({})
 
 // 编辑数据组件显示
 const visibleInit = () => ({
@@ -92,13 +92,13 @@ const edit = () => {
     logEdit,
     {
       files,
-      onProgress: info => {
+      onProgress: (info) => {
         upload.percent = Math.floor(info.percent * 100)
         upload.speed = +(info.speed / 1024 / 1024).toFixed(2)
       },
     },
     log
-  ).then(count => {
+  ).then((count) => {
     if (count === 1) emit('suc')
   })
 }

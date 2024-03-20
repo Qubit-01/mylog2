@@ -13,7 +13,7 @@ const { edit } = defineProps<{
 // File对象列表
 const files = shallowRef<LogFile[]>([])
 
-const types = ['video/mp4']
+const types = ['video/mp4', 'video/quicktime']
 const SIZE = 500 * 1024 * 1024 // 大小限制，字节
 const index = ref(0) // 计数，用于命名
 // watchEffect(() => count ? props.setIsLoad(true) : props.setIsLoad(false)) // 要控制外层的加载状态
@@ -21,8 +21,8 @@ const index = ref(0) // 计数，用于命名
 defineExpose({ files })
 
 // 更新imgs文件名列表
-watchEffect(() => {
-  videos.value = files.value.map((i) => i.key!)
+watch([videosOld, () => files.value.length], () => {
+  videos.value = [...videosOld.value, ...files.value.map((i) => i.key!)]
 })
 
 // :on-change 状态变化，添加文件、上传成功、失败
@@ -40,35 +40,104 @@ const onChange = async (file: LogFile, files: UploadFiles) => {
   file.key = `${dayjs().format('YYMMDD_HHmm')}-${index.value++}-${file.name}`
 }
 
+const delVideoOld = (video: string) => {
+  videosOld.value = videosOld.value.filter((i) => i !== video)
+}
+
 onUnmounted(() => {
   if (!edit) videos.value = []
 })
 </script>
 <template>
   <div class="edit-videos">
-    <div class="viewer-videos">
-      <ul class="el-upload-list el-upload-list--text">
-        <li
-          v-for="video in videosOld"
-          :key="video"
-          class="el-upload-list__item is-success"
-        >
-          <div class="el-upload-list__item-info" v-overflow-ellipsis>
-            {{ video }}
-          </div>
-          <ElIcon><Close /></ElIcon>
-        </li>
-      </ul>
+    <div class="all-videos">
+      <div class="viewer-videos">
+        <!-- 模仿element upload组件的卡片 -->
+        <ul class="el-upload-list el-upload-list--text">
+          <li
+            v-for="video in videosOld"
+            :key="video"
+            class="el-upload-list__item is-ready"
+          >
+            <div class="el-upload-list__item-info">
+              <a class="el-upload-list__item-name">
+                <ElIcon><VideoCamera /></ElIcon>
+                <span class="el-upload-list__item-file-name">{{ video }}</span>
+              </a>
+            </div>
+            <ElIcon class="el-icon--close" @click="delVideoOld(video)"><Close /></ElIcon>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 真正上传的 drag -->
+      <ElUpload
+        v-model:file-list="files"
+        class="upload-videos"
+        multiple
+        drag
+        :on-change="onChange"
+        :auto-upload="false"
+      >
+        点击或者拖拽到这里上传视频
+        <!-- <ElButton type="primary">上传视频</ElButton> -->
+        <!-- <template #file="{ file }">
+          {{ file.url }}
+        </template> -->
+      </ElUpload>
     </div>
-    <ElUpload
-      multiple
-      v-model:file-list="files"
-      :on-change="onChange"
-      :auto-upload="false"
-    >
-      <ElButton type="primary">上传视频</ElButton>
-    </ElUpload>
   </div>
 </template>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+.edit-videos {
+  --block-gap: 2px;
+
+  .all-videos {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-gap);
+
+    .viewer-videos,
+    .upload-videos {
+      display: flex;
+      flex-direction: column;
+      gap: var(--block-gap);
+
+      :deep(ul.el-upload-list) {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+
+        gap: var(--block-gap);
+        > * {
+          margin: 0;
+        }
+
+        &:empty {
+          display: none;
+        }
+      }
+    }
+
+    .upload-videos {
+      // 列表
+      // :deep(ul.el-upload-list) {
+      // }
+
+      // 添加框
+      :deep(.el-upload) {
+        order: 1;
+
+        .el-upload-dragger {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 0;
+          height: 36px;
+        }
+      }
+    }
+  }
+}
+</style>
