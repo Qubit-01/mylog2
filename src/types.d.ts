@@ -1,4 +1,5 @@
 import type dayjs from "dayjs"
+import type { logFileType } from "./stores/log"
 
 /**
  * Log的数据结构
@@ -55,6 +56,7 @@ export interface User {
       theme?: string // 主题 light | dark
       backgroundImage?: string // 选中的背景图片
       diyBackgroundImage?: string // 自己添加的背景图片
+      source?: string // 爬虫数据的来源
     }
   }
   createtime?: Date

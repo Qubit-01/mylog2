@@ -1,4 +1,12 @@
 <!-- 
+  图片上传组件 files必传
+  会向files.imgs里面注入COS.UploadFileItemParams[]值
+
+  添加图片的逻辑：如果添加的文件是不是图片文件
+  1. 是定义了类型的文件，就放进相应files项中。
+  2. 其他文件，放进files.files中
+
+
   图片压缩、上传，图片EXIF信息解析
   ElUpload组件文档：https://element-plus.org/zh-CN/component/upload.html#%E5%B1%9E%E6%80%A7
   原图、压缩图、95压缩图（几乎无损压缩，但是可以大量节省空间）
@@ -13,53 +21,83 @@
 -->
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import type { Log } from '@/types'
-import type { LogImgFile, LogItem } from '../types'
 import type { UploadFiles } from 'element-plus'
+import type { LogFile, LogImgFile, LogItem } from '../types'
+import type { Log } from '@/types'
+import { fileType, logFileItem, type LogFileItem } from '@/stores/log'
 import { getExifByFile, compressImg, type ExifImgFile } from '@/utils/img'
 import AMap, { l2v } from '@/utils/map'
 import { toFileUrl } from '@/utils/cos'
 
 // 文件名: 首次传入的数据会被imgsOld记录，然后立即被watch修改
 const imgs = defineModel<string[]>({ required: true })
+// 外部传入的files，要朝里面放入cos文件对象。
+const filesModel = defineModel<
+  {
+    [key in LogFileItem]: LogFile[]
+  } & {
+    imgs: LogImgFile[]
+  }
+>('files', {
+  required: true,
+})
+
 // 原有文件：编辑模块要传入一些图片进来
 const imgsOld = ref([...imgs.value])
 const { add, edit } = defineProps<{
-  // 添加项目
   add: <T extends LogItem>(item: T, data?: Log[T]) => void
   edit?: boolean
 }>()
 
-// File对象列表
-const files = shallowRef<LogImgFile[]>([])
-
-const types = ['image/png', 'image/gif', 'image/jpeg', 'image/jpg']
-const SIZE = 10 * 1024 * 1024 // 图片大小限制，字节
-const index = ref(0) // 给图片计数，用于命名
+let index = 1 // 给图片计数，用于命名
 const count = ref(0) // 用于压缩时控制按钮
 // watchEffect(() => count ? props.setIsLoad(true) : props.setIsLoad(false)) // 要控制外层的加载状态
 
-defineExpose({ files })
-
 // 更新imgs文件名列表
-watch([imgsOld, () => files.value.length], () => {
-  imgs.value = [...imgsOld.value, ...files.value.map((i) => i.key!)]
+watch([imgsOld, () => filesModel.value.imgs.length], () => {
+  imgs.value = [...imgsOld.value, ...filesModel.value.imgs.map(i => i.key!)]
 })
+
+watch(
+  () => filesModel.value.imgs.length,
+  () => {
+    filesModel.value.imgs.forEach((file:LogImgFile) => {
+      if (file.)
+    })
+  }
+)
 
 // :on-change 状态变化，添加文件、上传成功、失败
 const onChange = async (file: LogImgFile, files: UploadFiles) => {
-  const raw = file.raw! as ExifImgFile
+  const raw = file.raw!
 
-  // 判断是否是图片,判断大小
-  if (types.indexOf(raw.type) < 0 || raw.size > SIZE) {
-    files.pop()
-    ElMessage.error('图片不符合要求')
-    return
+  // Todo: 判断大小还没做
+
+  // 文件名，现在是任何文件都接收，所以都要加key
+  file.key = `${dayjs().format('YYMMDD-HHmmss')}-${index++}-${file.name}`
+
+  for (const type of logFileItem) {
+    console.log('🐤', type, fileType[type].indexOf(raw.type))
+
+    if (fileType[type].indexOf(raw.type) > -1) {
+      // 如果匹配到了其他类型，弹出后加进对应的filesModel
+      if (type !== 'imgs') filesModel.value[type].push(files.pop()!)
+      break // 匹配到了就要退出
+    }
   }
+}
 
-  // 文件名
-  file.key = `${dayjs().format('YYMMDD_HHmm')}-${index.value++}-${file.name}`
+const delImgOld = (img: string) => {
+  imgsOld.value = imgsOld.value.filter(i => i !== img)
+}
 
+onUnmounted(() => {
+  if (!edit) imgs.value = []
+})
+
+// 处理图片函数
+const handleImg = async (file: LogImgFile) => {
+  const raw = file.raw!
   // exifdata 直接被写入了file.raw中
   await getExifByFile(raw)
 
@@ -80,14 +118,6 @@ const onChange = async (file: LogImgFile, files: UploadFiles) => {
   })
 }
 
-const delImgOld = (img: string) => {
-  imgsOld.value = imgsOld.value.filter((i) => i !== img)
-}
-
-onUnmounted(() => {
-  if (!edit) imgs.value = []
-})
-
 // 自动用Exif信息补全
 const useExif = () => {
   let exif = null
@@ -95,7 +125,7 @@ const useExif = () => {
     logtime: false,
     location: false,
   }
-  for (const img of files.value) {
+  for (const img of filesModel.value.imgs) {
     exif = img.raw!.exifdata
     if (!Object.keys(exif).length) continue
 
@@ -138,9 +168,6 @@ const useExif = () => {
 
 <template>
   <div class="edit-imgs">
-    <!-- <div>imgs: {{ imgs }}</div>
-    <div>imgsOld: {{ imgsOld }}</div>
-    <div>files: {{ files }}</div> -->
     <!-- 
       multiple 支持多选文件
       drag 启用拖拽上传	(有样式bug)
@@ -170,7 +197,7 @@ const useExif = () => {
 
       <!-- 真正上传的 -->
       <ElUpload
-        v-model:file-list="files"
+        v-model:file-list="filesModel.imgs"
         class="upload-imgs"
         list-type="picture-card"
         multiple
@@ -182,7 +209,11 @@ const useExif = () => {
       </ElUpload>
     </div>
     <div>
-      <ElButton :disabled="files.length === 0" @click="useExif" size="small">
+      <ElButton
+        :disabled="filesModel.imgs.length === 0"
+        @click="useExif"
+        size="small"
+      >
         提取时间位置
       </ElButton>
     </div>

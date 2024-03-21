@@ -1,6 +1,6 @@
 <!-- 
-  如果是 用户log 就要有要有查看原图的功能
-  但是爬虫数据不需要查看原图功能
+  如果传入props.imgs，优先用，没传就用父组件注入的log.imgs
+  如果是 用户log 就要有要有查看原图的功能，但是爬虫数据不需要查看原图功能
 
   主要用到 viewerjs， 相关文档：
   https://blog.csdn.net/xingmeiok/article/details/127556464
@@ -44,7 +44,7 @@ onMounted(() => {
   })
 })
 
-watch([imgs, () => log.imgs], () => {
+watch(imgs, () => {
   imgUrls.value = toFileUrl(imgs.value, 'compress-imgs/', log.userid)
   nextTick(() => viewer.value!.update())
 })

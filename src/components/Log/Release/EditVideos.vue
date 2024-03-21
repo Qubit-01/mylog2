@@ -1,20 +1,23 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import type { UploadFiles } from 'element-plus'
+import { fileType, type LogFileItem } from '@/stores/log'
 import type { LogFile } from '../types'
 
 // 文件名列表
 const videos = defineModel<string[]>({ required: true })
-// 原有文件：编辑模块要传入一些图片进来
-const videosOld = ref([...videos.value])
-const { edit } = defineProps<{
-  edit?: boolean
-}>()
+// 外部传入的files，要朝里面放入cos文件对象。filesModel和files要双向绑定
+// files变化要向model中注入cos文件
+// model变化（由其他组件注入）要向向files里注入fileRaw
+const filesModel = defineModel<{ [key in LogFileItem]: LogFile[] }>('files')
+
 // File对象列表
 const files = shallowRef<LogFile[]>([])
 
-const types = ['video/mp4', 'video/quicktime']
-const SIZE = 500 * 1024 * 1024 // 大小限制，字节
+// 原有文件：编辑模块要传入一些图片进来
+const videosOld = ref([...videos.value])
+const { edit } = defineProps<{ edit?: boolean }>()
+
 const index = ref(0) // 计数，用于命名
 // watchEffect(() => count ? props.setIsLoad(true) : props.setIsLoad(false)) // 要控制外层的加载状态
 
@@ -22,7 +25,7 @@ defineExpose({ files })
 
 // 更新imgs文件名列表
 watch([videosOld, () => files.value.length], () => {
-  videos.value = [...videosOld.value, ...files.value.map((i) => i.key!)]
+  videos.value = [...videosOld.value, ...files.value.map(i => i.key!)]
 })
 
 // :on-change 状态变化，添加文件、上传成功、失败
@@ -30,7 +33,7 @@ const onChange = async (file: LogFile, files: UploadFiles) => {
   const raw = file.raw!
 
   // 判断是否是视频,判断大小
-  if (types.indexOf(raw.type) < 0 || raw.size > SIZE) {
+  if (fileType.videos.indexOf(raw.type) < 0 || raw.size > fileType.videoSize) {
     files.pop()
     ElMessage.error('视频不符合要求')
     return
@@ -41,7 +44,7 @@ const onChange = async (file: LogFile, files: UploadFiles) => {
 }
 
 const delVideoOld = (video: string) => {
-  videosOld.value = videosOld.value.filter((i) => i !== video)
+  videosOld.value = videosOld.value.filter(i => i !== video)
 }
 
 onUnmounted(() => {
@@ -65,7 +68,9 @@ onUnmounted(() => {
                 <span class="el-upload-list__item-file-name">{{ video }}</span>
               </a>
             </div>
-            <ElIcon class="el-icon--close" @click="delVideoOld(video)"><Close /></ElIcon>
+            <ElIcon class="el-icon--close" @click="delVideoOld(video)"
+              ><Close
+            /></ElIcon>
           </li>
         </ul>
       </div>

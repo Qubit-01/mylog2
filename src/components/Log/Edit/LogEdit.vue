@@ -1,16 +1,25 @@
 <script setup lang="ts">
-import type { LogItem } from '../types'
+import type { LogFile, LogImgFile, LogItem } from '../types'
 import type { Log } from '@/types'
-import { editLog } from '@/stores/log'
+import COS from 'cos-js-sdk-v5'
+import { editLog, logFileItem, type LogFileItem } from '@/stores/log'
 import { Bucket, Region } from '@/stores/constant'
 import { cosPath } from '@/utils/cos'
 import { cloneDeep } from 'lodash'
 
 const emit = defineEmits(['onSuccess'])
 
-// 获取组件暴露的files，用于上传
-const editImgs = ref()
-const editVideos = ref()
+// 换一种方式，父组件管理files，不再用组件暴露的files了，主要是为了一个组件上传其他类型文件可以兼容
+const files = reactive<{ 
+  [key in LogFileItem]: LogFile[]
+} & {
+  imgs: LogImgFile[]
+}>({
+  imgs: [],
+  videos: [],
+  audios: [],
+  files: [],
+})
 
 const log = inject<Log>('log')!
 const logEdit = reactive<Partial<Log>>({})
@@ -56,42 +65,40 @@ const add = <T extends LogItem>(item: T, data?: Log[T]) => {
 const edit = () => {
   // 大压缩图、95压缩图、原图。大压缩图必发，95压缩图和原图选择性发送
   // 目前先实现发 大压缩图＋原图
-  const files = []
+  const filesAll: LogFile[] = []
+  logFileItem.forEach(k => filesAll.push(...files[k]))
+  return console.log('🐤', filesAll)
 
-  if (editImgs?.value?.files) {
-    for (const file of editImgs.value.files) {
-      files.push({
-        // 大压缩图
-        Bucket,
-        Region,
-        Key: `${cosPath()}compress-imgs/${file.key}`,
-        Body: file.compressImg,
-      })
-      files.push({
-        // 原图
-        Bucket,
-        Region,
-        Key: `${cosPath()}imgs/${file.key}`,
-        Body: file.raw,
-      })
-    }
-  }
+    //   for (const file of editVideos.value.files) {
+  //     files.push({
+  //       Bucket,
+  //       Region,
+  //       Key: `${cosPath()}videos/${file.key}`,
+  //       Body: file.raw,
+  //     })
+  //   }
 
-  if (editVideos?.value?.files) {
-    for (const file of editVideos.value.files) {
-      files.push({
-        Bucket,
-        Region,
-        Key: `${cosPath()}videos/${file.key}`,
-        Body: file.raw,
-      })
-    }
-  }
+    //   for (const file of editImgs.value.files) {
+  //     files.push({
+  //       // 大压缩图
+  //       Bucket,
+  //       Region,
+  //       Key: `${cosPath()}compress-imgs/${file.key}`,
+  //       Body: file.compressImg,
+  //     })
+  //     files.push({
+  //       // 原图
+  //       Bucket,
+  //       Region,
+  //       Key: `${cosPath()}imgs/${file.key}`,
+  //       Body: file.raw,
+  //     })
+  //   }
 
   editLog(
     logEdit,
     {
-      files,
+      files: filesAll,
       onProgress: info => {
         upload.percent = Math.floor(info.percent * 100)
         upload.speed = +(info.speed / 1024 / 1024).toFixed(2)
@@ -103,6 +110,7 @@ const edit = () => {
 </script>
 
 <template>
+  <div>{{ files }}</div>
   <div class="log-edit" :class="{ disabled: upload.percent > -1 }" @click.stop>
     <ElProgress
       v-if="upload.percent > -1"
@@ -140,11 +148,11 @@ const edit = () => {
     </div>
 
     <div v-if="logEdit.hasOwnProperty('imgs')">
-      <EditImgs ref="editImgs" v-model="logEdit.imgs!" :add edit />
+      <EditImgs v-model="logEdit.imgs!" v-model:files="files" :add edit />
     </div>
 
     <div v-if="visible.videos">
-      <EditVideos ref="editVideos" v-model="logEdit.videos!" edit />
+      <EditVideos v-model="logEdit.videos!" v-model:files="files" edit />
     </div>
 
     <div v-if="visible.location">

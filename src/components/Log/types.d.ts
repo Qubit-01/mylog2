@@ -1,5 +1,5 @@
 import type { UploadFile, UploadRawFile } from 'element-plus'
-import { ExifImgFile } from '@/utils/img'
+import type { ExifImgFile } from '@/utils/img'
 
 /**
  * 继承 element 的 UploadRawFile，并加入EXIF信息

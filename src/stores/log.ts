@@ -129,7 +129,7 @@ export const useLogStore = defineStore('log', () => {
       return mylog.listAll.splice(index, 1)[0]
     },
     editLog(logEdit: Partial<Log>): Log {
-      const log = mylog.getLog(logEdit.id!)
+      const log = mylog.getLog(logEdit.id!)!
       Object.assign(log, logEdit)
       // 如果修改的是logtime，就先删再加
       if (logEdit.logtime) mylog.addLog(mylog.delLog(log.id!))
@@ -151,12 +151,29 @@ const logStore = useLogStore()
  * log中代表文件的项，需要和COS交互的属性
  * 方便一些方法循环
  */
-export const logFileType: ['imgs', 'videos', 'audios', 'files'] = [
-  'imgs',
-  'videos',
-  'audios',
-  'files',
-]
+export type LogFileItem = 'imgs' | 'videos' | 'audios' | 'files'
+// 这里files必须放在最后，遍历时兜底
+export const logFileItem: LogFileItem[] = ['imgs', 'videos', 'audios', 'files']
+
+const anyArray: string[] = []
+anyArray.indexOf = () => 0
+/**
+ * 可以上传的文件类型
+ */
+export const fileType: {
+  [K in LogFileItem]: string[]
+} & {
+  [Y in 'imgSize' | 'videoSize' | 'audioSize' | 'fileSize']: number
+} = {
+  imgs: ['image/png', 'image/gif', 'image/jpeg', 'image/jpg'],
+  imgSize: 10 * 1024 * 1024, // 图片大小限制，字节
+  videos: ['video/mp4', 'video/quicktime'],
+  videoSize: 500 * 1024 * 1024, // 大小限制，字节
+  audios: ['audios/mp3'], // 这里随便写的
+  audioSize: 100 * 1024 * 1024,
+  files: anyArray,
+  fileSize: 2000 * 1024 * 1024,
+}
 
 /**
  * 处理单个Log，直接操作参数
@@ -214,7 +231,7 @@ export const editLog = (
 
     // 筛选要删除的文件对象
     const delObjs: { Key: string }[] = []
-    logFileType.forEach(type => {
+    logFileItem.forEach(type => {
       if (logEdit[type]) {
         logOld[type]
           .filter(i => !logEdit[type]?.includes(i)) // 找old里面没有的
@@ -261,7 +278,7 @@ export const delLog = (log: Log): Promise<[any, Log]> => {
       .then(() => {
         // 先删文件，再删log
         const objects: { Key: string }[] = []
-        logFileType.forEach(type => {
+        logFileItem.forEach(type => {
           log[type].forEach(i => {
             objects.push({ Key: `${cosPath()}${type}/${i}` })
             if (type === 'imgs')
