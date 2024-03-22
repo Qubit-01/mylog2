@@ -84,6 +84,7 @@
     "ElMessage": true,
     "ElMessageessage": true,
     "ElMessagemessage": true,
-    "ElMessageBox": true
+    "ElMessageBox": true,
+    "ElMe": true
   }
 }

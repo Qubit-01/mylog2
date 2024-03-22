@@ -10,11 +10,13 @@ import { cloneDeep } from 'lodash'
 const emit = defineEmits(['onSuccess'])
 
 // 换一种方式，父组件管理files，不再用组件暴露的files了，主要是为了一个组件上传其他类型文件可以兼容
-const files = reactive<{ 
-  [key in LogFileItem]: LogFile[]
-} & {
-  imgs: LogImgFile[]
-}>({
+const files = reactive<
+  {
+    [key in LogFileItem]: LogFile[]
+  } & {
+    imgs: LogImgFile[]
+  }
+>({
   imgs: [],
   videos: [],
   audios: [],
@@ -65,40 +67,38 @@ const add = <T extends LogItem>(item: T, data?: Log[T]) => {
 const edit = () => {
   // 大压缩图、95压缩图、原图。大压缩图必发，95压缩图和原图选择性发送
   // 目前先实现发 大压缩图＋原图
-  const filesAll: LogFile[] = []
-  logFileItem.forEach(k => filesAll.push(...files[k]))
-  return console.log('🐤', filesAll)
+  const cosFiles: COS.UploadFileItemParams[] = []
 
-    //   for (const file of editVideos.value.files) {
-  //     files.push({
-  //       Bucket,
-  //       Region,
-  //       Key: `${cosPath()}videos/${file.key}`,
-  //       Body: file.raw,
-  //     })
-  //   }
-
-    //   for (const file of editImgs.value.files) {
-  //     files.push({
-  //       // 大压缩图
-  //       Bucket,
-  //       Region,
-  //       Key: `${cosPath()}compress-imgs/${file.key}`,
-  //       Body: file.compressImg,
-  //     })
-  //     files.push({
-  //       // 原图
-  //       Bucket,
-  //       Region,
-  //       Key: `${cosPath()}imgs/${file.key}`,
-  //       Body: file.raw,
-  //     })
-  //   }
+  for (const file of files.imgs) {
+    cosFiles.push({
+      // 原图
+      Bucket,
+      Region,
+      Key: `${cosPath()}imgs/${file.key}`,
+      Body: file.raw!,
+    })
+    cosFiles.push({
+      // 大压缩图
+      Bucket,
+      Region,
+      Key: `${cosPath()}compress-imgs/${file.key}`,
+      Body: file.compressImg!,
+    })
+  }
+  for (const file of files.videos) {
+    cosFiles.push({
+      Bucket,
+      Region,
+      Key: `${cosPath()}videos/${file.key}`,
+      Body: file.raw!,
+    })
+  }
+  console.log(logEdit)
 
   editLog(
     logEdit,
     {
-      files: filesAll,
+      files: cosFiles,
       onProgress: info => {
         upload.percent = Math.floor(info.percent * 100)
         upload.speed = +(info.speed / 1024 / 1024).toFixed(2)
@@ -152,7 +152,7 @@ const edit = () => {
     </div>
 
     <div v-if="visible.videos">
-      <EditVideos v-model="logEdit.videos!" v-model:files="files" edit />
+      <EditVideos v-model="logEdit.videos!" v-model:files="files" :add edit />
     </div>
 
     <div v-if="visible.location">

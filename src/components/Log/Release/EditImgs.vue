@@ -25,7 +25,7 @@ import type { UploadFiles } from 'element-plus'
 import type { LogFile, LogImgFile, LogItem } from '../types'
 import type { Log } from '@/types'
 import { fileType, logFileItem, type LogFileItem } from '@/stores/log'
-import { getExifByFile, compressImg, type ExifImgFile } from '@/utils/img'
+import { getExifByFile, compressImg } from '@/utils/img'
 import AMap, { l2v } from '@/utils/map'
 import { toFileUrl } from '@/utils/cos'
 
@@ -58,15 +58,6 @@ watch([imgsOld, () => filesModel.value.imgs.length], () => {
   imgs.value = [...imgsOld.value, ...filesModel.value.imgs.map(i => i.key!)]
 })
 
-watch(
-  () => filesModel.value.imgs.length,
-  () => {
-    filesModel.value.imgs.forEach((file:LogImgFile) => {
-      if (file.)
-    })
-  }
-)
-
 // :on-change 状态变化，添加文件、上传成功、失败
 const onChange = async (file: LogImgFile, files: UploadFiles) => {
   const raw = file.raw!
@@ -76,12 +67,15 @@ const onChange = async (file: LogImgFile, files: UploadFiles) => {
   // 文件名，现在是任何文件都接收，所以都要加key
   file.key = `${dayjs().format('YYMMDD-HHmmss')}-${index++}-${file.name}`
 
+  // files 项的indexOf永远返回0，它一定会是最后兜底的
   for (const type of logFileItem) {
-    console.log('🐤', type, fileType[type].indexOf(raw.type))
-
     if (fileType[type].indexOf(raw.type) > -1) {
       // 如果匹配到了其他类型，弹出后加进对应的filesModel
-      if (type !== 'imgs') filesModel.value[type].push(files.pop()!)
+      if (type !== 'imgs') {
+        ElMessage('检测到非图片文件，已自动归类')
+        add(type, [])
+        filesModel.value[type].push(files.pop()!)
+      }
       break // 匹配到了就要退出
     }
   }
@@ -91,13 +85,13 @@ const delImgOld = (img: string) => {
   imgsOld.value = imgsOld.value.filter(i => i !== img)
 }
 
-onUnmounted(() => {
-  if (!edit) imgs.value = []
-})
-
 // 处理图片函数
 const handleImg = async (file: LogImgFile) => {
   const raw = file.raw!
+
+  // 其他文件上传类型不会自动键url，图片要建
+  if (!file.url) file.url = URL.createObjectURL(raw)
+
   // exifdata 直接被写入了file.raw中
   await getExifByFile(raw)
 
@@ -117,6 +111,18 @@ const handleImg = async (file: LogImgFile) => {
     count.value--
   })
 }
+
+// 现在处理图片统一到watch中，因为图片列表可能被其他组件修改
+watch(
+  () => filesModel.value.imgs.length,
+  () => {
+    filesModel.value.imgs.forEach((file: LogImgFile) => {
+      // 如果没被处理过，就处理图片
+      if (!file.compressImg) handleImg(file)
+    })
+  },
+  { immediate: true }
+)
 
 // 自动用Exif信息补全
 const useExif = () => {
@@ -164,6 +170,10 @@ const useExif = () => {
 
   if (!flag.logtime && !flag.location) ElMessage.error('没有提取到信息')
 }
+
+onUnmounted(() => {
+  if (!edit) imgs.value = []
+})
 </script>
 
 <template>
