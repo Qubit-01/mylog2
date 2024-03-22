@@ -122,6 +122,32 @@ todo: 废弃，以前是待办事项，应该加进 log 的 tags 中
 如：users/1/mylog/compress-imgs/1666071890799-0.jpg
 
 
+## 发布和编辑Log逻辑梳理
+
+这方面逻辑有点复杂，主要是：  
+- 发布和编辑逻辑要尽量统一且兼容，这点主要是为了兼容组件。
+
+LogEdit 和 LogRelease 组件控制两个逻辑  
+这两个组件要管理 logEdit（要发送的编辑数据），files（要上传的文件）
+
+先说编辑组件，编辑的逻辑：
+现有源log，新建一个logEdit = {}
+用户打开一个编辑项，就去log中深拷贝这个属性值进logEdit
+用户关闭一个编辑项，就 delete logEdit.type
+
+编辑组件的显示由什么控制？visible（不能用数据项来if，因为空串为false）
+
+文件编辑的组件的逻辑
+父组件先给logEdit赋值，再使编辑组件显示
+组件内部（用video举例）
+先videos的model接收logEdit.videos，组件内用videosOld深拷贝一下
+再 filesModel接收整个files对象，操作里面的videos项，这就是El文件对象
+组件内 用 old数组渲染已有，只能删除，用files渲染要上传的
+watch中监视 videosOld, () => filesModel.value.videos.length 两个数据
+对两个进行拼接，
+
+如果用户关闭编辑组件显示，就删除对应数据项，不用再onUnmouted了
+
 
 ## 下面写一些作者的心得和怕忘记的东西
 
@@ -157,3 +183,5 @@ html.dark { // 里面的样式自己覆盖
 - 后端：SpringBoot、CDN、OSS文件服务（权限控制）、跨域配置、https 2.0
 - 技术栈：Vue 3.4
 - 文件上传
+
+

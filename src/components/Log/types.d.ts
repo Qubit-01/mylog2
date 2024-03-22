@@ -28,3 +28,9 @@ export type LogItem =
   | 'files'
   | 'location'
   | 'people'
+
+export type LogFiles = {
+  [key in LogFileItem]: LogFile[]
+} & {
+  imgs: LogImgFile[]
+}

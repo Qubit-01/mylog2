@@ -1,32 +1,5 @@
 import type dayjs from "dayjs"
-import type { logFileType } from "./stores/log"
-
-/**
- * Log的数据结构
- * 都必须有，但是可以为空数组
- */
-export interface Log {
-  id?: string
-  userid: string
-  username: string
-  type: 'public' | 'log' | 'tag'
-  sendtime?: dayjs.Dayjs // 发送时间
-  logtime: dayjs.Dayjs // 记录时间
-  content: string
-  tags: string[]
-  imgs: string[]
-  videos: string[]
-  audios: string[]
-  files: string[]
-  location: [[number, number], string] | []
-  people?: string[]
-  info: {
-    title?: string // log的标题
-    link?: string // 爬虫数据的原始链接
-    markdown?: boolean // 是否是MD类型
-    level?: number // 待办优先级（这个功能待定）
-  }
-}
+// import type { logFileType } from "./stores/log"
 
 /**
  * 用户数据结构
@@ -63,3 +36,31 @@ export interface User {
   openidQ?: string
   token?: string
 }
+
+/**
+ * Log的数据结构
+ * 都必须有，但是可以为空数组
+ */
+export interface Log {
+  id?: string
+  userid: string
+  username: string
+  type: 'public' | 'log' | 'tag'
+  sendtime?: dayjs.Dayjs // 发送时间
+  logtime: dayjs.Dayjs // 记录时间
+  content: string
+  tags: string[]
+  imgs: string[]
+  videos: string[]
+  audios: string[]
+  files: string[]
+  location: [[number, number], string] | []
+  people?: string[]
+  info: {
+    title?: string // log的标题
+    link?: string // 爬虫数据的原始链接
+    markdown?: boolean // 是否是MD类型
+    level?: number // 待办优先级（这个功能待定）
+  }
+}
+

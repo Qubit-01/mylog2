@@ -47,6 +47,7 @@ const visible = reactive<{ [key in LogItem]: boolean }>(visibleInit())
 
 /**
  * 新增且切换显示状态
+ * 不传data？深拷贝原log的属性
  * @param item 设置项
  */
 const add = <T extends LogItem>(item: T, data?: Log[T]) => {
