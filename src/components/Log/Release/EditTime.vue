@@ -5,17 +5,10 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 const time = defineModel<dayjs.Dayjs>({ required: true })
-const { edit } = defineProps<{
-  edit?: boolean
-}>()
 
 const editTime = computed({
   get: () => time.value.toDate(),
   set: v => (time.value = dayjs(v)),
-})
-
-onUnmounted(() => {
-  if (!edit) time.value = dayjs()
 })
 </script>
 

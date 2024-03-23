@@ -128,6 +128,8 @@ const isEdit = ref(false)
       white-space: pre-wrap;
       // 继承父元素的字体
       font-family: unset;
+      // 长英语要换行
+      word-break: break-all;
     }
   }
 

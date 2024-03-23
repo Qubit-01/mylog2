@@ -27,10 +27,6 @@ const inputConfirm = () => {
   inputVisible.value = false
   inputValue.value = ''
 }
-
-onUnmounted(() => {
-  tags.value = []
-})
 </script>
 
 <template>

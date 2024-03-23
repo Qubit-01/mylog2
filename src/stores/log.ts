@@ -1,4 +1,4 @@
-import type { Log } from '@/types'
+import type { Log, LogEdit, LogFileItem } from '@/types'
 import COS from 'cos-js-sdk-v5'
 import { myUploadFiles, myDeleteFiles, cosPath } from '@/utils/cos'
 import dayjs from 'dayjs'
@@ -147,32 +147,30 @@ export default useLogStore
 
 const logStore = useLogStore()
 
-/**
- * log中代表文件的项，需要和COS交互的属性
- * 方便一些方法循环
- */
-export type LogFileItem = 'imgs' | 'videos' | 'audios' | 'files'
 // 这里files必须放在最后，遍历时兜底
 export const logFileItem: LogFileItem[] = ['imgs', 'videos', 'audios', 'files']
 
+// 创造一个indexOf永远返回0的数组
 const anyArray: string[] = []
 anyArray.indexOf = () => 0
 /**
  * 可以上传的文件类型
  */
-export const fileType: {
-  [K in LogFileItem]: string[]
-} & {
-  [Y in 'imgSize' | 'videoSize' | 'audioSize' | 'fileSize']: number
-} = {
+export const fileType: { [K in LogFileItem]: string[] } = {
   imgs: ['image/png', 'image/gif', 'image/jpeg', 'image/jpg'],
-  imgSize: 10 * 1024 * 1024, // 图片大小限制，字节
   videos: ['video/mp4', 'video/quicktime'],
-  videoSize: 500 * 1024 * 1024, // 大小限制，字节
   audios: ['audios/mp3'], // 这里随便写的
-  audioSize: 100 * 1024 * 1024,
   files: anyArray,
-  fileSize: 2000 * 1024 * 1024,
+}
+
+/**
+ * 文件的大小限制
+ */
+export const fileSize: { [K in LogFileItem]: number } = {
+  imgs: 10 * 1024 * 1024, // 图片大小限制，字节
+  videos: 500 * 1024 * 1024, // 大小限制，字节
+  audios: 100 * 1024 * 1024,
+  files: 2000 * 1024 * 1024,
 }
 
 /**
@@ -186,81 +184,112 @@ export const handleLog = (log: any): void => {
 }
 
 /**
+ * 默认数据，兜底
+ */
+export const logInit: LogEdit = {
+  type: 'log',
+  // logtime: dayjs(), // 一般不用，他要自己算
+  content: '',
+  tags: [],
+  imgs: [],
+  videos: [],
+  audios: [],
+  files: [],
+  location: [],
+  people: [],
+  info: {},
+}
+
+/**
  * 发布log，并上传文件，返回有正确id的log
- * @param log log对象本体
+ * @param log log对象，部分
  * @param file 要上传的文件
  */
 export const rlsLog = (
-  log: Log,
+  logEdit: Log,
   params: COS.UploadFilesParams
-): Promise<Log> => {
-  log.userid = Global.user.id
-  log.username = Global.user.name
-  return new Promise((resolve, reject) => {
-    myUploadFiles(params).then(data => {
-      releaseLog({ logJson: JSON.stringify(log) }).then(id => {
-        if (id !== '0') {
-          log.id = id
-          logStore.mylog.addLog(log)
-          ElMessage({ message: '发布成功：' + log.id, type: 'success' })
-          resolve(log)
-        }
-      })
+): Promise<Log | undefined> => {
+  if (!logEdit.content) {
+    ElMessage.error('必须填入内容哦')
+    return Promise.reject(undefined)
+  }
+  // 填入必要数据：userid, username, sendtime
+  // logtime没有就用当前默认
+  const log: Log = Object.assign(
+    {},
+    logInit,
+    {
+      userid: Global.user.id,
+      username: Global.user.name,
+      sendtime: dayjs(),
+      logtime: dayjs(),
+    },
+    logEdit
+  )
+
+  return myUploadFiles(params).then(data => {
+    if (data[0]) return Promise.reject(data)
+    return releaseLog({ logJson: JSON.stringify(log) }).then(id => {
+      if (id !== '0') {
+        log.id = id
+        logStore.mylog.addLog(log)
+        ElMessage({ message: '发布成功：' + log.id, type: 'success' })
+        return log
+      }
     })
   })
 }
 
 /**
  * 编辑Log，先看文件，再编辑log
- * 传入新旧log，新log只传入要修改的项，然后和旧log对比（只有文件需要对比，要区分哪些文件需要删除和上传）
- * @param log 编辑的Log对象，这个里面的属性是log要最终成为的样子，不分添加或覆盖
+ * log只传入要修改的项（只有文件需要对比，要区分哪些文件需要删除和上传）
+ * @param log 编辑的Log对象，这个里面的属性是log要最终成为的样子，不分添加或覆盖，id必传
  * @param params 文件上传参数，{files[]文件对象列表，SliceSize? 触发分块的大小，onProgress? 进度条方法}
- * @param oldLog 旧log，主要用来比对文件
  * @returns 受影响log的条数
  */
 export const editLog = (
-  logEdit: Partial<Log>,
-  params: COS.UploadFilesParams,
-  logOld: Log
+  logEdit: LogEdit & { id: string },
+  params: COS.UploadFilesParams
 ): Promise<number> => {
-  return new Promise((resolve, reject) => {
-    logEdit.id = logOld.id // id 必传
+  const logOld = logStore.mylog.getLog(logEdit.id)!
+  // 记录一下要上传的文件的Key，后面要去除
+  const uploadImgs = params.files.map(i => i.Key)
 
-    // 记录一下要上传的文件的Key，后面要去除
-    const uploadImgs = params.files.map(i => i.Key)
+  // 筛选要删除的文件对象
+  const delObjs: { Key: string }[] = []
+  logFileItem.forEach(type => {
+    if (logEdit[type]) {
+      logOld[type]
+        .filter(i => !logEdit[type]?.includes(i)) // 找old里面没有的
+        .forEach(i => {
+          const Key = `${cosPath()}${type}/${i}`
 
-    // 筛选要删除的文件对象
-    const delObjs: { Key: string }[] = []
-    logFileItem.forEach(type => {
-      if (logEdit[type]) {
-        logOld[type]
-          .filter(i => !logEdit[type]?.includes(i)) // 找old里面没有的
-          .forEach(i => {
-            const Key = `${cosPath()}${type}/${i}`
-
-            // 文件的键还不能是上传文件里面的
-            if (!uploadImgs.includes(Key)) {
-              delObjs.push({ Key })
-              if (type === 'imgs')
-                delObjs.push({ Key: `${cosPath()}compress-imgs/${i}` })
-            }
-          })
-      }
-    })
-
-    return Promise.all([myDeleteFiles(delObjs), myUploadFiles(params)]).then(
-      data => {
-        if (!data[0][0] && !data[1][0])
-          updateLog({ logJson: JSON.stringify(logEdit) }).then(count => {
-            if (count === 1) {
-              ElMessage({ message: '编辑成功', type: 'success' })
-              logStore.mylog.editLog(logEdit)
-              resolve(count)
-            }
-          })
-      }
-    )
+          // 文件的键还不能是上传文件里面的
+          if (!uploadImgs.includes(Key)) {
+            delObjs.push({ Key })
+            if (type === 'imgs')
+              delObjs.push({ Key: `${cosPath()}compress-imgs/${i}` })
+          }
+        })
+    }
   })
+  console.log(logEdit, params, delObjs)
+  // return Promise.resolve(1)
+
+  return Promise.all([myDeleteFiles(delObjs), myUploadFiles(params)]).then(
+    data => {
+      if (!data[0][0] && !data[1][0])
+        updateLog({ logJson: JSON.stringify(logEdit) }).then(count => {
+          if (count === 1) {
+            ElMessage({ message: '编辑成功', type: 'success' })
+            logStore.mylog.editLog(logEdit)
+            return count
+          }
+        })
+      // 上传出错返回 0
+      return 0
+    }
+  )
 }
 
 /**

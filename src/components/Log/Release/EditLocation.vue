@@ -5,9 +5,6 @@ import AMap, { useMap, l2v, getAddress } from '@/utils/map'
 const location = defineModel<[[number, number], string] | []>({
   required: true,
 })
-const { edit } = defineProps<{
-  edit?: boolean
-}>()
 
 const mapDom = ref<HTMLDivElement>()
 const search = ref<string>('')
@@ -47,10 +44,6 @@ watch(
     })
   }
 )
-
-onUnmounted(() => {
-  if (!edit) location.value = []
-})
 </script>
 
 <template>

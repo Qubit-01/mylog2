@@ -22,9 +22,14 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import type { UploadFiles } from 'element-plus'
-import type { LogFile, LogImgFile, LogItem } from '../types'
-import type { Log } from '@/types'
-import { fileType, logFileItem, type LogFileItem } from '@/stores/log'
+import type {
+  KeyFile,
+  LogEdit,
+  LogFileItem,
+  LogImgFile,
+  LogItem,
+} from '@/types'
+import { fileType, logFileItem } from '@/stores/log'
 import { getExifByFile, compressImg } from '@/utils/img'
 import AMap, { l2v } from '@/utils/map'
 import { toFileUrl } from '@/utils/cos'
@@ -32,21 +37,13 @@ import { toFileUrl } from '@/utils/cos'
 // 文件名: 首次传入的数据会被imgsOld记录，然后立即被watch修改
 const imgs = defineModel<string[]>({ required: true })
 // 外部传入的files，要朝里面放入cos文件对象。
-const filesModel = defineModel<
-  {
-    [key in LogFileItem]: LogFile[]
-  } & {
-    imgs: LogImgFile[]
-  }
->('files', {
-  required: true,
-})
+const filesModel = defineModel<LogImgFile[]>('files', { required: true })
 
 // 原有文件：编辑模块要传入一些图片进来
 const imgsOld = ref([...imgs.value])
-const { add, edit } = defineProps<{
-  add: <T extends LogItem>(item: T, data?: Log[T]) => void
-  edit?: boolean
+const { addFile, setItem } = defineProps<{
+  addFile: (item: LogFileItem, file: KeyFile) => void
+  setItem: <T extends LogItem>(item: T, data: LogEdit[T]) => void
 }>()
 
 let index = 1 // 给图片计数，用于命名
@@ -54,12 +51,16 @@ const count = ref(0) // 用于压缩时控制按钮
 // watchEffect(() => count ? props.setIsLoad(true) : props.setIsLoad(false)) // 要控制外层的加载状态
 
 // 更新imgs文件名列表
-watch([imgsOld, () => filesModel.value.imgs.length], () => {
-  imgs.value = [...imgsOld.value, ...filesModel.value.imgs.map(i => i.key!)]
-})
+watch(
+  [imgsOld, () => filesModel.value.length],
+  () => {
+    imgs.value = [...imgsOld.value, ...filesModel.value.map(i => i.key!)]
+  },
+  { immediate: true }
+)
 
 // :on-change 状态变化，添加文件、上传成功、失败
-const onChange = async (file: LogImgFile, files: UploadFiles) => {
+const onChange = async (file: KeyFile, files: UploadFiles) => {
   const raw = file.raw!
 
   // Todo: 判断大小还没做
@@ -73,8 +74,7 @@ const onChange = async (file: LogImgFile, files: UploadFiles) => {
       // 如果匹配到了其他类型，弹出后加进对应的filesModel
       if (type !== 'imgs') {
         ElMessage('检测到非图片文件，已自动归类')
-        add(type, [])
-        filesModel.value[type].push(files.pop()!)
+        addFile(type, files.pop()!)
       }
       break // 匹配到了就要退出
     }
@@ -114,9 +114,9 @@ const handleImg = async (file: LogImgFile) => {
 
 // 现在处理图片统一到watch中，因为图片列表可能被其他组件修改
 watch(
-  () => filesModel.value.imgs.length,
+  () => filesModel.value.length,
   () => {
-    filesModel.value.imgs.forEach((file: LogImgFile) => {
+    filesModel.value.forEach((file: LogImgFile) => {
       // 如果没被处理过，就处理图片
       if (!file.compressImg) handleImg(file)
     })
@@ -124,14 +124,15 @@ watch(
   { immediate: true }
 )
 
+onUnmounted(() => {
+  filesModel.value = []
+})
+
 // 自动用Exif信息补全
 const useExif = () => {
   let exif = null
-  const flag = {
-    logtime: false,
-    location: false,
-  }
-  for (const img of filesModel.value.imgs) {
+  const flag = { logtime: false, location: false }
+  for (const img of filesModel.value) {
     exif = img.raw!.exifdata
     if (!Object.keys(exif).length) continue
 
@@ -143,7 +144,7 @@ const useExif = () => {
       if (dateTime) {
         // 'YYYY:MM:DD HH:MM:SS' 转为 'YYYY-MM-DD HH:mm:ss'
         dateTime = dateTime.replace(':', '-').replace(':', '-')
-        add('logtime', dayjs(dateTime))
+        setItem('logtime', dayjs(dateTime))
         flag.logtime = true
       }
     }
@@ -158,7 +159,7 @@ const useExif = () => {
           // status：complete 查询成功，no_data 无结果，error 错误
           // 查询成功时，result.locations 即为转换后的高德坐标系
           if (status === 'complete' && result.info === 'ok') {
-            add('location', [l2v(result.locations[0]), ''])
+            setItem('location', [l2v(result.locations[0]), ''])
             flag.location = true
           }
         })
@@ -170,10 +171,6 @@ const useExif = () => {
 
   if (!flag.logtime && !flag.location) ElMessage.error('没有提取到信息')
 }
-
-onUnmounted(() => {
-  if (!edit) imgs.value = []
-})
 </script>
 
 <template>
@@ -207,7 +204,7 @@ onUnmounted(() => {
 
       <!-- 真正上传的 -->
       <ElUpload
-        v-model:file-list="filesModel.imgs"
+        v-model:file-list="filesModel"
         class="upload-imgs"
         list-type="picture-card"
         multiple
@@ -220,7 +217,7 @@ onUnmounted(() => {
     </div>
     <div>
       <ElButton
-        :disabled="filesModel.imgs.length === 0"
+        :disabled="filesModel.length === 0"
         @click="useExif"
         size="small"
       >

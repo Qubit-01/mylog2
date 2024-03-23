@@ -1,40 +1,34 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import type { Log } from '@/types'
+import type {
+  KeyFile,
+  Log,
+  LogEdit,
+  LogFileItem,
+  LogFiles,
+  LogItem,
+} from '@/types'
 import { Bucket, Region } from '@/stores/constant'
-import type { LogItem } from '../types'
-import { rlsLog } from '@/stores/log'
+import { logInit, rlsLog } from '@/stores/log'
 import { cloneDeep } from 'lodash'
 import { cosPath } from '@/utils/cos'
+import type COS from 'cos-js-sdk-v5'
 
-// 获取组件暴露的files，用于上传
-const editImgs = ref()
-const editVideos = ref()
+// 换一种方式，父组件管理files，不再用组件暴露的files了，主要是为了一个组件上传其他类型文件可以兼容
+const files = reactive<LogFiles>({
+  imgs: [],
+  videos: [],
+  audios: [],
+  files: [],
+})
+
+const logEdit = reactive<LogEdit>({ content: '' })
 const upload = reactive({
   percent: -1, // 上传进度
   speed: 0, // 上传速度 MB/s
 })
 
-// 编辑的数据
-const logInit = (): Log => ({
-  userid: '',
-  username: '',
-  type: 'log',
-  sendtime: dayjs(),
-  logtime: dayjs(),
-  content: '',
-  tags: [],
-  imgs: [],
-  videos: [],
-  audios: [],
-  files: [],
-  location: [],
-  people: [],
-  info: {},
-})
-const logEdit = reactive<Log>(logInit())
-
-// 编辑数据组件显示
+// 编辑数据组件显示，release组件不会被销毁，所有重置时要这么一个方法
 const visibleInit = () => ({
   logtime: false,
   tags: false,
@@ -48,75 +42,97 @@ const visibleInit = () => ({
 })
 const visible = reactive<{ [key in LogItem]?: boolean }>(visibleInit())
 
+/**
+ * 设置logEdit中的值，并总会打开组件
+ * @param item 设置项
+ * @param data 设置数据，不传就是原数据
+ */
+const setItem = <T extends LogItem>(item: T, data?: LogEdit[T]) => {
+  if (item === 'logtime') logEdit.logtime = (data as dayjs.Dayjs) || dayjs()
+  else logEdit[item] = data || cloneDeep(logInit[item])
+  visible[item] = true
+}
+
+/**
+ * 添加文件
+ * 加入文件，最后组件总会显示
+ *
+ * @param item 文件类型
+ * @param file 文件
+ */
+const addFile = (item: LogFileItem, file: KeyFile) => {
+  // 如果组件没显示，说明数据没有
+  if (!visible[item]) logEdit[item] = cloneDeep(logInit[item])
+  // 向flist加入文件
+  files[item].push(file)
+  visible[item] = true
+}
+
+/**
+ * 关闭组件
+ * 删除数据，关闭组件。文件又组件销毁钩子删除
+ */
+const closeItem = (item: LogItem) => {
+  delete logEdit[item]
+  visible[item] = false
+}
+
 const release = () => {
   upload.percent = 0
   // 大压缩图、95压缩图、原图。大压缩图必发，95压缩图和原图选择性发送
   // 目前先实现发 大压缩图＋原图
-  const files = []
 
-  if (editImgs?.value?.files) {
-    for (const file of editImgs.value.files) {
-      files.push({
-        // 大压缩图
-        Bucket,
-        Region,
-        Key: `${cosPath()}compress-imgs/${file.key}`,
-        Body: file.compressImg,
-      })
-      files.push({
-        // 原图
-        Bucket,
-        Region,
-        Key: `${cosPath()}imgs/${file.key}`,
-        Body: file.raw,
-      })
-    }
+  const cosFiles: COS.UploadFileItemParams[] = []
+
+  for (const file of files.imgs) {
+    cosFiles.push({
+      // 原图
+      Bucket,
+      Region,
+      Key: `${cosPath()}imgs/${file.key}`,
+      Body: file.raw!,
+    })
+    cosFiles.push({
+      // 大压缩图
+      Bucket,
+      Region,
+      Key: `${cosPath()}compress-imgs/${file.key}`,
+      Body: file.compressImg!,
+    })
   }
-
-  if (editVideos?.value?.files) {
-    for (const file of editVideos.value.files) {
-      files.push({
-        Bucket,
-        Region,
-        Key: `${cosPath()}videos/${file.key}`,
-        Body: file.raw,
-      })
-    }
+  for (const file of files.videos) {
+    cosFiles.push({
+      Bucket,
+      Region,
+      Key: `${cosPath()}videos/${file.key}`,
+      Body: file.raw!,
+    })
   }
 
   rlsLog(cloneDeep(logEdit), {
-    files,
+    files: cosFiles,
     onProgress: info => {
       upload.percent = Math.floor(info.percent * 100)
       upload.speed = +(info.speed / 1024 / 1024).toFixed(2)
     },
-  }).then(log => {
-    console.log(log)
-    Object.assign(logEdit, logInit())
-    Object.assign(visible, visibleInit())
-    Object.assign(upload, { percent: -1, speed: 0 })
   })
-}
-
-/**
- * 新增且切换显示状态，这里不用考虑数据重置，因为组件在卸载钩子中会自动重置
- * 不传data，仅修改组件的展示和隐藏
- * @param item 设置项
- * @param data 如果不传入，则会切换显示状态，如果传入，则会设置数据
- */
-const add = <T extends LogItem>(item: T, data?: Log[T]) => {
-  if (data) {
-    logEdit[item] = data
-    visible[item] = true
-  } else {
-    visible[item] = !visible[item]
-  }
+    .then(log => {
+      console.log(log)
+      // 清空logEdit
+      for (let k in logEdit) delete logEdit[k as keyof LogEdit]
+      Object.assign(visible, visibleInit())
+      Object.assign(upload, { percent: -1, speed: 0 })
+    })
+    .catch(err => {
+      upload.percent = -1
+    })
 }
 
 defineExpose({ logEdit }) // 暴露数据给父组件用
 </script>
 
 <template>
+  <!-- <div>logEdit{{ logEdit }}</div> -->
   <div
     class="log-release"
     v-m
@@ -136,35 +152,47 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
       :text-inside="true"
       :stroke-width="20"
       striped
+      striped-flow
+      :duration="10"
     >
       {{ upload.percent }}% {{ upload.speed }}MB/s
     </ElProgress>
 
     <div v-else class="control">
-      <ControlIcons :visible :add />
+      <ControlIcons v-model="visible" :setItem :closeItem />
       <div class="rls-btn">
         <ElButton size="small" type="primary" @click="release">发布</ElButton>
       </div>
     </div>
 
     <div v-if="visible.logtime">
-      <EditTime v-model="logEdit.logtime" />
+      <EditTime v-model="logEdit.logtime!" />
     </div>
 
     <div v-if="visible.tags">
-      <EditTags v-model="logEdit.tags" />
+      <EditTags v-model="logEdit.tags!" />
     </div>
 
     <div v-if="visible.imgs">
-      <EditImgs ref="editImgs" v-model="logEdit.imgs" :add />
+      <EditImgs
+        v-model="logEdit.imgs!"
+        v-model:files="files.imgs"
+        :addFile
+        :setItem
+      />
     </div>
 
     <div v-if="visible.videos">
-      <EditVideos ref="editVideos" v-model="logEdit.videos" />
+      <EditVideos
+        v-model="logEdit.videos!"
+        v-model:files="files.videos"
+        :addFile
+        :setItem
+      />
     </div>
 
     <div v-if="visible.location">
-      <EditLocation v-model="logEdit.location" />
+      <EditLocation v-model="logEdit.location!" />
     </div>
 
     <!-- <div v-m>logEdit: {{ logEdit }}</div>

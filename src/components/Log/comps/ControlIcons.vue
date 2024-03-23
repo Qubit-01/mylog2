@@ -4,8 +4,7 @@
     如果是undefined，控制按钮有无
  -->
 <script setup lang="ts">
-import type { LogItem } from '../types'
-import type { Log } from '@/types'
+import type { LogEdit, LogItem } from '@/types'
 import {
   Document,
   Clock,
@@ -19,9 +18,10 @@ import {
   More,
 } from '@element-plus/icons-vue'
 
-const { visible, add } = defineProps<{
-  visible: { [key in LogItem]?: boolean }
-  add: <T extends LogItem>(item: T, data?: Log[T]) => void
+const visible = defineModel<{ [key in LogItem]?: boolean }>({ required: true })
+const { setItem, closeItem } = defineProps<{
+  setItem: <T extends LogItem>(item: T, data?: LogEdit[T]) => void
+  closeItem: (item: LogItem) => void
 }>()
 
 const map = {
@@ -45,7 +45,7 @@ const map = {
         v-if="visible[k] !== undefined"
         link
         :icon="v"
-        @click="add(k)"
+        @click="visible[k] ? closeItem(k) : setItem(k)"
         :type="visible[k] ? 'primary' : undefined"
       />
     </template>

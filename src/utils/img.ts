@@ -39,7 +39,7 @@ export function compressImg(file: File, rate = 0.2): Promise<File> {
   read.readAsDataURL(disposeFile)
   return new Promise((resolve, reject) => {
     try {
-      read.onload = (e) => {
+      read.onload = e => {
         const img = new Image()
         img.src = e.target!.result as string
         img.onload = function () {
@@ -93,9 +93,12 @@ export function getFileByUrl(url: string, fileName?: string): Promise<File> {
   })
 }
 
+/**
+ * 在File类型基础上加入可选 exifdata 和 iptcdata 数据
+ */
 export interface ExifImgFile extends File {
-  exifdata?: any // exif信息
-  iptcdata?: any // iptc信息
+  exifdata?: any
+  iptcdata?: any
 }
 
 /**
@@ -121,7 +124,7 @@ export function getExifByFile(file: ExifImgFile): Promise<any> {
 // 传入URL，返回图片EXIF信息
 export function getExifFromURL(url: string) {
   return new Promise(() => {
-    getFileByUrl(url).then((file) => {
+    getFileByUrl(url).then(file => {
       return getExifByFile(file)
     })
   })

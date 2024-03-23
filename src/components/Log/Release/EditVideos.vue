@@ -1,36 +1,34 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import type { UploadFiles } from 'element-plus'
-import { fileType, logFileItem, type LogFileItem } from '@/stores/log'
-import type { LogFile, LogItem } from '../types'
-import type { Log } from '@/types'
+import { fileType, logFileItem } from '@/stores/log'
+import type { KeyFile, LogFileItem } from '@/types'
 
 // 文件名列表
 const videos = defineModel<string[]>({ required: true })
 // 外部传入的files，要朝里面放入cos文件对象。
-const filesModel = defineModel<{ [key in LogFileItem]: LogFile[] }>('files', {
-  required: true,
-})
+const filesModel = defineModel<KeyFile[]>('files', { required: true })
 
 // 原有文件：编辑模块要传入一些图片进来
 const videosOld = ref([...videos.value])
-const { add, edit } = defineProps<{
-  add: <T extends LogItem>(item: T, data?: Log[T]) => void
-  edit?: boolean
+const { addFile } = defineProps<{
+  addFile: (item: LogFileItem, file: KeyFile) => void
 }>()
+
 let index = 1 // 计数，用于命名
 // watchEffect(() => count ? props.setIsLoad(true) : props.setIsLoad(false)) // 要控制外层的加载状态
 
 // 更新imgs文件名列表
-watch([videosOld, () => filesModel.value.videos.length], () => {
-  videos.value = [
-    ...videosOld.value,
-    ...filesModel.value.videos.map(i => i.key!),
-  ]
-})
+watch(
+  [videosOld, () => filesModel.value.length],
+  () => {
+    videos.value = [...videosOld.value, ...filesModel.value.map(i => i.key!)]
+  },
+  { immediate: true }
+)
 
 // :on-change 状态变化，添加文件、上传成功、失败
-const onChange = async (file: LogFile, files: UploadFiles) => {
+const onChange = async (file: KeyFile, files: UploadFiles) => {
   const raw = file.raw!
 
   // Todo: 判断大小还没做
@@ -44,8 +42,7 @@ const onChange = async (file: LogFile, files: UploadFiles) => {
       // 如果匹配到了其他类型，弹出后加进对应的filesModel
       if (type !== 'videos') {
         ElMessage('检测到非视频文件，已自动归类')
-        add(type, [])
-        filesModel.value[type].push(files.pop()!)
+        addFile(type, files.pop()!)
       }
       break // 匹配到了就要退出
     }
@@ -57,7 +54,7 @@ const delVideoOld = (video: string) => {
 }
 
 onUnmounted(() => {
-  if (!edit) videos.value = []
+  filesModel.value = []
 })
 </script>
 <template>
@@ -86,7 +83,7 @@ onUnmounted(() => {
 
       <!-- 真正上传的 drag -->
       <ElUpload
-        v-model:file-list="filesModel.videos"
+        v-model:file-list="filesModel"
         class="upload-videos"
         multiple
         drag
