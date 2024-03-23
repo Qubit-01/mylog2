@@ -1,3 +1,6 @@
+<!-- 
+  主题切换组件，直接引入就能用
+ -->
 <script setup lang="ts">
 import useGlobalStore from '@/stores/global'
 import { Sunny, Moon } from '@element-plus/icons-vue'

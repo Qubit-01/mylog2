@@ -117,7 +117,7 @@ todo: 废弃，以前是待办事项，应该加进 log 的 tags 中
 - 更新了文件存储结构，现在每个用户的有自己的文件域，更便于管理
 - 加入了权限控制，文件只能在本网站并通过CDN读取，用户只能写操作自己的文件域，文件存储更安全
 
-文件结构：`users/[用户 id]/[项目]/[文件类型]/[YYMMDD_HHmm]-[编号]-源文件名`  
+文件结构：`users/[用户 id]/[项目]/[文件类型]/[YYMMDD_HHmmss]_[编号]-源文件名`  
 不同类型文件夹：compress-imgs, imgs, audios, files, videos, recycle  
 如：users/1/mylog/compress-imgs/1666071890799-0.jpg
 

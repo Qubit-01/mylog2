@@ -11,7 +11,7 @@ import type {
 import { Bucket, Region } from '@/stores/constant'
 import { logInit, rlsLog } from '@/stores/log'
 import { cloneDeep } from 'lodash'
-import { cosPath } from '@/utils/cos'
+import { cosPath, getCosFiles } from '@/utils/cos'
 import type COS from 'cos-js-sdk-v5'
 
 // 换一种方式，父组件管理files，不再用组件暴露的files了，主要是为了一个组件上传其他类型文件可以兼容
@@ -79,35 +79,7 @@ const closeItem = (item: LogItem) => {
 
 const release = () => {
   upload.percent = 0
-  // 大压缩图、95压缩图、原图。大压缩图必发，95压缩图和原图选择性发送
-  // 目前先实现发 大压缩图＋原图
-
-  const cosFiles: COS.UploadFileItemParams[] = []
-
-  for (const file of files.imgs) {
-    cosFiles.push({
-      // 原图
-      Bucket,
-      Region,
-      Key: `${cosPath()}imgs/${file.key}`,
-      Body: file.raw!,
-    })
-    cosFiles.push({
-      // 大压缩图
-      Bucket,
-      Region,
-      Key: `${cosPath()}compress-imgs/${file.key}`,
-      Body: file.compressImg!,
-    })
-  }
-  for (const file of files.videos) {
-    cosFiles.push({
-      Bucket,
-      Region,
-      Key: `${cosPath()}videos/${file.key}`,
-      Body: file.raw!,
-    })
-  }
+  const cosFiles = getCosFiles(files)
 
   rlsLog(cloneDeep(logEdit), {
     files: cosFiles,
@@ -187,8 +159,11 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
         v-model="logEdit.videos!"
         v-model:files="files.videos"
         :addFile
-        :setItem
       />
+    </div>
+
+    <div v-if="visible.files">
+      <EditFiles v-model="logEdit.files!" v-model:files="files.files" />
     </div>
 
     <div v-if="visible.location">

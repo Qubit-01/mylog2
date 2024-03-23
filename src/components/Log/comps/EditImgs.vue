@@ -32,7 +32,7 @@ import type {
 import { fileType, logFileItem } from '@/stores/log'
 import { getExifByFile, compressImg } from '@/utils/img'
 import AMap, { l2v } from '@/utils/map'
-import { toFileUrl } from '@/utils/cos'
+import { getKey, toFileUrl } from '@/utils/cos'
 
 // 文件名: 首次传入的数据会被imgsOld记录，然后立即被watch修改
 const imgs = defineModel<string[]>({ required: true })
@@ -66,7 +66,7 @@ const onChange = async (file: KeyFile, files: UploadFiles) => {
   // Todo: 判断大小还没做
 
   // 文件名，现在是任何文件都接收，所以都要加key
-  file.key = `${dayjs().format('YYMMDD-HHmmss')}-${index++}-${file.name}`
+  file.key = getKey(file.name)
 
   // files 项的indexOf永远返回0，它一定会是最后兜底的
   for (const type of logFileItem) {
@@ -264,10 +264,10 @@ const useExif = () => {
             width: 100%;
             height: 100%;
           }
+        }
 
-          &:empty {
-            display: none;
-          }
+        &:empty {
+          display: none;
         }
       }
     }

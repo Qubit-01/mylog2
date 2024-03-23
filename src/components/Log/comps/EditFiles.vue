@@ -1,28 +1,23 @@
 <script setup lang="ts">
 import type { UploadFiles } from 'element-plus'
-import { fileType, logFileItem } from '@/stores/log'
-import type { KeyFile, LogFileItem } from '@/types'
+import type { KeyFile } from '@/types'
 import { getKey } from '@/utils/cos'
 
 // 文件名列表
-const videos = defineModel<string[]>({ required: true })
+const files = defineModel<string[]>({ required: true })
 // 外部传入的files，要朝里面放入cos文件对象。
 const filesModel = defineModel<KeyFile[]>('files', { required: true })
 
 // 原有文件：编辑模块要传入一些图片进来
-const videosOld = ref([...videos.value])
-const { addFile } = defineProps<{
-  addFile: (item: LogFileItem, file: KeyFile) => void
-}>()
+const filesOld = ref([...files.value])
 
-let index = 1 // 计数，用于命名
 // watchEffect(() => count ? props.setIsLoad(true) : props.setIsLoad(false)) // 要控制外层的加载状态
 
 // 更新imgs文件名列表
 watch(
-  [videosOld, () => filesModel.value.length],
+  [filesOld, () => filesModel.value.length],
   () => {
-    videos.value = [...videosOld.value, ...filesModel.value.map(i => i.key!)]
+    files.value = [...filesOld.value, ...filesModel.value.map(i => i.key!)]
   },
   { immediate: true }
 )
@@ -36,21 +31,11 @@ const onChange = async (file: KeyFile, files: UploadFiles) => {
   // 文件名，现在是任何文件都接收，所以都要加key
   file.key = getKey(file.name)
 
-  // files 项的indexOf永远返回0，它一定会是最后兜底的
-  for (const type of logFileItem) {
-    if (fileType[type].indexOf(raw.type) > -1) {
-      // 如果匹配到了其他类型，弹出后加进对应的filesModel
-      if (type !== 'videos') {
-        ElMessage('检测到非视频文件，已自动归类')
-        addFile(type, files.pop()!)
-      }
-      break // 匹配到了就要退出
-    }
-  }
+  // 因为这是files兜底，所以默认用户就是想把文件放进去files
 }
 
 const delVideoOld = (video: string) => {
-  videosOld.value = videosOld.value.filter(i => i !== video)
+  filesOld.value = filesOld.value.filter(i => i !== video)
 }
 
 onUnmounted(() => {
@@ -58,13 +43,13 @@ onUnmounted(() => {
 })
 </script>
 <template>
-  <div class="edit-videos">
-    <div class="all-videos">
-      <div class="viewer-videos">
+  <div class="edit-files">
+    <div class="all-files">
+      <div class="viewer-files">
         <!-- 模仿element upload组件的卡片 -->
         <ul class="el-upload-list el-upload-list--text">
           <li
-            v-for="video in videosOld"
+            v-for="video in filesOld"
             :key="video"
             class="el-upload-list__item is-ready"
           >
@@ -84,13 +69,13 @@ onUnmounted(() => {
       <!-- 真正上传的 drag -->
       <ElUpload
         v-model:file-list="filesModel"
-        class="upload-videos"
+        class="upload-files"
         multiple
         drag
         :on-change="onChange"
         :auto-upload="false"
       >
-        点击或者拖拽到这里上传视频
+        点击或者拖拽到这里上传文件
         <!-- <ElButton type="primary">上传视频</ElButton> -->
         <!-- <template #file="{ file }">
           {{ file.url }}
@@ -101,16 +86,16 @@ onUnmounted(() => {
 </template>
 
 <style scoped lang="less">
-.edit-videos {
+.edit-files {
   --block-gap: 2px;
 
-  .all-videos {
+  .all-files {
     display: flex;
     flex-direction: column;
     gap: var(--block-gap);
 
-    .viewer-videos,
-    .upload-videos {
+    .viewer-files,
+    .upload-files {
       display: flex;
       flex-direction: column;
       gap: var(--block-gap);
@@ -131,7 +116,7 @@ onUnmounted(() => {
       }
     }
 
-    .upload-videos {
+    .upload-files {
       // 列表
       // :deep(ul.el-upload-list) {
       // }

@@ -10,7 +10,7 @@ import type {
 import type COS from 'cos-js-sdk-v5'
 import { editLog } from '@/stores/log'
 import { Bucket, Region } from '@/stores/constant'
-import { cosPath } from '@/utils/cos'
+import { cosPath, getCosFiles } from '@/utils/cos'
 import { cloneDeep } from 'lodash'
 
 const emit = defineEmits(['onSuccess'])
@@ -80,35 +80,7 @@ const closeItem = (item: LogItem) => {
 
 const edit = () => {
   upload.percent = 0
-
-  // 大压缩图、95压缩图、原图。大压缩图必发，95压缩图和原图选择性发送
-  // 目前先实现发 大压缩图＋原图
-  const cosFiles: COS.UploadFileItemParams[] = []
-
-  for (const file of files.imgs) {
-    cosFiles.push({
-      // 原图
-      Bucket,
-      Region,
-      Key: `${cosPath()}imgs/${file.key}`,
-      Body: file.raw!,
-    })
-    cosFiles.push({
-      // 大压缩图
-      Bucket,
-      Region,
-      Key: `${cosPath()}compress-imgs/${file.key}`,
-      Body: file.compressImg!,
-    })
-  }
-  for (const file of files.videos) {
-    cosFiles.push({
-      Bucket,
-      Region,
-      Key: `${cosPath()}videos/${file.key}`,
-      Body: file.raw!,
-    })
-  }
+  const cosFiles = getCosFiles(files)
 
   editLog(logEdit, {
     files: cosFiles,
@@ -121,8 +93,8 @@ const edit = () => {
 </script>
 
 <template>
-  <div>logEdit{{ logEdit }}</div>
-  <div>files{{ files }}</div>
+  <!-- <div>logEdit{{ logEdit }}</div> -->
+  <!-- <div>files{{ files }}</div> -->
   <div class="log-edit" :class="{ disabled: upload.percent > -1 }" @click.stop>
     <ElProgress
       v-if="upload.percent > -1"

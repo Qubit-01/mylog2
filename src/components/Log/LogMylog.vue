@@ -48,7 +48,7 @@ const isEdit = ref(false)
     <!-- 音频 和 文件 -->
     <template v-if="isExpand">
       <div v-if="log.audios.length">音频：{{ log.audios }}</div>
-      <div v-if="log.audios.length">文件：{{ log.files }}</div>
+      <ViewerFiles v-if="log.files.length">文件：{{ log.files }}</ViewerFiles>
     </template>
 
     <div class="tags">

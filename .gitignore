@@ -35,3 +35,6 @@ src/components.d.ts
 
 # 证书
 cert
+
+# VsCount 的记录
+.VSCodeCounter

@@ -228,7 +228,6 @@ export const rlsLog = (
   )
 
   return myUploadFiles(params).then(data => {
-    if (data[0]) return Promise.reject(data)
     return releaseLog({ logJson: JSON.stringify(log) }).then(id => {
       if (id !== '0') {
         log.id = id
@@ -278,14 +277,13 @@ export const editLog = (
 
   return Promise.all([myDeleteFiles(delObjs), myUploadFiles(params)]).then(
     data => {
-      if (!data[0][0] && !data[1][0])
-        updateLog({ logJson: JSON.stringify(logEdit) }).then(count => {
-          if (count === 1) {
-            ElMessage({ message: '编辑成功', type: 'success' })
-            logStore.mylog.editLog(logEdit)
-            return count
-          }
-        })
+      updateLog({ logJson: JSON.stringify(logEdit) }).then(count => {
+        if (count === 1) {
+          ElMessage({ message: '编辑成功', type: 'success' })
+          logStore.mylog.editLog(logEdit)
+          return count
+        }
+      })
       // 上传出错返回 0
       return 0
     }
@@ -297,33 +295,29 @@ export const editLog = (
  * @param log 删除的Log对象
  * @returns 参一为null，既成功
  */
-export const delLog = (log: Log): Promise<[any, Log]> => {
-  return new Promise((resolve, reject) => {
-    ElMessageBox.confirm('确定删除吗？', '删除Log', {
-      confirmButtonText: '删除',
-      cancelButtonText: '取消',
-      type: 'warning',
+export const delLog = (log: Log): Promise<Log> => {
+  return ElMessageBox.confirm('确定删除吗？', '删除Log', {
+    confirmButtonText: '删除',
+    cancelButtonText: '取消',
+    type: 'warning',
+  }).then(() => {
+    // 先删文件，再删log
+    const objects: { Key: string }[] = []
+    logFileItem.forEach(type => {
+      log[type].forEach(i => {
+        objects.push({ Key: `${cosPath()}${type}/${i}` })
+        if (type === 'imgs')
+          objects.push({ Key: `${cosPath()}compress-imgs/${i}` })
+      })
     })
-      .then(() => {
-        // 先删文件，再删log
-        const objects: { Key: string }[] = []
-        logFileItem.forEach(type => {
-          log[type].forEach(i => {
-            objects.push({ Key: `${cosPath()}${type}/${i}` })
-            if (type === 'imgs')
-              objects.push({ Key: `${cosPath()}compress-imgs/${i}` })
-          })
-        })
-        myDeleteFiles(objects).then(data => {
-          deleteLog({ id: log.id! }).then(count => {
-            ElMessage({ message: '删除成功', type: 'success' })
-            logStore.mylog.delLog(log.id!)
-            resolve([null, log])
-          })
+    return myDeleteFiles(objects)
+      .then(data => {
+        return deleteLog({ id: log.id! }).then(count => {
+          ElMessage({ message: '删除成功', type: 'success' })
+          logStore.mylog.delLog(log.id!)
+          return log
         })
       })
-      .catch(() => {
-        // reject()
-      })
+      .catch(err => err)
   })
 }
