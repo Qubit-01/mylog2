@@ -29,9 +29,9 @@ dependencies:
   element-plus:
     specifier: ^2.5.3
     version: 2.5.3(vue@3.4.15)
-  exif-js:
-    specifier: ^2.3.0
-    version: 2.3.0
+  exifreader:
+    specifier: ^4.21.1
+    version: 4.21.1
   lodash:
     specifier: ^4.17.21
     version: 4.17.21
@@ -1452,8 +1452,11 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
-  /exif-js@2.3.0:
-    resolution: {integrity: sha512-1Og9pAzG2FZRVlaavH8bB8BTeHcjMdJhKmeQITkX+uLRCD0xPtKAdZ2clZmQdJ56p9adXtJ8+jwrGp/4505lYg==}
+  /exifreader@4.21.1:
+    resolution: {integrity: sha512-xbS8byUxV2YVKR3n1ukhwS89KNF77utMePZoHLvQpLvcP+TNkehJBZhdM7HQjDavyY3ggjqZw5vMXbJFtLCDhg==}
+    requiresBuild: true
+    optionalDependencies:
+      '@xmldom/xmldom': 0.8.10
     dev: false
 
   /fast-deep-equal@3.1.3:

@@ -20,7 +20,7 @@
     "dayjs": "^1.11.10",
     "default-passive-events": "^2.0.0",
     "element-plus": "^2.5.3",
-    "exif-js": "^2.3.0",
+    "exifreader": "^4.21.1",
     "lodash": "^4.17.21",
     "pinia": "^2.1.7",
     "viewerjs": "^1.11.6",
