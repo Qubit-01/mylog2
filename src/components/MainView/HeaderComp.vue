@@ -17,11 +17,13 @@ const router = useRouter()
           </div>
         </div>
         <nav>
-          <RouterLink to="/logger">主页</RouterLink>
           <!-- 我的主页（别人看见的） -->
-          <RouterLink to="/mylog">记录</RouterLink>
+          <RouterLink to="/logger">主页</RouterLink>
           <!-- 我的记录（自己看见的） -->
+          <RouterLink to="/mylog">记录</RouterLink>
+          <RouterLink to="/album">相册</RouterLink>
           <RouterLink to="/map">地图</RouterLink>
+          <RouterLink to="/relation">人脉</RouterLink>
         </nav>
         <div class="right">
           <div v-if="Global.isLogined" class="user">{{ User.name }}</div>

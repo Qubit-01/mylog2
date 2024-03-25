@@ -24,9 +24,19 @@ const router = createRouter({
           component: () => import('../views/mylog/index.vue'),
         },
         {
+          path: 'album',
+          name: 'album', // 相册
+          component: () => import('../views/album/index.vue'),
+        },
+        {
           path: 'map',
-          name: 'map',
+          name: 'map', // 地图
           component: () => import('../views/map/index.vue'),
+        },
+        {
+          path: 'relation',
+          name: 'relation', // 人脉
+          component: () => import('../views/relation/index.vue'),
         },
       ],
     },

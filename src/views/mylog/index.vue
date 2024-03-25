@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import useLogStore from '@/stores/log'
 
+const tab = ref<string>('Timeline')
+
 const logStore = useLogStore()
 const mylog = logStore.mylog
 mylog.getLogs!() // 进入页面再获取数据
@@ -11,6 +13,13 @@ const logReleaseDom = ref()
 
 <template>
   <div class="mylog-page">
+    <ElRadioGroup v-model="tab">
+      <!-- size="large" -->
+      <ElRadioButton label="时间线" value="Timeline" />
+      <ElRadioButton label="待办" value="Todo" />
+      <ElRadioButton label="日历" value="Calendar" />
+    </ElRadioGroup>
+
     <LogRelease ref="logReleaseDom" />
 
     <div class="time-line">
