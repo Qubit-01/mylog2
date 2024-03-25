@@ -21,6 +21,11 @@ interface Global {
   user: User
   token: string
   /**
+   * 通过token获取用户信息之后的promise
+   * 成功返回拿到的user数据，没有token或者错误token都返回空
+   */
+  afterGetUser: Promise<User>
+  /**
    * 是否已登录（计算属性）
    */
   isLogined: boolean
@@ -48,24 +53,34 @@ export const useGlobalStore: () => Global = defineStore('global', () => {
     },
   })
 
-  // 先去本地存储获取
-  const pageSetting = localStorage.getItem('pageSetting')
-  if (pageSetting) {
-    deepMerge(user.setting!, JSON.parse(pageSetting))
-  }
-
-  // 再去云端获取
   const token = ref(localStorage.getItem('token') || '')
 
-  if (token.value) {
-    getUserByToken({ token: token.value }).then((res) => {
-      if (res) deepMerge(user, res)
-    })
-  }
+  // 先去本地存储获取页面设置
+  const pageSetting = localStorage.getItem('pageSetting')
+  if (pageSetting) deepMerge(user.setting!, JSON.parse(pageSetting))
+
+  /**
+   * 通过token获取用户信息之后的promise，但是很多页面都是直接用token发请求
+   * 成功返回拿到的user数据，没有token或者错误token都返回空
+   */
+  const afterGetUser: Promise<User> = new Promise((resolve, reject) => {
+    if (token.value)
+      getUserByToken({ token: token.value }).then(res => {
+        if (res) {
+          deepMerge(user, res)
+          resolve(res)
+        } else reject()
+      })
+    else reject()
+  })
 
   // 用户相关 ===============================
-  // 是否已登录，判断
-  const isLogined = computed(() => user.id !== '0')
+  /**
+   * 是否已登录，判断。
+   * 本来也是用id是否等于0判断的，但是后来感觉不对，要用token是否有，才是同步的
+   * 路由这种优先级很高的东西，同步就尤为重要
+   */
+  const isLogined = computed(() => !!token)
   // 退出登录，删除 token、pageSetting
   const logout = () => {
     localStorage.removeItem('token')
@@ -78,7 +93,7 @@ export const useGlobalStore: () => Global = defineStore('global', () => {
   // 是否是暗黑模式
   const isDark = computed<boolean>({
     get: () => user.setting.page.theme === 'dark',
-    set: (v) => (user.setting.page.theme = v ? 'dark' : 'light'),
+    set: v => (user.setting.page.theme = v ? 'dark' : 'light'),
   })
 
   // 主题切换
@@ -94,6 +109,7 @@ export const useGlobalStore: () => Global = defineStore('global', () => {
     isLogined,
     logout,
     isDark,
+    afterGetUser,
   }
 })
 
