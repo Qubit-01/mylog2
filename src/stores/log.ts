@@ -102,7 +102,7 @@ export const useLogStore = defineStore('log', () => {
     ),
     listAll: [],
     params: { skip: 0, limit: 15 },
-    loading: false,
+    loading: true,
     addLogs: async () => {
       mylog.loading = true
       mylog.params.skip += mylog.params.limit
@@ -113,7 +113,6 @@ export const useLogStore = defineStore('log', () => {
       const logs = await getLogsAllByToken({})
       logs.forEach(handleLog)
       mylog.listAll = logs
-      mylog.loading = false
       mylog.addLogs!() // 加载完成后立即加载几个数据
     },
     getLog: (id: string) => mylog.listAll.find(log => log.id === id),

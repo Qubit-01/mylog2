@@ -7,6 +7,7 @@ import { deepMerge } from '@/utils'
 const Global = useGlobalStore()
 const User = Global.user
 const router = useRouter()
+const route = useRoute()
 
 const login = reactive({
   name: '',
@@ -18,10 +19,10 @@ const doLogin = async () => {
   user = await loginPswd(login)
   if (user) {
     ElMessage.success(`欢迎你，${user.name} ！`)
-    router.push('/').then(a => {
-      deepMerge(User, user!)
-      localStorage.setItem('token', user!.token!)
-    })
+    Global.token = user.token!
+    // 跳转并刷新
+    location.replace('/#' + (route.query.redirect || ''))
+    location.reload()
   } else {
     ElMessage.error('用户名或密码错误')
   }
@@ -33,10 +34,19 @@ const doLogin = async () => {
     <div class="title">登录</div>
 
     <div class="login">
-
       <form>
-        <input v-model="login.name" placeholder="用户名" type="text" autocomplete="on" />
-        <input v-model="login.pswd" placeholder="密码" type="password" autocomplete="on" />
+        <input
+          v-model="login.name"
+          placeholder="用户名"
+          type="text"
+          autocomplete="on"
+        />
+        <input
+          v-model="login.pswd"
+          placeholder="密码"
+          type="password"
+          autocomplete="on"
+        />
         <ElButton @click="doLogin">登录</ElButton>
         <div class="toSignin">
           没有账号？
@@ -51,12 +61,20 @@ const doLogin = async () => {
           <div></div>
         </div>
         <div class="icons">
-          <img src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/wechat.png" alt="QQ登录">
-          <img src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/weibo.png" alt="QQ登录">
-          <img src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/qq.png" alt="QQ登录">
+          <img
+            src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/wechat.png"
+            alt="QQ登录"
+          />
+          <img
+            src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/weibo.png"
+            alt="QQ登录"
+          />
+          <img
+            src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/qq.png"
+            alt="QQ登录"
+          />
         </div>
       </div>
-
     </div>
   </StructLogin>
 </template>
@@ -68,14 +86,13 @@ const doLogin = async () => {
   margin-bottom: 20px;
 }
 
-
 .login {
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 
-  >form {
+  > form {
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -96,8 +113,7 @@ const doLogin = async () => {
       &:-webkit-autofill:focus,
       &:-webkit-autofill:active {
         -webkit-transition-delay: 99999s;
-        -webkit-transition:
-          color 99999s ease-out,
+        -webkit-transition: color 99999s ease-out,
           background-color 99999s ease-out;
       }
 
@@ -113,7 +129,7 @@ const doLogin = async () => {
   }
 
   // 选中最后一个div
-  >div:last-child {
+  > div:last-child {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -123,11 +139,11 @@ const doLogin = async () => {
       align-items: center;
       opacity: 0.6;
 
-      >span {
+      > span {
         margin: 0 20px;
       }
 
-      >div {
+      > div {
         display: inline-block;
         height: 0;
         flex: 1;

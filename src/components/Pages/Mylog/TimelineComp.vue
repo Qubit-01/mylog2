@@ -1,11 +1,17 @@
 <script setup lang="ts">
+import { getUser } from '@/stores/global'
 import useLogStore from '@/stores/log'
 const logStore = useLogStore()
 const mylog = logStore.mylog
-mylog.getLogs!() // 进入页面再获取数据
 
 // 拿到编辑的数据
 const logReleaseDom = ref()
+
+getUser
+  .then(user => {
+    mylog.getLogs!() // 进入页面再获取数据
+  })
+  .catch(() => {})
 </script>
 
 <template>
