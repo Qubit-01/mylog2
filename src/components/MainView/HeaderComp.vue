@@ -18,12 +18,12 @@ const router = useRouter()
         </div>
         <nav>
           <!-- 我的主页（别人看见的） -->
-          <RouterLink to="/logger">主页</RouterLink>
+          <RouterLink to="/logger" v-overflowEllipsis>主页</RouterLink>
           <!-- 我的记录（自己看见的） -->
-          <RouterLink to="/mylog">记录</RouterLink>
-          <RouterLink to="/album">相册</RouterLink>
-          <RouterLink to="/map">地图</RouterLink>
-          <RouterLink to="/relation">人脉</RouterLink>
+          <RouterLink to="/mylog" v-overflowEllipsis>记录</RouterLink>
+          <RouterLink to="/album" v-overflowEllipsis>相册</RouterLink>
+          <RouterLink to="/map" v-overflowEllipsis>地图</RouterLink>
+          <RouterLink to="/relation" v-overflowEllipsis>人脉</RouterLink>
         </nav>
         <div class="right">
           <div v-if="Global.isLogined" class="user">{{ User.name }}</div>
@@ -82,7 +82,7 @@ const router = useRouter()
       > .left {
         .logo {
           position: relative;
-          font-size: 22px;
+          font-size: 1.5rem;
           width: var(--lan-width);
           height: var(--header-height);
           padding-left: 20px;
@@ -129,6 +129,7 @@ const router = useRouter()
 
         > nav {
           order: 2;
+          font-size: 1rem;
         }
       }
     }
