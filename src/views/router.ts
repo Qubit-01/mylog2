@@ -22,6 +22,25 @@ const router = createRouter({
           path: 'mylog',
           name: 'mylog', // 我的记录（自己看的）
           component: () => import('../views/mylog/index.vue'),
+          children: [
+            {
+              path: '',
+              name: 'timeline', // 时间线
+              component: () =>
+                import('../components/Pages/Mylog/TimelineComp.vue'),
+            },
+            {
+              path: 'todo',
+              name: 'todo', // 待办
+              component: () => import('../components/Pages/Mylog/TodoComp.vue'),
+            },
+            {
+              path: 'calendar',
+              name: 'calendar', // 日历
+              component: () =>
+                import('../components/Pages/Mylog/CalendarComp.vue'),
+            },
+          ],
         },
         {
           path: 'album',
