@@ -130,3 +130,32 @@ export interface LogImgFile extends KeyFile {
  * 就是有EXIF信息的El Raw文件
  */
 export interface ExifUploadRawFile extends UploadRawFile, ExifImgFile {}
+
+
+/**
+ * 过滤器对象
+ */
+interface LogFilter {
+  type: '' | 'log' | 'public'
+  /**
+   * 时间限制，范围
+   */
+  timeLimit: [any | null, any | null]
+  /**
+   * 全部大筛选项都或运算
+   */
+  isOrAll: boolean
+  content: {
+    include: string[]
+    isOr: boolean
+  }
+  people: {
+    include: string[]
+    isOr: boolean
+  }
+  tags: {
+    include: string[]
+    isOr: boolean
+  }
+  exclude: string[] // 排除，填入id
+}

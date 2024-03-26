@@ -1,4 +1,4 @@
-import type { Log, LogEdit, LogFileItem } from '@/types'
+import type { Log, LogEdit, LogFileItem, LogFilter } from '@/types'
 import COS from 'cos-js-sdk-v5'
 import { myUploadFiles, myDeleteFiles, cosPath } from '@/utils/cos'
 import dayjs from 'dayjs'
@@ -98,13 +98,13 @@ export const useLogStore = defineStore('log', () => {
    */
   const mylog: Mylog = reactive<Mylog>({
     list: computed<Log[]>(() =>
-      mylog.listAll.slice(0, mylog.params.skip + mylog.params.limit)
+      mylog.listFilter.slice(0, mylog.params.skip + mylog.params.limit)
     ),
     listAll: [],
     listFilter: computed<Log[]>(() => {
-      return mylog.listAll
+      return mylog.listAll.filter(log => filteLog(log, mylog.filter))
     }),
-    filter: {},
+    filter: null,
     params: { skip: 0, limit: 15 },
     loading: true,
     addLogs: async () => {
@@ -187,7 +187,7 @@ export const handleLog = (log: any): void => {
 }
 
 /**
- * 默认数据，兜底
+ * 发布Log时的，默认数据，兜底
  */
 export const logInit: LogEdit = {
   type: 'log',
@@ -323,4 +323,85 @@ export const delLog = (log: Log): Promise<Log> => {
       })
       .catch(err => err)
   })
+}
+
+/**
+ * 传入一个log，返回布尔值
+ * @param log Log对象
+ * @param filter 过滤器对象
+ * @return 为真就是满足，false就是不满足
+ */
+export const filteLog = (log: Log, filter: LogFilter): boolean => {
+  // 餐二传入null，直接返回true
+  if (!filter) return true 
+
+  // 记录状态
+  if (filter.type !== '' && log.type != filter.type) return false
+
+  // 时间限制，包含两头
+  if (
+    filter.timeLimit[0] &&
+    dayjs(log.logtime).diff(dayjs(filter.timeLimit[0])) < 0
+  )
+    return false
+  if (
+    filter.timeLimit[1] &&
+    dayjs(log.logtime).diff(dayjs(filter.timeLimit[1])) > 86400000
+  )
+    return false
+
+  // 排除
+  if (filter.exclude.indexOf(log.id!) != -1) return false
+
+  // 判断arr是否含有includeArr, isOr为true则全部都要有
+  let include = (
+    arr: string[] | string,
+    includeArr: string[],
+    isOr: boolean
+  ) => {
+    if (!arr || !arr.length) return false
+
+    for (const value of includeArr) {
+      if (arr.indexOf(value) != -1) {
+        // 有
+        if (isOr) return true // 或
+        else continue // 与
+      } else {
+        // 无
+        if (!isOr) return false // 与
+        else continue // 或
+      }
+    }
+    return !isOr
+  }
+
+  if (filter.content.include.length) {
+    if (include(log.content, filter.content.include, filter.content.isOr)) {
+      // 有
+      if (filter.isOrAll) return true // 或
+    } else {
+      // 无
+      if (!filter.isOrAll) return false // 与
+    }
+  }
+  if (filter.people.include.length) {
+    if (include(log.people!, filter.people.include, filter.people.isOr)) {
+      // 有
+      if (filter.isOrAll) return true // 或
+    } else {
+      // 无
+      if (!filter.isOrAll) return false // 与
+    }
+  }
+  if (filter.tags.include.length) {
+    if (include(log.tags, filter.tags.include, filter.tags.isOr)) {
+      // 有
+      if (filter.isOrAll) return true // 或
+    } else {
+      // 无
+      if (!filter.isOrAll) return false // 与
+    }
+  }
+
+  return !filter.isOrAll
 }

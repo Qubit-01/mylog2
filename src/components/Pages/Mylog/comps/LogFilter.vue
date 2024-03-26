@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Log } from '@/types'
+import type { Log, LogFilter } from '@/types'
 import dayjs from 'dayjs'
 
 const curFilter = ref(-1) // -1是全部，-2是自定义筛选
@@ -19,36 +19,16 @@ const filters = [
 
 // const diyFilter = props.screen
 
-interface LogFilter {
-  /**
-   * 时间限制，范围
-   */
-  timeLimit: [any, any]
-  /**
-   *
-   */
-  isOrAll: boolean
-  contentInclude: string[]
-  isOrContent: boolean
-  peopleInclude: []
-  isOrPeople: boolean
-  tagsInclude: string[]
-  isOrTags: boolean
-  exclude: string[] // 不包括，填入noteI
-  type: '' | 'log' | 'public'
-}
+
 
 const diyFilter = reactive<LogFilter>({
+  type: '',
   timeLimit: [null, null],
   isOrAll: true,
-  contentInclude: [],
-  isOrContent: false,
-  peopleInclude: [],
-  isOrPeople: false,
-  tagsInclude: [],
-  isOrTags: false,
+  content: { include: [], isOr: false },
+  people: { include: [], isOr: false },
+  tags: { include: [], isOr: false },
   exclude: [], // 不包括，填入noteI
-  type: '',
 })
 
 // watch(filter.timeLimit, () => {
@@ -63,82 +43,10 @@ const diyFilter = reactive<LogFilter>({
 //     }
 //   })
 
-/**
- * 传入一个log，返回布尔值
- * @param log Log对象
- * @param filter 过滤器对象
- */
-const filteLog = (log: Log, filter: any) => {
-  // 记录状态
-  if (filter.noteType != 'all' && log.type != filter.type) return false
 
-  // 时间限制，包含两头
-  if (
-    filter.timeLimit[0] &&
-    dayjs(log.logtime).diff(dayjs(filter.timeLimit[0])) < 0
-  )
-    return false
-  if (
-    filter.timeLimit[1] &&
-    dayjs(log.logtime).diff(dayjs(filter.timeLimit[1])) > 86400000
-  )
-    return false
-
-  // 排除
-  if (filter.exclude.indexOf(log.id) != -1) return false
-
-  // 判断arr是否含有includeArr, isOr为true则全部都要有
-  let include = (arr, includeArr, isOr) => {
-    if (!arr || !arr.length) return false
-
-    for (const value of includeArr) {
-      if (arr.indexOf(value) != -1) {
-        // 有
-        if (isOr) return true // 或
-        else continue // 与
-      } else {
-        // 无
-        if (!isOr) return false // 与
-        else continue // 或
-      }
-    }
-    return !isOr
-  }
-
-  if (filter.contentInclude.length) {
-    if (include(log.content, filter.contentInclude, filter.isOrContent)) {
-      // 有
-      if (filter.isOrAll) return true // 或
-    } else {
-      // 无
-      if (!filter.isOrAll) return false // 与
-    }
-  }
-  if (filter.peopleInclude.length) {
-    if (include(log.people, filter.peopleInclude, filter.isOrPeople)) {
-      // 有
-      if (filter.isOrAll) return true // 或
-    } else {
-      // 无
-      if (!filter.isOrAll) return false // 与
-    }
-  }
-  if (filter.tagsInclude.length) {
-    if (include(log.tags, filter.tagsInclude, filter.isOrTags)) {
-      // 有
-      if (filter.isOrAll) return true // 或
-    } else {
-      // 无
-      if (!filter.isOrAll) return false // 与
-    }
-  }
-
-  return !filter.isOrAll
-}
 </script>
 
 <template>
-  <!-- {{ curFilter }} -->
   <div class="log-filter">
     <ElRadioGroup v-model="curFilter" size="small">
       <!-- size="large" -->
@@ -146,14 +54,14 @@ const filteLog = (log: Log, filter: any) => {
       <ElRadioButton v-for="(f, i) in filters" :label="f.name" :value="i" />
       <ElRadioButton label="筛选" :value="-2" />
     </ElRadioGroup>
-
+    {{ diyFilter }}
     <div v-if="curFilter === -2" class="diy-filter" v-m>
       <ElRow>
-        记录状态：
+        记录类型：
         <ElRadioGroup size="small" v-model="diyFilter.type">
-          <ElRadioButton label="all">全部</ElRadioButton>
-          <ElRadioButton label="log">隐私</ElRadioButton>
-          <ElRadioButton label="public">公开</ElRadioButton>
+          <ElRadioButton label="全部" value="" />
+          <ElRadioButton label="隐私" value="log" />
+          <ElRadioButton label="公开" value="public" />
         </ElRadioGroup>
       </ElRow>
       <ElRow>
@@ -178,34 +86,37 @@ const filteLog = (log: Log, filter: any) => {
       </ElRow>
 
       <ElRow>
-        <TagsComp :tags="diyFilter.contentInclude" label="内容含有">
+        <EditTags v-model="diyFilter.content.include" label="内容含有：">
           <ElSwitch
-            v-model="diyFilter.isOrContent"
+            v-model="diyFilter.content.isOr"
             size="small"
-            active-text="或运算"
-            style="margin-right: 10px"
+            inline-prompt
+            active-text="或"
+            inactive-text="和"
           />
-        </TagsComp>
+        </EditTags>
       </ElRow>
       <ElRow>
-        <TagsComp :tags="diyFilter.peopleInclude" label="人员含有">
+        <EditTags v-model="diyFilter.people.include" label="人员含有：">
           <ElSwitch
-            v-model="diyFilter.isOrPeople"
+            v-model="diyFilter.people.isOr"
             size="small"
-            active-text="或运算"
-            style="margin-right: 10px"
+            inline-prompt
+            active-text="或"
+            inactive-text="和"
           />
-        </TagsComp>
+        </EditTags>
       </ElRow>
       <ElRow>
-        <TagsComp :tags="diyFilter.tagsInclude" label="标签含有">
+        <EditTags v-model="diyFilter.tags.include" label="标签含有：">
           <ElSwitch
-            v-model="diyFilter.isOrTags"
+            v-model="diyFilter.tags.isOr"
             size="small"
-            active-text="或运算"
-            style="margin-right: 10px"
+            inline-prompt
+            active-text="或"
+            inactive-text="和"
           />
-        </TagsComp>
+        </EditTags>
       </ElRow>
       <ElRow>
         <ElSwitch
@@ -238,9 +149,10 @@ const filteLog = (log: Log, filter: any) => {
 
   .diy-filter {
     padding: var(--padding);
+    border-radius: var(--border-radius);
     display: flex;
     flex-direction: column;
-    gap: 8px
+    gap: 8px;
   }
 }
 </style>
