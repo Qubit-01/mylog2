@@ -3,21 +3,29 @@ import type { User } from '@/types'
 import { deepMerge } from '@/utils'
 
 /**
- * 获取用户接口全局只调用一次，所以用Promise
- * 通过token获取用户信息之后的promise，但是很多页面都是直接用token发请求
+ * # 获取用户接口全局只调用一次，所以用Promise
+ * 通过token获取用户信息之后的promise，页面一般不能直接用token发请求
  * 成功返回拿到的user数据，没有token或者错误token都返回空
+ * 几种情况：
+ * 1. 没token，正常访问路由跳转，不会发getUser请求
+ * 2. 有token，发getUser请求
+ *  - token正确，正常进行注册then方法
+ *  - token错误，删除错误token，重新加载页面
+ * 保证进入页面后，要么没有token，要么是正确的token
  */
 export const getUser: Promise<User> = new Promise((resolve, reject) => {
   const token = localStorage.getItem('token')
   if (token)
     getUserByToken({ token: token }).then(res => {
-      if (res) resolve(res)
+      if (res) resolve(res) // 2.1 正常token
       else {
+        // 2.2 错误token，回归到没有token
         ElMessage.error('用户登录信息已过期或错误，请重新登录')
-        reject()
+        localStorage.removeItem('token')
+        location.reload()
       }
     })
-  else reject()
+  else reject() // 1.没有token
 })
 
 /**
@@ -43,15 +51,11 @@ interface Global {
    */
   isLogined: boolean
   /**
-   * 是否是暗黑模式（计算属性）
+   * # 是否是暗黑模式（计算属性）
    * 监视 user.setting.page.theme 变化
    * 改变 html class属性
    */
   isDark: boolean
-  /**
-   * 退出登录方法
-   */
-  logout: () => void
 }
 
 export const useGlobalStore: () => Global = defineStore('global', () => {
@@ -100,12 +104,6 @@ export const useGlobalStore: () => Global = defineStore('global', () => {
    * 路由这种优先级很高的东西，同步就尤为重要
    */
   const isLogined = computed(() => !!token.value)
-  // 退出登录，删除 token、pageSetting
-  const logout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('pageSetting')
-    location.href = '/'
-  }
 
   // 主题相关 ===============================
 
@@ -126,9 +124,20 @@ export const useGlobalStore: () => Global = defineStore('global', () => {
     user,
     token,
     isLogined,
-    logout,
     isDark,
   }
 })
 
 export default useGlobalStore
+
+/**
+ * 退出登录方法
+ * 退出登录，删除 token、pageSetting
+ * @param to 跳转的页面， 不传跳主页，传空串刷新当前页，传路径跳指定
+ */
+export const logout = (to: string = '/') => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('pageSetting')
+  if (to !== '') location.href = to
+  location.reload()
+}

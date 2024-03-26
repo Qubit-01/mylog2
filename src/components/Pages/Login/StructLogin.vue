@@ -1,13 +1,8 @@
 <script setup lang="ts">
-import useGlobalStore from '@/stores/global'
+import useGlobalStore, { logout } from '@/stores/global'
 
 const Global = useGlobalStore()
 const router = useRouter()
-
-const logout = () => {
-  Global.logout()
-  router.go(0) // 刷新页面
-}
 </script>
 
 <template>
@@ -31,7 +26,7 @@ const logout = () => {
       <div v-if="Global.isLogined" class="loged">
         <div>检测到您已经登录了，是否要</div>
         <ElButton @click="router.push('/')" type="primary">进入首页</ElButton>
-        <ElButton @click="logout">退出登录</ElButton>
+        <ElButton @click="logout('')">退出登录</ElButton>
       </div>
 
       <template v-else>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import useGlobalStore from '@/stores/global'
+import useGlobalStore, { logout } from '@/stores/global'
 const Global = useGlobalStore()
 const User = Global.user
 </script>
@@ -15,7 +15,7 @@ const User = Global.user
       </div>
       <div>我的主页</div>
       <div>发个 Log</div>
-      <div @click="Global.logout">退出</div>
+      <div @click="logout()">退出</div>
     </template>
     <template v-else>
       <div>
