@@ -38,6 +38,15 @@ export type LogsResp = {
 interface Mylog extends LogsResp {
   listAll: Log[] // 存储全部Log
   /**
+   * 过滤器
+   */
+  filter: LogFilter | undefined
+  /**
+   * 每次调用都会重置params，重新筛选
+   * @param filter 过滤器
+   */
+  setFilter: (filter?: LogFilter) => void
+  /**
    * 通过修改params参数，从listAll中截取，list会自动计算
    */
   addLogs: () => Promise<void>
@@ -101,10 +110,21 @@ export const useLogStore = defineStore('log', () => {
       mylog.listFilter.slice(0, mylog.params.skip + mylog.params.limit)
     ),
     listAll: [],
-    listFilter: computed<Log[]>(() => {
-      return mylog.listAll.filter(log => filteLog(log, mylog.filter))
-    }),
-    filter: null,
+    filter: undefined,
+    listFilter: computed<Log[]>(() =>
+      mylog.listAll.filter(log => {
+        const f = filteLog(log, mylog.filter)
+        console.log(f, log)
+        return f
+      })
+    ), // 由all筛选而来
+    // 每次调用都会重置params，重新筛选
+    setFilter: (filter?: LogFilter) => {
+      mylog.loading = true
+      mylog.params.skip = 0
+      mylog.filter = filter
+      mylog.addLogs()
+    },
     params: { skip: 0, limit: 15 },
     loading: true,
     addLogs: async () => {
@@ -117,7 +137,8 @@ export const useLogStore = defineStore('log', () => {
       const logs = await getLogsAllByToken({})
       logs.forEach(handleLog)
       mylog.listAll = logs
-      mylog.addLogs!() // 加载完成后立即加载几个数据
+      // mylog.setFilter() // 先全部放进listFilter
+      mylog.addLogs() // 加载完成后立即加载几个数据
     },
     getLog: (id: string) => mylog.listAll.find(log => log.id === id),
     addLog(log: Log) {
@@ -182,6 +203,7 @@ export const fileSize: { [K in LogFileItem]: number } = {
  * 2. 时间要处理, 用dayjs转
  */
 export const handleLog = (log: any): void => {
+  log.id = String(log.id)
   log.logtime = dayjs(log.logtime)
   log.sendtime = dayjs(log.sendtime)
 }
@@ -331,77 +353,97 @@ export const delLog = (log: Log): Promise<Log> => {
  * @param filter 过滤器对象
  * @return 为真就是满足，false就是不满足
  */
-export const filteLog = (log: Log, filter: LogFilter): boolean => {
-  // 餐二传入null，直接返回true
-  if (!filter) return true 
+export const filteLog = (log: Log, filter?: LogFilter): boolean => {
+  // 参二传入null，直接返回true
+  if (!filter) return true
 
   // 记录状态
   if (filter.type !== '' && log.type != filter.type) return false
 
   // 时间限制，包含两头
-  if (
-    filter.timeLimit[0] &&
-    dayjs(log.logtime).diff(dayjs(filter.timeLimit[0])) < 0
-  )
+  if (filter.timeLimit[0] && log.logtime.diff(dayjs(filter.timeLimit[0])) < 0)
     return false
   if (
     filter.timeLimit[1] &&
-    dayjs(log.logtime).diff(dayjs(filter.timeLimit[1])) > 86400000
+    log.logtime.diff(dayjs(filter.timeLimit[1])) > 86400000
   )
     return false
 
   // 排除
-  if (filter.exclude.indexOf(log.id!) != -1) return false
-
-  // 判断arr是否含有includeArr, isOr为true则全部都要有
-  let include = (
-    arr: string[] | string,
-    includeArr: string[],
-    isOr: boolean
-  ) => {
-    if (!arr || !arr.length) return false
-
-    for (const value of includeArr) {
-      if (arr.indexOf(value) != -1) {
-        // 有
-        if (isOr) return true // 或
-        else continue // 与
-      } else {
-        // 无
-        if (!isOr) return false // 与
-        else continue // 或
-      }
-    }
-    return !isOr
-  }
+  if (filter.exclude.includes(log.id!)) return false
 
   if (filter.content.include.length) {
-    if (include(log.content, filter.content.include, filter.content.isOr)) {
-      // 有
-      if (filter.isOrAll) return true // 或
-    } else {
-      // 无
-      if (!filter.isOrAll) return false // 与
-    }
-  }
-  if (filter.people.include.length) {
-    if (include(log.people!, filter.people.include, filter.people.isOr)) {
-      // 有
-      if (filter.isOrAll) return true // 或
-    } else {
-      // 无
-      if (!filter.isOrAll) return false // 与
-    }
-  }
-  if (filter.tags.include.length) {
-    if (include(log.tags, filter.tags.include, filter.tags.isOr)) {
-      // 有
-      if (filter.isOrAll) return true // 或
-    } else {
-      // 无
-      if (!filter.isOrAll) return false // 与
-    }
+    const f = filter.content.isOr
+      ? !filter.content.include.some(c => log.content.includes(c))
+      : !filter.content.include.every(c => log.content.includes(c))
+    if (f) return false
   }
 
-  return !filter.isOrAll
+  if (filter.people.include.length) {
+    const f = filter.people.isOr
+      ? !filter.people.include.some(c => log.people!.includes(c))
+      : !filter.people.include.every(c => log.people!.includes(c))
+    if (f) return false
+  }
+
+  if (filter.tags.include.length) {
+    const f = filter.tags.isOr
+      ? !filter.tags.include.some(c => log.tags!.includes(c))
+      : !filter.tags.include.every(c => log.tags!.includes(c))
+    if (f) return false
+  }
+
+  // 判断arr是否含有includeArr, isOr为true则全部都要有
+  // let include = (
+  //   arr: string[] | string,
+  //   includeArr: string[],
+  //   isOr: boolean
+  // ) => {
+  //   if (!arr || !arr.length) return false
+
+  //   for (const value of includeArr) {
+  //     if (arr.indexOf(value) != -1) {
+  //       // 有
+  //       if (isOr) return true // 或
+  //       else continue // 与
+  //     } else {
+  //       // 无
+  //       if (!isOr) return false // 与
+  //       else continue // 或
+  //     }
+  //   }
+  //   return !isOr
+  // }
+
+  // if (filter.content.include.length) {
+  //   if (include(log.content, filter.content.include, filter.content.isOr)) {
+  //     // 有
+  //     if (filter.isOrAll) return true // 或
+  //   } else {
+  //     // 无
+  //     if (!filter.isOrAll) return false // 与
+  //   }
+  // }
+  // if (filter.people.include.length) {
+  //   if (include(log.people!, filter.people.include, filter.people.isOr)) {
+  //     // 有
+  //     if (filter.isOrAll) return true // 或
+  //   } else {
+  //     // 无
+  //     if (!filter.isOrAll) return false // 与
+  //   }
+  // }
+
+  // if (filter.tags.include.length) {
+  //   if (include(log.tags, filter.tags.include, filter.tags.isOr)) {
+  //     // 有
+  //     if (filter.isOrAll) return true // 或
+  //   } else {
+  //     // 无
+  //     if (!filter.isOrAll) return false // 与
+  //   }
+  // }
+
+  // return !filter.isOrAll
+  return true
 }

@@ -54,7 +54,7 @@ const expand = () => {
     </template>
 
     <div class="tags">
-      <!-- <ElTag v-if="log.type != 'log'" size="small" type="warning">公开</ElTag> -->
+      <!-- <ElTag v-if="log.type === 'public'" size="small" type="warning">公开</ElTag> -->
       <ElTag v-for="p in log.people" :key="p" size="small">{{ p }}</ElTag>
       <ElTag v-for="t in log.tags" :key="t" size="small" type="success">
         {{ t }}

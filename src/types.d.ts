@@ -136,6 +136,7 @@ export interface ExifUploadRawFile extends UploadRawFile, ExifImgFile {}
  * 过滤器对象
  */
 interface LogFilter {
+  name?: string
   type: '' | 'log' | 'public'
   /**
    * 时间限制，范围

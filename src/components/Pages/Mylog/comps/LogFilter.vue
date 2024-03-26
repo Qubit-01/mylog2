@@ -1,26 +1,11 @@
 <script setup lang="ts">
+import useLogStore from '@/stores/log'
 import type { Log, LogFilter } from '@/types'
 import dayjs from 'dayjs'
 
+const mylog = useLogStore().mylog
+
 const curFilter = ref(-1) // -1是全部，-2是自定义筛选
-// 这段数据应该从后端获取的
-// 因为用户筛选项应该有先后顺序，所以用数组
-const filters = [
-  {
-    name: '与时间无关的',
-  },
-  {
-    name: '文学',
-  },
-  {
-    name: '健身',
-  },
-]
-
-// const diyFilter = props.screen
-
-
-
 const diyFilter = reactive<LogFilter>({
   type: '',
   timeLimit: [null, null],
@@ -29,6 +14,48 @@ const diyFilter = reactive<LogFilter>({
   people: { include: [], isOr: false },
   tags: { include: [], isOr: false },
   exclude: [], // 不包括，填入noteI
+})
+// 这段数据应该从后端获取的
+// 因为用户筛选项应该有先后顺序，所以用数组
+const filters: LogFilter[] = [
+  {
+    name: '公开',
+    type: 'public',
+    timeLimit: [null, null],
+    isOrAll: true,
+    content: { include: [], isOr: false },
+    people: { include: [], isOr: false },
+    tags: { include: [], isOr: false },
+    exclude: [],
+  },
+  {
+    name: '洗衣服',
+    type: '',
+    timeLimit: [null, null],
+    isOrAll: true,
+    content: { include: ['洗'], isOr: false },
+    people: { include: [], isOr: false },
+    tags: { include: [], isOr: false },
+    exclude: [],
+  },
+  {
+    name: '排除3970',
+    type: '',
+    timeLimit: [null, null],
+    isOrAll: true,
+    content: { include: ['洗'], isOr: false },
+    people: { include: [], isOr: false },
+    tags: { include: [], isOr: false },
+    exclude: ['3970'],
+  },
+]
+
+// const diyFilter = props.screen
+
+watch([curFilter, diyFilter], () => {
+  if (curFilter.value === -1) mylog.setFilter(undefined)
+  else if (curFilter.value === -2) mylog.setFilter(diyFilter)
+  else mylog.setFilter(filters[curFilter.value])
 })
 
 // watch(filter.timeLimit, () => {
@@ -42,8 +69,6 @@ const diyFilter = reactive<LogFilter>({
 //       ElMessage('结束时间必须在开始时间之后哦！')
 //     }
 //   })
-
-
 </script>
 
 <template>
