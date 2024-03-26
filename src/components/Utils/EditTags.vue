@@ -4,7 +4,7 @@
 <script setup lang="ts">
 const tags = defineModel<string[]>({ required: true })
 const { label } = defineProps<{
-  label: string
+  label?: string
 }>()
 
 const inputVisible = ref(false)
