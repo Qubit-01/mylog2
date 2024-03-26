@@ -101,6 +101,10 @@ export const useLogStore = defineStore('log', () => {
       mylog.listAll.slice(0, mylog.params.skip + mylog.params.limit)
     ),
     listAll: [],
+    listFilter: computed<Log[]>(() => {
+      return mylog.listAll
+    }),
+    filter: {},
     params: { skip: 0, limit: 15 },
     loading: true,
     addLogs: async () => {

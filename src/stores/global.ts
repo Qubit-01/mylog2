@@ -85,13 +85,10 @@ export const useGlobalStore: () => Global = defineStore('global', () => {
   })
 
   // 云端获取用户信息
-  getUser
-    .then(res => {
-      deepMerge(user, res)
-    })
-    .catch(() => {
-      token.value = ''
-    })
+  getUser.then(
+    res => deepMerge(user, res),
+    () => (token.value = '')
+  )
 
   // 先去本地存储获取页面设置
   const pageSetting = localStorage.getItem('pageSetting')

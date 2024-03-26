@@ -7,16 +7,14 @@ const mylog = logStore.mylog
 // 拿到编辑的数据
 const logReleaseDom = ref()
 
-getUser
-  .then(user => {
-    mylog.getLogs!() // 进入页面再获取数据
-  })
-  .catch(() => {})
+getUser.then(user => mylog.getLogs!(), null) // 进入页面再获取数据
 </script>
 
 <template>
   <div class="timeline-comp">
     <LogRelease ref="logReleaseDom" />
+
+    <LogFilter />
 
     <ElTimeline
       v-infinite-scroll="mylog.addLogs!"
