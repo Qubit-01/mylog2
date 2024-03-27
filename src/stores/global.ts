@@ -90,17 +90,20 @@ export const useGlobalStore: () => Global = defineStore('global', () => {
   getUser.then(
     res => {
       // 临时删掉东西
-      delete res.setting.note
-      console.log('🐤', res.setting)
-      deepMerge(user, res)
+      const setting = res.setting
+      // @ts-ignore 这里用deepMerge会有意想不到得bug，慎用
+      delete res.setting
+      Object.assign(user, res)
+      Object.assign(user.setting.page, setting.page)
+      Object.assign(user.setting.mylog, setting.mylog)
       // 获取到远端用户setting在注册监视，同步双端
       watch(user.setting, () => {
-        console.log('🐤 setting变化了，发请求')
+        console.log('🐤 setting 变化了，发请求')
         const settingJson = JSON.stringify(user.setting)
         updateSetting({ settingJson }).then(
           count => {
             if (count) {
-              console.log('🐤 设置更改成功')
+              console.log('🐤 setting 设置更改成功')
               localStorage.setItem('setting', settingJson)
             }
           }

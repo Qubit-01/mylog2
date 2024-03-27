@@ -19,45 +19,13 @@ const diyFilter = reactive<LogFilter>({
   tags: { include: [], isOr: false },
   exclude: [], // 不包括，填入noteI
 })
+
 // 这段数据应该从后端获取的
 // 因为用户筛选项应该有先后顺序，所以用数组
 const filters = toRef<LogFilter[]>(Global.user.setting.mylog.filters)
-// [
-//   {
-//     name: '公开',
-//     type: 'public',
-//     timeLimit: [null, null],
-//     isOrAll: true,
-//     content: { include: [], isOr: false },
-//     people: { include: [], isOr: false },
-//     tags: { include: [], isOr: false },
-//     exclude: [],
-//   },
-//   {
-//     name: '洗衣服',
-//     type: '',
-//     timeLimit: [null, null],
-//     isOrAll: true,
-//     content: { include: ['洗'], isOr: false },
-//     people: { include: [], isOr: false },
-//     tags: { include: [], isOr: false },
-//     exclude: [],
-//   },
-//   {
-//     name: '排除3970',
-//     type: '',
-//     timeLimit: [null, null],
-//     isOrAll: true,
-//     content: { include: ['洗'], isOr: false },
-//     people: { include: [], isOr: false },
-//     tags: { include: [], isOr: false },
-//     exclude: ['3970'],
-//   },
-// ]
-
-// const diyFilter = props.screen
 
 watch([curFilter, diyFilter], () => {
+  console.log('curFilter', curFilter.value, filters.value[curFilter.value])
   if (curFilter.value === -1) mylog.setFilter(undefined)
   else if (curFilter.value === -2) mylog.setFilter(diyFilter)
   else mylog.setFilter(filters.value[curFilter.value])
@@ -75,6 +43,9 @@ watch(diyFilter.timeLimit, () => {
   }
 })
 
+/**
+ * 添加自定义筛选
+ */
 const addFilter = () => {
   if (!diyFilter.name) {
     ElMessage('给你的过滤器取个名字哦')
@@ -83,17 +54,30 @@ const addFilter = () => {
   filters.value.push(cloneDeep(diyFilter))
   curFilter.value = filters.value.length - 1
 }
+
+/**
+ * 删除当前预设
+ */
+const delFilter = () => {
+  filters.value.splice(curFilter.value, 1)
+  curFilter.value = -1
+}
 </script>
 
 <template>
   <div class="log-filter">
-    <ElRadioGroup v-model="curFilter" size="small">
-      <!-- size="large" -->
-      <ElRadioButton label="全部" :value="-1" />
-      <ElRadioButton v-for="(f, i) in filters" :label="f.name" :value="i" />
-      <ElRadioButton label="筛选" :value="-2" />
-    </ElRadioGroup>
-    {{ diyFilter }}
+    <div class="control-filter">
+      <ElRadioGroup v-model="curFilter" size="small">
+        <!-- size="large" -->
+        <ElRadioButton label="全部" :value="-1" />
+        <ElRadioButton v-for="(f, i) in filters" :label="f.name" :value="i" />
+        <ElRadioButton label="自定义" :value="-2" />
+      </ElRadioGroup>
+
+      <ElButton v-if="curFilter >= 0" size="small" @click="delFilter">删除此预设</ElButton>
+    </div>
+
+    <!-- {{ diyFilter }} -->
     <div v-if="curFilter === -2" class="diy-filter" v-m>
       <ElRow>
         记录类型：
@@ -178,8 +162,9 @@ const addFilter = () => {
       </ElRow>
       <div class="add-filter">
         <ElInput
+          v-if="curFilter === -2"
           v-model="diyFilter.name"
-          style="max-width: 300px"
+          style="max-width: 200px"
           placeholder="输入名称添加到预设"
           size="small"
         >
@@ -198,16 +183,27 @@ const addFilter = () => {
   flex-direction: column;
   gap: 8px;
 
+  .control-filter {
+    border-radius: var(--border-radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  // 自定义筛选框
   .diy-filter {
     padding: var(--padding);
     border-radius: var(--border-radius);
     display: flex;
     flex-direction: column;
     gap: 8px;
+    position: relative;
 
     .add-filter {
-      display: flex;
-      justify-content: flex-end;
+      position: absolute;
+      top: -20px;
+      right: var(--padding);
     }
   }
 }
