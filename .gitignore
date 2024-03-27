@@ -32,6 +32,7 @@ coverage
 # 自动导入生成的类型声明文件
 src/auto-imports.d.ts
 src/components.d.ts
+.eslintrc-auto-import.json
 
 # 证书
 cert
