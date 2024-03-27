@@ -302,15 +302,13 @@ export const editLog = (
 
   return Promise.all([myDeleteFiles(delObjs), myUploadFiles(params)]).then(
     data => {
-      updateLog({ logJson: JSON.stringify(logEdit) }).then(count => {
+      return updateLog({ logJson: JSON.stringify(logEdit) }).then(count => {
         if (count === 1) {
           ElMessage({ message: '编辑成功', type: 'success' })
           logStore.mylog.editLog(logEdit)
-          return count
         }
+        return count
       })
-      // 上传出错返回 0
-      return 0
     }
   )
 }
