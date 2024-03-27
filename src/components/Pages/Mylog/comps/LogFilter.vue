@@ -22,7 +22,7 @@ const diyFilter = reactive<LogFilter>({
 
 // 这段数据应该从后端获取的
 // 因为用户筛选项应该有先后顺序，所以用数组
-const filters = toRef<LogFilter[]>(Global.user.setting.mylog.filters)
+const filters = toRef(Global.user.setting.mylog, 'filters')
 
 watch([curFilter, diyFilter], () => {
   console.log('curFilter', curFilter.value, filters.value[curFilter.value])
@@ -74,7 +74,9 @@ const delFilter = () => {
         <ElRadioButton label="自定义" :value="-2" />
       </ElRadioGroup>
 
-      <ElButton v-if="curFilter >= 0" size="small" @click="delFilter">删除此预设</ElButton>
+      <ElButton v-if="curFilter >= 0" size="small" @click="delFilter"
+        >删除此预设</ElButton
+      >
     </div>
 
     <!-- {{ diyFilter }} -->
