@@ -18,21 +18,29 @@ export interface User {
     stuClass?: string // 班级
   }
   setting: {
-    isOK?: boolean // 不知道干嘛的
-    note?: {
-      // log设置集
-      tags: string[] // 不知道干嘛的
-      noteTags: string[] // 待选tag
-      noteView: string // 默认视图
-      calendarTags: string[] // 日历上的待选按钮
-      diyLocations: [] // 不知道干嘛的
-    }
     page: {
       // 页面设置
-      theme?: string // 主题 light | dark
+      theme: string // 主题 light | dark
       backgroundImage?: string // 选中的背景图片
       diyBackgroundImage?: string // 自己添加的背景图片
-      source?: string // 爬虫数据的来源
+    }
+    mylog: {
+      /**
+       * 用户发布时待选tags
+       */
+      tags: string[]
+      /**
+       * 用户过滤器列表
+       */
+      filters: LogFilter[]
+      /**
+       * 默认筛选器的索引
+       */
+      filterIndex: number
+      /**
+       * 日历上的待选按钮
+       */
+      calendarTags?: string[]
     }
   }
   createtime?: Date
@@ -64,6 +72,7 @@ export interface Log {
     link?: string // 爬虫数据的原始链接
     markdown?: boolean // 是否是MD类型
     level?: number // 待办优先级（这个功能待定）
+    source?: string // 爬虫数据的来源
   }
 }
 

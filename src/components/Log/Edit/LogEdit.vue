@@ -7,10 +7,8 @@ import type {
   LogItem,
   LogEdit,
 } from '@/types'
-import type COS from 'cos-js-sdk-v5'
 import { editLog } from '@/stores/log'
-import { Bucket, Region } from '@/stores/constant'
-import { cosPath, getCosFiles } from '@/utils/cos'
+import { getCosFiles } from '@/utils/cos'
 import { cloneDeep } from 'lodash'
 
 const emit = defineEmits(['onSuccess'])

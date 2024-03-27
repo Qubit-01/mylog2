@@ -4,6 +4,7 @@ import { Bucket, Region, BucketCDN } from '@/stores/constant'
 import useGlobalStore from '@/stores/global'
 import dayjs from 'dayjs'
 import type { LogFiles } from '@/types'
+import { downloadFile, getBlob } from '.'
 
 const Global = useGlobalStore()
 
@@ -240,9 +241,13 @@ export const myDeleteFiles = (
  * （推荐使用 window.open()方式）这里是新窗口打开 url，如果需要在当前窗口打开，可以使用隐藏的 iframe 下载，或使用 a 标签 download 属性协助下载
  * 未来要做个还原文件名的功能，但是现在COS里面文件名不统一
  * @param Key 文件在cos中的key
+ * @param download 是否触发下载
  * @returns
  */
-export const myGetObjectUrl = (Key: string): Promise<string> => {
+export const myGetObjectUrl = (
+  Key: string,
+  download: boolean = true
+): Promise<string> => {
   return new Promise((resolve, reject) => {
     cos.getObjectUrl(
       {
@@ -253,29 +258,22 @@ export const myGetObjectUrl = (Key: string): Promise<string> => {
         Expires: 600, // 单位秒
       },
       (err, data) => {
-        // 补充强制下载的参数
-        let downloadUrl =
-          data.Url +
-          (data.Url.indexOf('?') > -1 ? '&' : '?') +
-          'response-content-disposition=attachment'
-        // 可拼接 filename 来实现下载时重命名myname就是文件名
-        // downloadUrl += ';filename=myname'
         if (err) return reject(err)
-        else resolve(downloadUrl) // data.Url
+        else {
+          // 补充强制下载的参数
+          let url =
+            data.Url +
+            (data.Url.indexOf('?') > -1 ? '&' : '?') +
+            'response-content-disposition=attachment'
+          // 可拼接 filename 来实现下载时重命名myname就是文件名
+          const filename = Key.substring(
+            Key.indexOf('-', Key.lastIndexOf('/')) + 1
+          )
+          // downloadUrl += `;filename=${filename}` // url会进行中文转码，不适用
+          if (download) downloadFile(url, filename)
+          resolve(url)
+        }
       }
     )
   })
 }
-// https://
-// bit-1310383539.cos.ap-chengdu.myqcloud.com/
-// users/1/mylog/files/
-// 240323-213002-1-%E5%BB%96%E4%B8%96%E5%BC%BA_%E5%9B%9B%E5%B7%9D%E5%86%9C%E4%B8%9A%E5%A4%A7%E5%AD%A6_%E6%9C%AC%E7%A7%91_%E5%BA%94%E5%B1%8A%E7%94%9F_18030681789.pdf
-// ?q-sign-algorithm=sha1
-// &q-ak=AKID3mqu0EiVIJ6HQrtpibz0r4efJSoRIkP_DkdJujh1TyA_yDesTGLtfHWs2vSzQV4o
-// &q-sign-time=1711209648;1711211448
-// &q-key-time=1711209648;1711211448
-// &q-header-list=host
-// &q-url-param-list=
-// &q-signature=088468644b77491d663569065cf3c6bd78c83772
-// &x-cos-security-token=757aNnZYgD4so9UFfnejX4NRW9a1sDWa66d5ffb393e882eba13e8db1476c0f47SLD_cu1GosCrZu6jeiuMMZAFQPD7zsr7kgjyB2R_oO1kCTp4W8lGQUHPVcnT8hfYO1gjUz_14uDU6-gTfvTDi5GfQz2wC49Q7fmDGBaWOpThjQizyykDTxgDBoSQZ6wWzkyaY571hpUv9k78hRARJli3c7oMPl8FFLpYn3XpkLe_AjwFmMPg7gFhCCkEkyp1rvf9Me7yGD1WhXe-N-8bssdWD5nUiaSHu2hp9-W_3B2fpgfN4sB_h_zGewq3_L3BmaIIFdKf-WfVMfwitzKUWbT6bkvYhe6dUdDyAUvl76o
-// &response-content-disposition=attachment

@@ -1,4 +1,4 @@
-import { getUserByToken } from '@/api/user'
+import { getUserByToken, updateSetting } from '@/api/user'
 import type { User } from '@/types'
 import { deepMerge } from '@/utils'
 
@@ -67,6 +67,12 @@ export const useGlobalStore: () => Global = defineStore('global', () => {
       page: {
         theme: localStorage.getItem('theme') || 'light',
       },
+      mylog: {
+        tags: [],
+        filters: [],
+        filterIndex: -1,
+        calendarTags: [],
+      },
     },
   })
 
@@ -75,18 +81,32 @@ export const useGlobalStore: () => Global = defineStore('global', () => {
    * 通过设置 token 的 get 和 set 方法，实现 token 的存储和删除
    */
   const token = computed({
-    get() {
-      return localStorage.getItem('token') || ''
-    },
-    set(v) {
-      if (v) localStorage.setItem('token', v)
-      else localStorage.removeItem('token')
-    },
+    get: () => localStorage.getItem('token') || '',
+    set: v =>
+      v ? localStorage.setItem('token', v) : localStorage.removeItem('token'),
   })
 
   // 云端获取用户信息
   getUser.then(
-    res => deepMerge(user, res),
+    res => {
+      // 临时删掉东西
+      delete res.setting.note
+      console.log('🐤', res.setting)
+      deepMerge(user, res)
+      // 获取到远端用户setting在注册监视，同步双端
+      watch(user.setting, () => {
+        console.log('🐤 setting变化了，发请求')
+        const settingJson = JSON.stringify(user.setting)
+        updateSetting({ settingJson }).then(
+          count => {
+            if (count) {
+              console.log('🐤 设置更改成功')
+              localStorage.setItem('setting', settingJson)
+            }
+          }
+        )
+      })
+    },
     () => (token.value = '')
   )
 

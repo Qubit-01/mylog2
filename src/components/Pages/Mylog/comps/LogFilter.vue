@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import useLogStore from '@/stores/log'
 import type { Log, LogFilter } from '@/types'
+import useGlobalStore from '@/stores/global'
+import useLogStore from '@/stores/log'
+import { cloneDeep } from 'lodash'
 import dayjs from 'dayjs'
 
 const mylog = useLogStore().mylog
+const Global = useGlobalStore()
 
 const curFilter = ref(-1) // -1是全部，-2是自定义筛选
 const diyFilter = reactive<LogFilter>({
+  name: '',
   type: '',
   timeLimit: [null, null],
   isOrAll: true,
@@ -17,58 +21,68 @@ const diyFilter = reactive<LogFilter>({
 })
 // 这段数据应该从后端获取的
 // 因为用户筛选项应该有先后顺序，所以用数组
-const filters: LogFilter[] = [
-  {
-    name: '公开',
-    type: 'public',
-    timeLimit: [null, null],
-    isOrAll: true,
-    content: { include: [], isOr: false },
-    people: { include: [], isOr: false },
-    tags: { include: [], isOr: false },
-    exclude: [],
-  },
-  {
-    name: '洗衣服',
-    type: '',
-    timeLimit: [null, null],
-    isOrAll: true,
-    content: { include: ['洗'], isOr: false },
-    people: { include: [], isOr: false },
-    tags: { include: [], isOr: false },
-    exclude: [],
-  },
-  {
-    name: '排除3970',
-    type: '',
-    timeLimit: [null, null],
-    isOrAll: true,
-    content: { include: ['洗'], isOr: false },
-    people: { include: [], isOr: false },
-    tags: { include: [], isOr: false },
-    exclude: ['3970'],
-  },
-]
+const filters = toRef<LogFilter[]>(Global.user.setting.mylog.filters)
+// [
+//   {
+//     name: '公开',
+//     type: 'public',
+//     timeLimit: [null, null],
+//     isOrAll: true,
+//     content: { include: [], isOr: false },
+//     people: { include: [], isOr: false },
+//     tags: { include: [], isOr: false },
+//     exclude: [],
+//   },
+//   {
+//     name: '洗衣服',
+//     type: '',
+//     timeLimit: [null, null],
+//     isOrAll: true,
+//     content: { include: ['洗'], isOr: false },
+//     people: { include: [], isOr: false },
+//     tags: { include: [], isOr: false },
+//     exclude: [],
+//   },
+//   {
+//     name: '排除3970',
+//     type: '',
+//     timeLimit: [null, null],
+//     isOrAll: true,
+//     content: { include: ['洗'], isOr: false },
+//     people: { include: [], isOr: false },
+//     tags: { include: [], isOr: false },
+//     exclude: ['3970'],
+//   },
+// ]
 
 // const diyFilter = props.screen
 
 watch([curFilter, diyFilter], () => {
   if (curFilter.value === -1) mylog.setFilter(undefined)
   else if (curFilter.value === -2) mylog.setFilter(diyFilter)
-  else mylog.setFilter(filters[curFilter.value])
+  else mylog.setFilter(filters.value[curFilter.value])
 })
 
-// watch(filter.timeLimit, () => {
-//     // 判断时间先后
-//     if (
-//       filter.timeLimit[0] &&
-//       filter.timeLimit[1] &&
-//       dayjs(filter.timeLimit[0]).diff(dayjs(filter.timeLimit[1])) > 0
-//     ) {
-//       delete filter.timeLimit[1]
-//       ElMessage('结束时间必须在开始时间之后哦！')
-//     }
-//   })
+watch(diyFilter.timeLimit, () => {
+  // 判断时间先后
+  if (
+    diyFilter.timeLimit[0] &&
+    diyFilter.timeLimit[1] &&
+    dayjs(diyFilter.timeLimit[0]).diff(dayjs(diyFilter.timeLimit[1])) > 0
+  ) {
+    delete diyFilter.timeLimit[1]
+    ElMessage('结束时间必须在开始时间之后哦！')
+  }
+})
+
+const addFilter = () => {
+  if (!diyFilter.name) {
+    ElMessage('给你的过滤器取个名字哦')
+    return
+  }
+  filters.value.push(cloneDeep(diyFilter))
+  curFilter.value = filters.value.length - 1
+}
 </script>
 
 <template>
@@ -162,6 +176,18 @@ watch([curFilter, diyFilter], () => {
           {{ tag }}</ElTag
         >
       </ElRow>
+      <div class="add-filter">
+        <ElInput
+          v-model="diyFilter.name"
+          style="max-width: 300px"
+          placeholder="输入名称添加到预设"
+          size="small"
+        >
+          <template #append>
+            <ElButton @click="addFilter">添加</ElButton>
+          </template>
+        </ElInput>
+      </div>
     </div>
   </div>
 </template>
@@ -178,6 +204,11 @@ watch([curFilter, diyFilter], () => {
     display: flex;
     flex-direction: column;
     gap: 8px;
+
+    .add-filter {
+      display: flex;
+      justify-content: flex-end;
+    }
   }
 }
 </style>

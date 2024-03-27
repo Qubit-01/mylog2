@@ -2,7 +2,7 @@ import type { Log } from '@/types'
 import request from '@/utils/request'
 import useGlobalStore from '@/stores/global'
 
-const global = useGlobalStore()
+const Global = useGlobalStore()
 
 /**
  * 获取首页log列表
@@ -48,7 +48,7 @@ export const getLogsAllByToken = (data: {
   return request({
     url: 'log/get_logs_all_by_token',
     method: 'post',
-    data: { token: global.token, ...data },
+    data: { token: Global.token, ...data },
   })
 }
 
@@ -76,7 +76,7 @@ export const releaseLog = (data: {
   return request({
     url: 'log/release_log',
     method: 'post',
-    data: { token: global.token, ...data },
+    data: { token: Global.token, ...data },
   })
 }
 
@@ -92,7 +92,7 @@ export const updateLog = (data: {
   return request({
     url: 'log/update_log',
     method: 'post',
-    data: { token: global.token, ...data },
+    data: { token: Global.token, ...data },
   })
 }
 
@@ -108,6 +108,6 @@ export const deleteLog = (data: {
   return request({
     url: 'log/delete_log',
     method: 'post',
-    data: { token: global.token, ...data },
+    data: { token: Global.token, ...data },
   })
 }

@@ -114,7 +114,7 @@ export const useLogStore = defineStore('log', () => {
     listFilter: computed<Log[]>(() =>
       mylog.listAll.filter(log => {
         const f = filteLog(log, mylog.filter)
-        console.log(f, log)
+        // console.log(f, log)
         return f
       })
     ), // 由all筛选而来
@@ -372,78 +372,42 @@ export const filteLog = (log: Log, filter?: LogFilter): boolean => {
   // 排除
   if (filter.exclude.includes(log.id!)) return false
 
+  const includes = (filter: string[], logV: string[], isOr: boolean) => {
+    
+  }
+
   if (filter.content.include.length) {
     const f = filter.content.isOr
-      ? !filter.content.include.some(c => log.content.includes(c))
-      : !filter.content.include.every(c => log.content.includes(c))
-    if (f) return false
+      ? filter.content.include.some(c => log.content.includes(c))
+      : filter.content.include.every(c => log.content.includes(c))
+    if (f) {
+      if (filter.isOrAll) return true
+    } else {
+      return false
+    }
   }
 
   if (filter.people.include.length) {
     const f = filter.people.isOr
-      ? !filter.people.include.some(c => log.people!.includes(c))
-      : !filter.people.include.every(c => log.people!.includes(c))
-    if (f) return false
+      ? filter.people.include.some(c => log.people!.includes(c))
+      : filter.people.include.every(c => log.people!.includes(c))
+    if (f) {
+      if (filter.isOrAll) return true
+    } else {
+      return false
+    }
   }
 
   if (filter.tags.include.length) {
     const f = filter.tags.isOr
-      ? !filter.tags.include.some(c => log.tags!.includes(c))
-      : !filter.tags.include.every(c => log.tags!.includes(c))
-    if (f) return false
+      ? filter.tags.include.some(c => log.tags!.includes(c))
+      : filter.tags.include.every(c => log.tags!.includes(c))
+    if (f) {
+      if (filter.isOrAll) return true
+    } else {
+      return false
+    }
   }
 
-  // 判断arr是否含有includeArr, isOr为true则全部都要有
-  // let include = (
-  //   arr: string[] | string,
-  //   includeArr: string[],
-  //   isOr: boolean
-  // ) => {
-  //   if (!arr || !arr.length) return false
-
-  //   for (const value of includeArr) {
-  //     if (arr.indexOf(value) != -1) {
-  //       // 有
-  //       if (isOr) return true // 或
-  //       else continue // 与
-  //     } else {
-  //       // 无
-  //       if (!isOr) return false // 与
-  //       else continue // 或
-  //     }
-  //   }
-  //   return !isOr
-  // }
-
-  // if (filter.content.include.length) {
-  //   if (include(log.content, filter.content.include, filter.content.isOr)) {
-  //     // 有
-  //     if (filter.isOrAll) return true // 或
-  //   } else {
-  //     // 无
-  //     if (!filter.isOrAll) return false // 与
-  //   }
-  // }
-  // if (filter.people.include.length) {
-  //   if (include(log.people!, filter.people.include, filter.people.isOr)) {
-  //     // 有
-  //     if (filter.isOrAll) return true // 或
-  //   } else {
-  //     // 无
-  //     if (!filter.isOrAll) return false // 与
-  //   }
-  // }
-
-  // if (filter.tags.include.length) {
-  //   if (include(log.tags, filter.tags.include, filter.tags.isOr)) {
-  //     // 有
-  //     if (filter.isOrAll) return true // 或
-  //   } else {
-  //     // 无
-  //     if (!filter.isOrAll) return false // 与
-  //   }
-  // }
-
-  // return !filter.isOrAll
   return true
 }
