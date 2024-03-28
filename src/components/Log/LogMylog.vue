@@ -2,7 +2,7 @@
   MyLog和普通log有很多不同，但很多功能也要同步加入
  -->
 <script setup lang="ts">
-import type { Log, LogEdit } from '@/types'
+import type { Log } from '@/types'
 import { delLog, editLog } from '@/stores/log'
 import { Delete, Edit, Share, Promotion } from '@element-plus/icons-vue'
 
@@ -20,20 +20,17 @@ const isEdit = ref(false)
 
 // 点击公开按钮
 const toggleType = (log: Log) => {
-  editLog(
-    {
-      id: log.id!,
-      type: log.type === 'public' ? 'log' : 'public',
-    },
-    { files: [] }
-  ).then(count => {
+  editLog({
+    id: log.id!,
+    type: log.type === 'public' ? 'log' : 'public',
+  }).then(count => {
     console.log('修改了', count, '条记录')
   })
 }
 </script>
 
 <template>
-  <div class="log" v-m @click="expand">
+  <div class="log" v-m @click="expand" :id="'log' + log.id">
     <!-- 标题 -->
     <div
       class="title"

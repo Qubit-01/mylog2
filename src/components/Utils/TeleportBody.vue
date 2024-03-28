@@ -1,3 +1,7 @@
+<!-- 
+  自己用v-if或v-show控制显示
+  close事件是点击背景遮罩的事件
+ -->
 <script setup lang="ts">
 const emit = defineEmits(['close'])
 </script>

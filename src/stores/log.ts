@@ -268,14 +268,15 @@ export const rlsLog = (
  * 编辑Log，先看文件，再编辑log
  * log只传入要修改的项（只有文件需要对比，要区分哪些文件需要删除和上传）
  * @param log 编辑的Log对象，这个里面的属性是log要最终成为的样子，不分添加或覆盖，id必传
- * @param params 文件上传参数，{files[]文件对象列表，SliceSize? 触发分块的大小，onProgress? 进度条方法}
+ * @param params 可以不传，文件上传参数，{files[]文件列表，SliceSize? 触发分块的大小，onProgress? 进度条方法}
  * @returns 受影响log的条数
  */
 export const editLog = (
   logEdit: LogEdit & { id: string },
-  params: COS.UploadFilesParams
+  params: COS.UploadFilesParams = { files: []}
 ): Promise<number> => {
   const logOld = logStore.mylog.getLog(logEdit.id)!
+
   // 记录一下要上传的文件的Key，后面要去除
   const uploadImgs = params.files.map(i => i.Key)
 
@@ -370,9 +371,7 @@ export const filteLog = (log: Log, filter?: LogFilter): boolean => {
   // 排除
   if (filter.exclude.includes(log.id!)) return false
 
-  const includes = (filter: string[], logV: string[], isOr: boolean) => {
-    
-  }
+  const includes = (filter: string[], logV: string[], isOr: boolean) => {}
 
   if (filter.content.include.length) {
     const f = filter.content.isOr
