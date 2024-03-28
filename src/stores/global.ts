@@ -1,6 +1,6 @@
-import { getUserByToken, updateSetting } from '@/api/user'
+import { getUserByToken } from '@/api/user'
 import type { User } from '@/types'
-import { deepMerge } from '@/utils'
+import useUserStore from './user'
 
 /**
  * # 获取用户接口全局只调用一次，所以用Promise
@@ -41,15 +41,7 @@ export const getUser: Promise<User> = new Promise((resolve, reject) => {
  * Global 全局数据的类型
  */
 interface Global {
-  /**
-   * 信息（不含token）就是User数据，里面没有方法
-   */
-  user: User
   token: string
-  /**
-   * 是否已登录（计算属性）
-   */
-  isLogined: boolean
   /**
    * # 是否是暗黑模式（计算属性）
    * 监视 user.setting.page.theme 变化
@@ -59,23 +51,7 @@ interface Global {
 }
 
 export const useGlobalStore: () => Global = defineStore('global', () => {
-  // 当前默认用户数据
-  const user = reactive<User>({
-    id: '0',
-    name: '',
-    setting: {
-      page: {
-        theme: localStorage.getItem('theme') || 'light',
-      },
-      mylog: {
-        tags: [],
-        filters: [],
-        filterIndex: -1,
-        calendarTags: [],
-      },
-    },
-  })
-
+  const user = useUserStore()
   // const token = ref(localStorage.getItem('token') || '')
   /**
    * 通过设置 token 的 get 和 set 方法，实现 token 的存储和删除
@@ -85,45 +61,6 @@ export const useGlobalStore: () => Global = defineStore('global', () => {
     set: v =>
       v ? localStorage.setItem('token', v) : localStorage.removeItem('token'),
   })
-
-  // 云端获取用户信息
-  getUser.then(
-    res => {
-      // 临时删掉东西
-      const setting = res.setting
-      // @ts-ignore 这里用deepMerge会有意想不到得bug，慎用
-      delete res.setting
-      Object.assign(user, res)
-      Object.assign(user.setting.page, setting.page)
-      Object.assign(user.setting.mylog, setting.mylog)
-      // 获取到远端用户setting在注册监视，同步双端
-      watch(user.setting, () => {
-        console.log('🐤 setting 变化了，发请求')
-        const settingJson = JSON.stringify(user.setting)
-        updateSetting({ settingJson }).then(
-          count => {
-            if (count) {
-              console.log('🐤 setting 设置更改成功')
-              localStorage.setItem('setting', settingJson)
-            }
-          }
-        )
-      })
-    },
-    () => (token.value = '')
-  )
-
-  // 先去本地存储获取页面设置
-  const pageSetting = localStorage.getItem('pageSetting')
-  if (pageSetting) deepMerge(user.setting!, JSON.parse(pageSetting))
-
-  // 用户相关 ===============================
-  /**
-   * 是否已登录，判断。
-   * 本来也是用id是否等于0判断的，但是后来感觉不对，要用token是否有，才是同步的
-   * 路由这种优先级很高的东西，同步就尤为重要
-   */
-  const isLogined = computed(() => !!token.value)
 
   // 主题相关 ===============================
 
@@ -141,23 +78,9 @@ export const useGlobalStore: () => Global = defineStore('global', () => {
   })
 
   return {
-    user,
     token,
-    isLogined,
     isDark,
   }
 })
 
 export default useGlobalStore
-
-/**
- * 退出登录方法
- * 退出登录，删除 token、pageSetting
- * @param to 跳转的页面， 不传跳主页，传空串刷新当前页，传路径跳指定
- */
-export const logout = (to: string = '/') => {
-  localStorage.removeItem('token')
-  localStorage.removeItem('pageSetting')
-  if (to !== '') location.href = to
-  location.reload()
-}

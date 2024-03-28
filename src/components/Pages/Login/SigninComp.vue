@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { signin } from '@/api/user'
-import useGlobalStore from '@/stores/global'
 import { baseURL } from '@/stores/constant'
 
-const Global = useGlobalStore()
-const User = Global.user
 const router = useRouter()
 
 const captchaDom = ref<HTMLImageElement | null>(null)

@@ -1,4 +1,10 @@
-// 深层次合并对象
+/**
+ * 深层次合并对象
+ * @param target
+ * @param source
+ * @returns
+ * @deprecated
+ */
 export function deepMerge(
   target: { [attrName: string]: any },
   source: { [attrName: string]: any }
@@ -12,6 +18,28 @@ export function deepMerge(
     }
   }
   return target
+}
+
+/**
+ * 使用递归的方式实现数组、对象的深拷贝
+ * @param obj 拷贝的对象
+ * @returns 深拷贝后的对象
+ */
+export function clone<T>(obj: T): T {
+  const objClone: any = Array.isArray(obj) ? [] : {}
+
+  if (obj && typeof obj === 'object') {
+    for (const k in obj) {
+      if (obj.hasOwnProperty(k)) {
+        //判断ojb子元素是否为对象，如果是，递归复制
+        if (obj[k] && typeof obj[k] === 'object') objClone[k] = clone(obj[k])
+        //如果不是，简单复制
+        else objClone[k] = obj[k]
+      }
+    }
+  }
+
+  return objClone
 }
 
 // 获取链接后的参数(不带#号)

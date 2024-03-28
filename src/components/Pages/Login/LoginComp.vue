@@ -2,11 +2,8 @@
 import type { User } from '@/types'
 import { loginPswd } from '@/api/user'
 import useGlobalStore from '@/stores/global'
-import { deepMerge } from '@/utils'
 
 const Global = useGlobalStore()
-const User = Global.user
-const router = useRouter()
 const route = useRoute()
 
 const login = reactive({

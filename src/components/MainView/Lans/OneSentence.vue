@@ -13,7 +13,7 @@ onMounted(getHitoketo)
 <template>
   <div class="one-sentence" @click="getHitoketo()" v-m>
     <div class="title">一言</div>
-    <div class="lanitems">{{ hitokoto }}</div>
+    <div class="items">{{ hitokoto }}</div>
   </div>
 </template>
 

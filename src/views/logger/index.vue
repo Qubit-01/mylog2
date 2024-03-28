@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import useGlobalStore from '@/stores/global'
+import useUserStore from '@/stores/user'
 
-const User = useGlobalStore().user
+const User = useUserStore()
 </script>
 
 <template>
@@ -22,10 +22,9 @@ const User = useGlobalStore().user
     .img {
       height: 50px;
       width: 50px;
-      img{
+      img {
         width: 100%;
       }
-      
     }
   }
 }

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { Log, LogFilter } from '@/types'
-import useGlobalStore from '@/stores/global'
+import type { LogFilter } from '@/types'
+import useUserStore from '@/stores/user'
 import useLogStore from '@/stores/log'
-import { cloneDeep } from 'lodash'
+import { clone } from '@/utils'
 import dayjs from 'dayjs'
 
 const mylog = useLogStore().mylog
-const Global = useGlobalStore()
+const User = useUserStore()
 
 const curFilter = ref(-1) // -1是全部，-2是自定义筛选
 const diyFilter = reactive<LogFilter>({
@@ -22,7 +22,7 @@ const diyFilter = reactive<LogFilter>({
 
 // 这段数据应该从后端获取的
 // 因为用户筛选项应该有先后顺序，所以用数组
-const filters = toRef(Global.user.setting.mylog, 'filters')
+const filters = toRef(User.setting.mylog, 'filters')
 
 watch([curFilter, diyFilter], () => {
   console.log('curFilter', curFilter.value, filters.value[curFilter.value])
@@ -51,7 +51,7 @@ const addFilter = () => {
     ElMessage('给你的过滤器取个名字哦')
     return
   }
-  filters.value.push(cloneDeep(diyFilter))
+  filters.value.push(clone(diyFilter))
   curFilter.value = filters.value.length - 1
 }
 

@@ -1,20 +1,18 @@
 <script setup lang="ts">
-import useGlobalStore, { logout } from '@/stores/global'
+import useUserStore, { logout } from '@/stores/user'
 
-const Global = useGlobalStore()
+const User = useUserStore()
 const router = useRouter()
 </script>
 
 <template>
   <div class="login-comp" v-m>
-
     <div class="banner">
       <div class="text">
         <div>欢迎来到</div>
         <div class="title">多元记</div>
-        <div> </div>
+        <div></div>
         <div>把你写成书 ~</div>
-
       </div>
       <div class="theme-switch">
         <ThemeSwitch />
@@ -22,8 +20,7 @@ const router = useRouter()
     </div>
 
     <div class="main">
-
-      <div v-if="Global.isLogined" class="loged">
+      <div v-if="User.isLogined" class="loged">
         <div>检测到您已经登录了，是否要</div>
         <ElButton @click="router.push('/')" type="primary">进入首页</ElButton>
         <ElButton @click="logout('')">退出登录</ElButton>
@@ -32,9 +29,7 @@ const router = useRouter()
       <template v-else>
         <slot>加载中...</slot>
       </template>
-
     </div>
-
   </div>
 </template>
 
@@ -92,14 +87,13 @@ const router = useRouter()
     .loged {
       margin-bottom: 20px;
 
-      >div:nth-child(1) {
+      > div:nth-child(1) {
         margin-bottom: 24px;
       }
     }
   }
 
   @media (max-width: 1024px) {
-
     & {
       width: inherit;
     }

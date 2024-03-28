@@ -1,22 +1,27 @@
 <script setup lang="ts">
+import useGlobalStore from '@/stores/global'
+
+const Global = useGlobalStore()
 const showBeg = ref(false)
 </script>
-
 <template>
   <!-- 公告栏 -->
   <div class="note-lan" v-m>
     <div class="title">公告</div>
-    <div class="lanitems">
-      <div>
-        <a href='https://gitee.com/bit-01/mylog2'><img src='https://gitee.com/bit-01/mylog2/badge/star.svg?theme=dark' alt='star'></img></a>
-      </div>
+    <div class="items">
+      <div @click="showBeg = true">联系&资助</div>
+      <a href="https://gitee.com/bit-01/mylog2">
+        <img
+          :src="`https://gitee.com/bit-01/mylog2/badge/star.svg?theme=${
+            Global.isDark ? 'dark' : 'white'
+          }`"
+          alt="star"
+        />
+      </a>
       <!-- <div><span @click="router.push('/about')">关于本站</span></div> -->
       <!-- <div>
         <span @click="router.push('/user?name=Sybit')">更新公告</span>
       </div> -->
-      <div>
-        <span @click="showBeg = true">联系&资助</span>
-      </div>
     </div>
   </div>
 
@@ -29,16 +34,28 @@ const showBeg = ref(false)
 
 <style scoped lang="less">
 .note-lan {
+  border-radius: var(--border-radius);
+  padding: var(--border-radius);
+
   display: flex;
   flex-direction: column;
   align-items: center;
-  border-radius: var(--border-radius);
-  padding: var(--border-radius);
-  font-size: 14px;
-  
+  gap: 8px;
+
   .title {
     font-weight: bolder;
-    margin-bottom: 8px;
+  }
+
+  .items {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .beg-window {
+    overflow: hidden;
+    border-radius: var(--border-radius);
   }
 }
 </style>

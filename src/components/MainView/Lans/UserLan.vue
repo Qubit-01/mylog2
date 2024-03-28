@@ -1,30 +1,25 @@
 <script setup lang="ts">
-import useGlobalStore, { logout } from '@/stores/global'
-const Global = useGlobalStore()
-const User = Global.user
+import useUserStore, { logout } from '@/stores/user'
+const User = useUserStore()
 </script>
 <!-- 可以加点数量统计 -->
 <template>
   <div class="user-lan" v-m>
-    <template v-if="Global.isLogined">
+    <template v-if="User.isLogined">
       <div class="img">
         <img :src="User.img" alt="用户头像" />
       </div>
-      <div class="name">
+      <div class="title">
         {{ User.name }}
       </div>
-      <div>我的主页</div>
-      <div>发个 Log</div>
-      <div @click="logout()">退出</div>
+      <div class="items">
+        <div>发个Log</div>
+        <div @click="logout()">退出</div>
+      </div>
     </template>
     <template v-else>
-      <div>
-        {{ User.name }}
-      </div>
-      <div>
+      <div class="items">
         <router-link to="/login">登录</router-link>
-      </div>
-      <div>
         <router-link to="/register">注册</router-link>
       </div>
     </template>
@@ -53,8 +48,15 @@ const User = Global.user
     }
   }
 
-  .name {
+  .title {
     font-size: 1.5rem;
+  }
+
+  .items {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
   }
 }
 </style>

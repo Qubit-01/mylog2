@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { BucketCDN } from '@/stores/constant'
-import useGlobalStore from '@/stores/global'
-const Global = useGlobalStore()
-const User = Global.user
+import useUserStore from '@/stores/user'
+const User = useUserStore()
 const router = useRouter()
 </script>
 
@@ -26,7 +25,7 @@ const router = useRouter()
           <RouterLink to="/relation" v-overflowEllipsis>人脉</RouterLink>
         </nav>
         <div class="right">
-          <div v-if="Global.isLogined" class="user">{{ User.name }}</div>
+          <div v-if="User.isLogined" class="user">{{ User.name }}</div>
           <RouterLink v-else to="/login">去登录</RouterLink>
           <ThemeSwitch />
         </div>

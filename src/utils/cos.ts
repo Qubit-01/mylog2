@@ -2,11 +2,13 @@ import COS from 'cos-js-sdk-v5'
 import request from '@/utils/request'
 import { Bucket, Region, BucketCDN } from '@/stores/constant'
 import useGlobalStore from '@/stores/global'
+import useUserStore from '@/stores/user'
 import dayjs from 'dayjs'
 import type { LogFiles } from '@/types'
-import { downloadFile, getBlob } from '.'
+import { downloadFile } from '.'
 
 const Global = useGlobalStore()
+const User = useUserStore()
 
 /**
  * 获取临时密钥接口 API
@@ -118,7 +120,7 @@ export const getCosFiles = (files: LogFiles): COS.UploadFileItemParams[] => {
  * @returns 返回链接字符串
  */
 export const cosPath = (userid: string | undefined = undefined) =>
-  `users/${userid || Global.user.id}/mylog/`
+  `users/${userid || User.id}/mylog/`
 
 /**
  * 处理文件地址
@@ -137,10 +139,9 @@ export const toFileUrl = <T extends string | string[]>(
     return file.map(f => toFileUrl(f, prefix, userid)) as T
   } else {
     // 处理单个字符串的逻辑
-    if (file.indexOf('http') !== 0)
-      file = `${BucketCDN}${cosPath(userid)}${prefix}${file}` as T
-    else file.replace('http://', 'https://')
-    return file
+    return file.indexOf('http') !== 0
+      ? (`${BucketCDN}${cosPath(userid)}${prefix}${file}` as T)
+      : (file.replace('http://', 'https://') as T)
   }
 }
 

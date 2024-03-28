@@ -10,8 +10,10 @@ import {
   updateLog,
 } from '@/api/log'
 import useGlobalStore from './global'
+import useUserStore from './user'
 
 const Global = useGlobalStore()
+const User = useUserStore()
 
 // 请求响应
 export type LogsResp = {
@@ -244,8 +246,8 @@ export const rlsLog = (
     {},
     logInit,
     {
-      userid: Global.user.id,
-      username: Global.user.name,
+      userid: User.id,
+      username: User.name,
       sendtime: dayjs(),
       logtime: dayjs(),
     },

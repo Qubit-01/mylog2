@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import useGlobalStore from '@/stores/global'
+import useUserStore from '@/stores/user'
 
-const User = useGlobalStore().user
+const User = useUserStore()
 
 // 用户注册时间
 const userCreatetime = dayjs(User.createtime).valueOf()
