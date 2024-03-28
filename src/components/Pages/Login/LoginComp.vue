@@ -24,6 +24,16 @@ const doLogin = async () => {
     ElMessage.error('用户名或密码错误')
   }
 }
+
+/**
+ * QQ登录
+ */
+const qqLogin = () => {
+  let qqAppId = '102046486'; // 上面申请得到的appid
+  let qqAuthPath = 'https://sicau.xyz/#/qq-redirect'; // 前面设置的回调地址
+  let state = 'login'; // 防止CSRF攻击的随机参数，必传，登录成功之后会回传，最好后台自己生成然后校验合法性
+  location.href = `https://graph.qq.com/oauth2.0/authorize?response_type=token&client_id=${qqAppId}&redirect_uri=${encodeURIComponent(qqAuthPath)}&state=${state}`
+}
 </script>
 
 <template>

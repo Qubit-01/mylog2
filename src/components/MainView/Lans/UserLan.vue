@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import useUserStore, { logout } from '@/stores/user'
 const User = useUserStore()
+console.log(User.img)
 </script>
 <!-- 可以加点数量统计 -->
 <template>
@@ -33,6 +34,7 @@ const User = useUserStore()
   align-items: center;
   gap: 10px;
   padding: 8px 0;
+  border-radius: var(--border-radius);
 
   .img {
     margin-top: 8px;

@@ -8,8 +8,8 @@ import type { ExifImgFile } from '@/utils/img'
 export interface User {
   id: string
   name: string
-  img?: string
-  info?: {
+  img: string
+  info: {
     userSex?: '男' | '女' | undefined
     userBirth?: string // 生日
     userText?: string // 个性签名

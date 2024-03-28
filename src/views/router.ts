@@ -94,6 +94,12 @@ const router = createRouter({
           component: () => import('../components/Pages/Login/SigninComp.vue'),
           meta: { title: '注册 - 多元记' },
         },
+        {
+          path: 'qq-redirect',
+          name: 'qq-redirect', // QQ重定向页面
+          component: () => import('../components/Pages/Login/QQRedirect.vue'),
+          meta: { title: 'QQ登录 - 多元记' },
+        },
       ],
     },
     {

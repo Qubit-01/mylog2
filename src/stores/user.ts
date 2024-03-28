@@ -23,10 +23,12 @@ interface UserStroe extends User {
 }
 
 export const useUserStore: () => UserStroe = defineStore('user', () => {
-  // 当前默认用户数据
+  // 当前默认用户数据，这里下面用了toRefs，所以要在这里把全部属性定义好
   const user = reactive<User>({
     id: '0',
     name: '',
+    img: '',
+    info: {},
     setting: {
       page: {
         theme: localStorage.getItem('theme') || 'light',
@@ -38,6 +40,8 @@ export const useUserStore: () => UserStroe = defineStore('user', () => {
         calendarTags: [],
       },
     },
+    createtime: undefined,
+    openidQ: undefined,
   })
 
   /**
@@ -48,27 +52,33 @@ export const useUserStore: () => UserStroe = defineStore('user', () => {
   const isLogined = ref<boolean>(false)
 
   // 云端获取用户信息
-  getUser.then(res => {
-    const userdata = clone(res)
-    // 临时删掉东西
-    const setting = res.setting
-    // @ts-ignore 这里用deepMerge会有意想不到得bug，慎用
-    delete userdata.setting
-    Object.assign(user, userdata)
-    Object.assign(user.setting.page, setting.page)
-    Object.assign(user.setting.mylog, setting.mylog)
-    isLogined.value = true
-    // 获取到远端用户setting在注册监视，同步双端
-    watch(user.setting, () => {
-      const settingJson = JSON.stringify(user.setting)
-      updateSetting({ settingJson }).then(count => {
-        if (count) {
-          console.log('🐤 setting 设置更改成功')
-          localStorage.setItem('setting', settingJson)
-        }
+  getUser.then(
+    res => {
+      console.log(res)
+      const userdata = clone(res)
+      // 临时删掉东西
+      const setting = res.setting
+      // @ts-ignore 这里用deepMerge会有意想不到得bug，慎用
+      delete userdata.setting
+      console.log('🐤 用户信息获取成功', userdata)
+      Object.assign(user, userdata)
+      Object.assign(user.setting.page, setting.page)
+      Object.assign(user.setting.mylog, setting.mylog)
+      isLogined.value = true
+      console.log(user)
+      // 获取到远端用户setting在注册监视，同步双端
+      watch(user.setting, () => {
+        const settingJson = JSON.stringify(user.setting)
+        updateSetting({ settingJson }).then(count => {
+          if (count) {
+            console.log('🐤 setting 设置更改成功')
+            localStorage.setItem('setting', settingJson)
+          }
+        })
       })
-    })
-  })
+    },
+    () => null
+  )
 
   // 先去本地存储获取页面设置
   // const pageSetting = localStorage.getItem('pageSetting')
