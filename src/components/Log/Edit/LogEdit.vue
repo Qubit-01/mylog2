@@ -92,7 +92,7 @@ const edit = () => {
 
 <template>
   <!-- <div>logEdit{{ logEdit }}</div> -->
-  <!-- <div>files{{ files }}</div> -->
+  <div>files{{ files }}</div>
   <div class="log-edit" :class="{ disabled: upload.percent > -1 }" @click.stop>
     <ElProgress
       v-if="upload.percent > -1"
@@ -145,6 +145,10 @@ const edit = () => {
         v-model:files="files.videos"
         :addFile
       />
+    </div>
+
+    <div v-if="visible.files">
+      <EditFiles v-model="logEdit.files!" v-model:files="files.files" />
     </div>
 
     <div v-if="visible.location">

@@ -152,11 +152,13 @@ const expand = () => {
   .bottom {
     display: flex;
     gap: 4px;
+    font-size: 1rem;
+    color: var(--el-text-color-secondary);
   }
 
   .buttons {
     position: absolute;
-    top: -20px;
+    top: -26px;
     right: var(--padding);
   }
 }

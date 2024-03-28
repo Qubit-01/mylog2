@@ -204,7 +204,7 @@ const delFilter = () => {
 
     .add-filter {
       position: absolute;
-      top: -20px;
+      top: -26px;
       right: var(--padding);
     }
   }
