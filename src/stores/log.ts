@@ -233,7 +233,7 @@ export const logInit: LogEdit = {
  * @param file 要上传的文件
  */
 export const rlsLog = (
-  logEdit: Log,
+  logEdit: LogEdit,
   params: COS.UploadFilesParams
 ): Promise<Log | undefined> => {
   if (!logEdit.content) {
@@ -252,7 +252,7 @@ export const rlsLog = (
       logtime: dayjs(),
     },
     logEdit
-  )
+  ) as Log
 
   return myUploadFiles(params).then(data => {
     return releaseLog({ logJson: JSON.stringify(log) }).then(id => {
@@ -275,7 +275,7 @@ export const rlsLog = (
  */
 export const editLog = (
   logEdit: LogEdit & { id: string },
-  params: COS.UploadFilesParams = { files: []}
+  params: COS.UploadFilesParams = { files: [] }
 ): Promise<number> => {
   const logOld = logStore.mylog.getLog(logEdit.id)!
 
