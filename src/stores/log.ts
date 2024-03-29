@@ -3,8 +3,8 @@ import { myUploadFiles, myDeleteFiles, cosPath } from '@/utils/cos'
 import COS from 'cos-js-sdk-v5'
 import dayjs from 'dayjs'
 import {
-  getLogsHome,
-  getLogsAllByToken,
+  getPublics,
+  getMylogs,
   releaseLog,
   deleteLog,
   updateLog,
@@ -99,7 +99,7 @@ export const useLogStore = defineStore('log', () => {
     loading: false,
     addLogs: async () => {
       home.loading = true
-      const data = await getLogsHome(home.params)
+      const data = await getPublics(home.params)
       data.forEach(handleLog)
       home.list.push(...data)
       home.params.skip += home.params.limit
@@ -142,7 +142,7 @@ export const useLogStore = defineStore('log', () => {
     },
     getLogs: async () => {
       mylog.loading = true
-      const logstags = await getLogsAllByToken({})
+      const logstags = await getMylogs({})
       const logs: Log[] = []
       const tags: Log[] = []
       // 划分 logs 和 tags

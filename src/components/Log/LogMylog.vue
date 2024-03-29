@@ -165,8 +165,8 @@ const toggleType = (log: Log) => {
   .bottom {
     display: flex;
     gap: 4px;
-    font-size: 1rem;
-    color: var(--el-text-color-secondary);
+    font-size: 0.9rem;
+    color: var(--color-2);
   }
 
   .buttons {

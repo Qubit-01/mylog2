@@ -6,12 +6,18 @@ import request from '@/utils/request'
  *
  * @augments data { name: string, pswd: string }
  */
-export const loginPswd = (data: {
-  name: string
-  pswd: string
-}): Promise<User> => {
+export const login = (
+  data:
+    | {
+        name: string
+        pswd: string
+      }
+    | {
+        openidQ: string
+      }
+): Promise<User> => {
   return request({
-    url: 'user/login_pswd',
+    url: 'user/login',
     method: 'post',
     data,
   })
@@ -22,9 +28,11 @@ export const loginPswd = (data: {
  *
  * @augments data { name: string, pswd: string }
  */
-export const getUserByToken = (data: { token: string }): Promise<User> => {
+export const getUser = (
+  data: { token: string } | { openidQ: string }
+): Promise<User> => {
   return request({
-    url: 'user/get_user_by_token',
+    url: 'user/get_user',
     method: 'post',
     data,
   })
@@ -36,12 +44,12 @@ export const getUserByToken = (data: { token: string }): Promise<User> => {
  *
  * @augments data { name: string }
  */
-export const getHaveUser = (
+export const haveUser = (
   data: { name: string } | { openIdQ: string }
 ): Promise<number> => {
   return request({
     url: 'user/have_user',
-    method: 'get',
+    method: 'post',
     params: data,
   })
 }

@@ -5,31 +5,17 @@ import useGlobalStore from '@/stores/global'
 const Global = useGlobalStore()
 
 /**
- * 获取首页log列表
+ * 获取public列表
+ * 传入userid，就是通过用户查找public
  * 传入skip和limit
  */
-export const getLogsHome = (params: {
+export const getPublics = (params: {
+  userid?: string
   skip: number
   limit: number
 }): Promise<Log[]> => {
   return request({
-    url: 'log/get_logs_home',
-    method: 'get',
-    params,
-  })
-}
-
-/**
- * 通过用户ID获取log列表，page参数必填
- * log/get_logs_by_userid?userid=1&skip=10&limit=5
- */
-export const getLogsByUserid = (params: {
-  userid: number
-  skip: number
-  limit: number
-}): Promise<Log[]> => {
-  return request({
-    url: 'log/get_logs_by_userid',
+    url: 'log/get_publics',
     method: 'get',
     params,
   })
@@ -40,13 +26,28 @@ export const getLogsByUserid = (params: {
  * 不传page参数就返回全部
  * get_logs_all_by_userid
  */
-export const getLogsAllByToken = (data: {
+export const getMylogs = (data: {
   token?: string
   skip?: number
   limit?: number
 }): Promise<Log[]> => {
   return request({
-    url: 'log/get_logs_all_by_token',
+    url: 'log/get_mylogs',
+    method: 'post',
+    data: { token: Global.token, ...data },
+  })
+}
+
+/**
+ * 通过token获取log列表，全部
+ * 不传page参数就返回全部
+ * get_logs_all_by_userid
+ */
+export const getTags = (data: {
+  token?: string
+}): Promise<Log[]> => {
+  return request({
+    url: 'log/get_tags',
     method: 'post',
     data: { token: Global.token, ...data },
   })
@@ -56,9 +57,9 @@ export const getLogsAllByToken = (data: {
  * 通过logid在public里面查找log
  * log/get_log_by_id?id=3584
  */
-export const getLogById = (params: { id: number }): Promise<Log> => {
+export const getPublic = (params: { id: number }): Promise<Log> => {
   return request({
-    url: 'log/get_log_by_id',
+    url: 'log/get_public',
     method: 'get',
     params,
   })

@@ -10,9 +10,9 @@ export interface User {
   name: string
   img: string
   info: {
-    userSex?: '男' | '女' | undefined
-    userBirth?: string // 生日
-    userText?: string // 个性签名
+    sex?: '男' | '女' | undefined
+    birth?: string // 生日
+    text?: string // 个性签名
 
     stuId?: string // 学号
     stuClass?: string // 班级

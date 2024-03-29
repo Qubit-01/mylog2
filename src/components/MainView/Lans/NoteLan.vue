@@ -10,7 +10,7 @@ const showBeg = ref(false)
     <div class="title">公告</div>
     <div class="items">
       <div @click="showBeg = true">联系&资助</div>
-      <a href="https://gitee.com/bit-01/mylog2">
+      <a href="https://gitee.com/bit-01/mylog2" target="_black">
         <img
           :src="`https://gitee.com/bit-01/mylog2/badge/star.svg?theme=${
             Global.isDark ? 'dark' : 'white'

@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import type { User } from '@/types'
-import { loginPswd } from '@/api/user'
+import { login } from '@/api/user'
 import useGlobalStore from '@/stores/global'
 import { appId, redirectURI } from '@/utils/QQConnect'
 
 const Global = useGlobalStore()
 const route = useRoute()
 
-const login = reactive({
+const loginData = reactive({
   name: '',
   pswd: '',
 })
 
 const doLogin = async () => {
   let user: User
-  user = await loginPswd(login)
+  user = await login(loginData)
   if (user) {
     ElMessage.success(`欢迎你，${user.name} ！`)
     Global.token = user.token!
@@ -45,13 +45,13 @@ const qqLogin = () => {
     <div class="login">
       <form>
         <input
-          v-model="login.name"
+          v-model="loginData.name"
           placeholder="用户名"
           type="text"
           autocomplete="on"
         />
         <input
-          v-model="login.pswd"
+          v-model="loginData.pswd"
           placeholder="密码"
           type="password"
           autocomplete="on"

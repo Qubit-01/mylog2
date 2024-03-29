@@ -55,8 +55,18 @@ src下的源代码结构
 - App.vue
 
 
+## 数据表
 
-## 合并 note 表和 blog 表
+### 视图
+
+log表中承载了全部log，由于目前不会复杂的查询，所以很适合分成多个视图，简化SQL语句编写，提高数据安全性，限制系统漏洞造成的数据损失。  
+
+- public视图，`type='public'` 公开表，筛选出所有用户公开的log，发送时间排序（但是在logger页面时，后端要以记录时间排序）
+- mylog视图，`type='public' or type='log'` 用户Mylog表，记录时间排序
+- tag视图，`type='tag'` Tag表，日历里面的tag信息，记录时间排序
+
+
+### 合并 note 表和 blog 表
 
 以前主要是两张表存数据 note 和 blog:  
 note 有 id, userid, username, type, time, sendtime, content, imgs, videos, audios, files, location, people, tags, info  

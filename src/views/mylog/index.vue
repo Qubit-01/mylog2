@@ -9,9 +9,7 @@ getUser.then(user => Mylog.getLogs!(), null) // 进入页面再获取数据
 
 const tab = computed<string>({
   get: () => route.name as string,
-  set: v => {
-    router.push({ name: v })
-  },
+  set: v => router.push({ name: v }),
 })
 </script>
 
@@ -19,7 +17,7 @@ const tab = computed<string>({
   <div class="mylog-page">
     <ElRadioGroup v-model="tab">
       <!-- size="large" -->
-      <ElRadioButton label="时间线" value="timeline" />
+      <ElRadioButton label="时间线" value="mylog" />
       <ElRadioButton label="待办" value="todo" />
       <ElRadioButton label="日历" value="calendar" />
     </ElRadioGroup>

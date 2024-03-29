@@ -10,7 +10,7 @@
  -->
 <script setup lang="ts">
 import QC from '@/utils/QQConnect'
-import { getHaveUser, loginPswd } from '@/api/user'
+import { haveUser, login } from '@/api/user'
 import { ArrowLeftBold } from '@element-plus/icons-vue'
 const route = useRoute()
 const state = ref(0)
@@ -59,7 +59,7 @@ const bd = () => {
     return false
   }
   // 先登录获取token，再token和openid一起绑定
-  loginPswd({
+  login({
     name: user.name,
     pswd: user.pswd,
   }).then(user => {
@@ -87,7 +87,7 @@ const bd = () => {
 const handleNew = () => {
   state.value = 3
   user.name = user.data.nickname
-  getHaveUser({ name: user.name }).then(count => {
+  haveUser({ name: user.name }).then(count => {
     if (count) ElMessage.error('该用户名被占用了哦')
   })
 }
@@ -103,7 +103,7 @@ const zc = () => {
     return false
   }
 
-  getHaveUser({ name: user.name.trim() }).then(count => {
+  haveUser({ name: user.name.trim() }).then(count => {
     if (count) {
       ElMessage.error('该用户名被占用了哦')
       return false

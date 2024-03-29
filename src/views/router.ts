@@ -28,20 +28,32 @@ const router = createRouter({
           component: () => import('../views/home/index.vue'),
         },
         {
-          path: 'logger',
-          name: 'logger', // 我的主页（别人看的）
+          path: 'logger', // 我的主页（别人看的）
           component: () => import('../views/logger/index.vue'),
           meta: { title: '主页 - 多元记' },
+          children: [
+            {
+              path: '',
+              name: 'logger', // 时间线
+              component: () =>
+                import('../components/Pages/Logger/LoggerComp.vue'),
+            },
+            {
+              path: 'setting',
+              name: 'setting', // 设置
+              component: () =>
+                import('../components/Pages/Logger/SettingComp.vue'),
+            },
+          ],
         },
         {
-          path: 'mylog',
-          name: 'mylog', // 我的记录（自己看的）
+          path: 'mylog', // 我的记录（自己看的）
           component: () => import('../views/mylog/index.vue'),
           meta: { title: '记录 - 多元记', requiresAuth: true },
           children: [
             {
               path: '',
-              name: 'timeline', // 时间线
+              name: 'mylog', // 时间线
               component: () =>
                 import('../components/Pages/Mylog/TimelineComp.vue'),
             },

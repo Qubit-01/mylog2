@@ -1,4 +1,4 @@
-import { getUserByToken } from '@/api/user'
+import { getUser as getUserApi } from '@/api/user'
 import type { User } from '@/types'
 import useUserStore from './user'
 
@@ -16,7 +16,7 @@ import useUserStore from './user'
 export const getUser: Promise<User> = new Promise((resolve, reject) => {
   const token = localStorage.getItem('token')
   if (token)
-    getUserByToken({ token: token }).then(res => {
+    getUserApi({ token: token }).then(res => {
       if (res) resolve(res) // 2.1 正常token
       else {
         // 2.2 错误token，回归到没有token
