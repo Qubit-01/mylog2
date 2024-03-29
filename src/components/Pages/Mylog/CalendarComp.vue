@@ -1,80 +1,63 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import type { Log } from '@/types'
 import dayjs from 'dayjs'
-// import { useSetting } from '@/stores/setting'
-// import { useNote } from '@/stores/note'
 import useUserStore from '@/stores/user'
+import { delLog, rlsLog } from '@/stores/log'
+import useLogStore from '@/stores/log'
 
 const Setting = useUserStore().setting
+const Mylog = useLogStore().mylog
 
 // { "isSelected": true, "type": "current-month", "day": "2022-10-26", "date": "2022-10-26T01:21:04.150Z" }
 const valueCalendar = ref<Date>(new Date()) // 日历选中的日期
 
-// 日历每一项要获取对应的tags，每一项要输入自己的天数
-// const getTagsByDate = computed(() => (date) => {
-//   return Note.tags.filter((tag) => {
-//     return dayjs(tag.noteTime).format("YYYYMMDD") == dayjs(date).format("YYYYMMDD");
-//   })
-// })
-
 // 给选中日期绑定对应tag
-// const clickTag = (tagContent) => {
-//   let noteJson = JSON.stringify({
-//     noteTime: dayjs(valueCalendar.value).format("YYYY-MM-DD HH:mm:ss"),
-//     noteContent: tagContent, noteType: 'tag'
-//   })
-//   myPost("/note/release", { noteJson, userToken: User.token }, note => {
-//     // 这个接口返回插入数据的id
-//     console.log(note.noteId, "发送一条tagNote成功")
-//     Note.tags.push({
-//       noteContent: tagContent, noteId: note.noteId, noteTime: valueCalendar.value, noteType: "tag",
-//     })
-//   })
-// }
+const clickTag = (tag: string) => {
+  rlsLog({
+    logtime: dayjs(valueCalendar.value),
+    content: tag,
+    type: 'tag',
+  })
+}
 
 // 点击日历格子里的标签关闭
-// const tabNoteClose = (tag) => {
-//   myPost("/note/delete", { noteId: tag.noteId, userToken: User.token }, (data) => {
-//     console.log(data, "删除一条tagNote成功");
-//     Note.tags.splice(Note.tags.indexOf(tag), 1);
-//   })
-// }
+const tabNoteClose = (tag: Log) => {
+  delLog(tag)
+}
 </script>
 
 <template>
   <div class="calendar-comp">
     <!-- {{ Note.tags }} -->
     <!-- {{dayjs(valueCalendar).format("YYYY-MM-DD HH:mm:ss")}} -->
-    <div>
-      <!-- 建立标签 -->
-      <!-- <ElTag
-        v-for="tag in Setting.noteSetting.calendarTags"
-        :key="tag"
-        size="large"
-        @click="clickTag(tag)"
-        class="tags-top"
-      >
-        {{ tag }}
-      </ElTag> -->
-    </div>
 
     <div class="calendar-main" v-m>
+      <div>
+        <EditTags
+          v-model="Setting.mylog.calendarTags"
+          :clickTag="clickTag"
+          size="large"
+          closable
+        />
+      </div>
       <!-- 日历 -->
       <ElCalendar v-model="valueCalendar">
         <!-- 单元格 -->
         <template #date-cell="{ data }">
           <div>
             {{ dayjs(data.date).format('D') }}<br />
-            <div>
-              <!-- <ElTag
-                v-for="tag in getTagsByDate(data.date)"
-                :key="tag"
+            <div class="cell-tags">
+              <ElTag
+                v-for="tag in Mylog.tagsAll.filter(tag =>
+                  tag.logtime.isSame(dayjs(data.date), 'day')
+                )"
+                :key="tag.content"
                 closable
                 @close="tabNoteClose(tag)"
                 style="max-width: 100%"
               >
-                {{ tag.noteContent }}
-              </ElTag> -->
+                {{ tag.content }}
+              </ElTag>
             </div>
           </div>
         </template>
@@ -95,6 +78,12 @@ const valueCalendar = ref<Date>(new Date()) // 日历选中的日期
 
     /* 覆盖El的样式 */
     --el-fill-color-blank: transparent;
+
+    .cell-tags {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
 
     :deep(.el-calendar) {
       /* 整个日历表格的内边距 */
@@ -126,8 +115,8 @@ const valueCalendar = ref<Date>(new Date()) // 日历选中的日期
       // }
 
       /* .el-calendar ::v-deep(.el-calendar-table) {
-  min-height: 1000px;
-} */
+      min-height: 1000px;
+    } */
     }
   }
 }

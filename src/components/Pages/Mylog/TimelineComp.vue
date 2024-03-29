@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import { getUser } from '@/stores/global'
+
 import useLogStore from '@/stores/log'
-const logStore = useLogStore()
-const mylog = logStore.mylog
+const Mylog = useLogStore().mylog
 
 // 拿到编辑的数据
 const logReleaseDom = ref()
-
-getUser.then(user => mylog.getLogs!(), null) // 进入页面再获取数据
 </script>
 
 <template>
@@ -17,8 +14,8 @@ getUser.then(user => mylog.getLogs!(), null) // 进入页面再获取数据
     <LogFilter />
 
     <ElTimeline
-      v-infinite-scroll="mylog.addLogs!"
-      :infinite-scroll-disabled="mylog.loading"
+      v-infinite-scroll="Mylog.addLogs!"
+      :infinite-scroll-disabled="Mylog.loading"
     >
       <!-- 编辑预览 -->
       <!-- <ElTimelineItem
@@ -30,9 +27,9 @@ getUser.then(user => mylog.getLogs!(), null) // 进入页面再获取数据
     </ElTimelineItem> -->
 
       <!-- 时间线开始 -->
-      <template v-for="(log, i) in mylog.list">
+      <template v-for="(log, i) in Mylog.list">
         <ElTimelineItem
-          v-if="i != 0 && log.logtime!.year() !== mylog.list[i - 1].logtime!.year()"
+          v-if="i != 0 && log.logtime!.year() !== Mylog.list[i - 1].logtime!.year()"
           :timestamp="log.logtime!.year().toString()"
           type="danger"
           placement="top"
@@ -48,7 +45,7 @@ getUser.then(user => mylog.getLogs!(), null) // 进入页面再获取数据
       </template>
 
       <ElTimelineItem
-        v-if="mylog.loading"
+        v-if="Mylog.loading"
         timestamp="loading..."
         placement="top"
       >

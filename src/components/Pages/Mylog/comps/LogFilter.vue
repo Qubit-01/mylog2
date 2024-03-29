@@ -111,7 +111,7 @@ const delFilter = () => {
       </ElRow>
 
       <ElRow>
-        <EditTags v-model="diyFilter.content.include" label="内容含有：">
+        <EditTags v-model="diyFilter.content.include" label="内容含有：" closable>
           <ElSwitch
             v-model="diyFilter.content.isOr"
             size="small"
@@ -122,7 +122,7 @@ const delFilter = () => {
         </EditTags>
       </ElRow>
       <ElRow>
-        <EditTags v-model="diyFilter.people.include" label="人员含有：">
+        <EditTags v-model="diyFilter.people.include" label="人员含有：" closable>
           <ElSwitch
             v-model="diyFilter.people.isOr"
             size="small"
@@ -133,7 +133,7 @@ const delFilter = () => {
         </EditTags>
       </ElRow>
       <ElRow>
-        <EditTags v-model="diyFilter.tags.include" label="标签含有：">
+        <EditTags v-model="diyFilter.tags.include" label="标签含有：" closable>
           <ElSwitch
             v-model="diyFilter.tags.isOr"
             size="small"

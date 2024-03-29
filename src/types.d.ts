@@ -40,7 +40,7 @@ export interface User {
       /**
        * 日历上的待选按钮
        */
-      calendarTags?: string[]
+      calendarTags: string[]
     }
   }
   createtime?: Date

@@ -1,6 +1,6 @@
 import type { Log, LogEdit, LogFileItem, LogFilter } from '@/types'
-import COS from 'cos-js-sdk-v5'
 import { myUploadFiles, myDeleteFiles, cosPath } from '@/utils/cos'
+import COS from 'cos-js-sdk-v5'
 import dayjs from 'dayjs'
 import {
   getLogsHome,
@@ -9,10 +9,8 @@ import {
   deleteLog,
   updateLog,
 } from '@/api/log'
-import useGlobalStore from './global'
 import useUserStore from './user'
 
-const Global = useGlobalStore()
 const User = useUserStore()
 
 // 请求响应
@@ -38,7 +36,14 @@ export type LogsResp = {
 
 // mylog的类型
 interface Mylog extends LogsResp {
-  listAll: Log[] // 存储全部Log
+  /**
+   * 存储全部Log
+   */
+  listAll: Log[]
+  /**
+   * 存储全部Tag，日历的
+   */
+  tagsAll: Log[]
   /**
    * 过滤器
    */
@@ -63,7 +68,7 @@ interface Mylog extends LogsResp {
    */
   getLog: (id: string) => Log | undefined
   /**
-   * 添加单个log，目前用于发布后
+   * 添加单个log，目前用于发布后。兼容Tag
    * @param log log对象
    */
   addLog: (log: Log) => void
@@ -112,6 +117,7 @@ export const useLogStore = defineStore('log', () => {
       mylog.listFilter.slice(0, mylog.params.skip + mylog.params.limit)
     ),
     listAll: [],
+    tagsAll: [],
     filter: undefined,
     listFilter: computed<Log[]>(() =>
       mylog.listAll.filter(log => {
@@ -136,22 +142,43 @@ export const useLogStore = defineStore('log', () => {
     },
     getLogs: async () => {
       mylog.loading = true
-      const logs = await getLogsAllByToken({})
-      logs.forEach(handleLog)
+      const logstags = await getLogsAllByToken({})
+      const logs: Log[] = []
+      const tags: Log[] = []
+      // 划分 logs 和 tags
+      logstags.forEach(log => {
+        handleLog(log)
+        log.type === 'tag' ? tags.push(log) : logs.push(log)
+      })
+      console.log('🐤1', logs, tags)
       mylog.listAll = logs
-      // mylog.setFilter() // 先全部放进listFilter
+      mylog.tagsAll = tags
       mylog.addLogs() // 加载完成后立即加载几个数据
     },
     getLog: (id: string) => mylog.listAll.find(log => log.id === id),
     addLog(log: Log) {
-      // 获取应该插入到的位置
-      const index = mylog.listAll.findIndex(l => l.logtime <= log.logtime)
-      // 如果没有找到（也就是新元素的 logtime 是最大的），就将新元素插入到列表的末尾
-      if (index === -1) mylog.listAll.push(log)
-      else mylog.listAll.splice(index, 0, log)
+      if (log.type === 'tag') {
+        // 获取应该插入到的位置
+        const index = mylog.tagsAll.findIndex(l => l.logtime <= log.logtime)
+        // 如果没有找到（也就是新元素的 logtime 是最大的），就将新元素插入到列表的末尾
+        if (index === -1) mylog.tagsAll.push(log)
+        else mylog.tagsAll.splice(index, 0, log)
+      } else {
+        // 获取应该插入到的位置
+        const index = mylog.listAll.findIndex(l => l.logtime <= log.logtime)
+        // 如果没有找到（也就是新元素的 logtime 是最大的），就将新元素插入到列表的末尾
+        if (index === -1) mylog.listAll.push(log)
+        else mylog.listAll.splice(index, 0, log)
+      }
     },
     delLog(id: string): Log {
       const index = mylog.listAll.findIndex(l => l.id === id)
+      if (index === -1) {
+        return mylog.tagsAll.splice(
+          mylog.tagsAll.findIndex(l => l.id === id),
+          1
+        )[0]
+      }
       return mylog.listAll.splice(index, 1)[0]
     },
     editLog(logEdit: Partial<Log>): Log {
@@ -234,7 +261,7 @@ export const logInit: LogEdit = {
  */
 export const rlsLog = (
   logEdit: LogEdit,
-  params: COS.UploadFilesParams
+  params: COS.UploadFilesParams = { files: [] }
 ): Promise<Log | undefined> => {
   if (!logEdit.content) {
     ElMessage.error('必须填入内容哦')
@@ -321,31 +348,38 @@ export const editLog = (
  * @param log 删除的Log对象
  * @returns 参一为null，既成功
  */
-export const delLog = (log: Log): Promise<Log> => {
-  return ElMessageBox.confirm('确定删除吗？', '删除Log', {
-    confirmButtonText: '删除',
-    cancelButtonText: '取消',
-    type: 'warning',
-  }).then(() => {
-    // 先删文件，再删log
-    const objects: { Key: string }[] = []
-    logFileItem.forEach(type => {
-      log[type].forEach(i => {
-        objects.push({ Key: `${cosPath()}${type}/${i}` })
-        if (type === 'imgs')
-          objects.push({ Key: `${cosPath()}compress-imgs/${i}` })
+export const delLog = async (log: Log): Promise<Log> => {
+  if (log.type !== 'tag') {
+    try {
+      await ElMessageBox.confirm('确定删除吗？', '删除Log', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+    } catch {
+      return log
+    }
+  }
+
+  // 先删文件，再删log
+  const objects: { Key: string }[] = []
+  logFileItem.forEach(type => {
+    log[type].forEach(i => {
+      objects.push({ Key: `${cosPath()}${type}/${i}` })
+      if (type === 'imgs')
+        objects.push({ Key: `${cosPath()}compress-imgs/${i}` })
+    })
+  })
+
+  return myDeleteFiles(objects)
+    .then(data => {
+      return deleteLog({ id: log.id! }).then(count => {
+        ElMessage({ message: '删除成功', type: 'success' })
+        logStore.mylog.delLog(log.id!)
+        return log
       })
     })
-    return myDeleteFiles(objects)
-      .then(data => {
-        return deleteLog({ id: log.id! }).then(count => {
-          ElMessage({ message: '删除成功', type: 'success' })
-          logStore.mylog.delLog(log.id!)
-          return log
-        })
-      })
-      .catch(err => err)
-  })
+    .catch(err => err)
 }
 
 /**

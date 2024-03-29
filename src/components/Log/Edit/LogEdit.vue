@@ -131,7 +131,7 @@ const edit = () => {
     </div>
 
     <div v-if="visible.tags">
-      <EditTags v-model="logEdit.tags!" />
+      <EditTags v-model="logEdit.tags!" closable />
     </div>
 
     <div v-if="visible.imgs">
