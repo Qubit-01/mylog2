@@ -2,6 +2,7 @@
 import type { User } from '@/types'
 import { loginPswd } from '@/api/user'
 import useGlobalStore from '@/stores/global'
+import { appId, redirectURI } from '@/utils/QQConnect'
 
 const Global = useGlobalStore()
 const route = useRoute()
@@ -29,10 +30,11 @@ const doLogin = async () => {
  * QQ登录
  */
 const qqLogin = () => {
-  let qqAppId = '102046486'; // 上面申请得到的appid
-  let qqAuthPath = 'https://sicau.xyz/#/qq-redirect'; // 前面设置的回调地址
-  let state = 'login'; // 防止CSRF攻击的随机参数，必传，登录成功之后会回传，最好后台自己生成然后校验合法性
-  location.href = `https://graph.qq.com/oauth2.0/authorize?response_type=token&client_id=${qqAppId}&redirect_uri=${encodeURIComponent(qqAuthPath)}&state=${state}`
+  // 防止CSRF攻击的随机参数，必传，登录成功之后会回传，最好后台自己生成然后校验合法性
+  let state = 'login'
+  location.href = `https://graph.qq.com/oauth2.0/authorize?response_type=token&client_id=${appId}&redirect_uri=${encodeURIComponent(
+    redirectURI
+  )}&state=${state}`
 }
 </script>
 
@@ -54,7 +56,7 @@ const qqLogin = () => {
           type="password"
           autocomplete="on"
         />
-        <ElButton @click="doLogin">登录</ElButton>
+        <ElButton @click="doLogin" size="large">登录</ElButton>
         <div class="toSignin">
           没有账号？
           <RouterLink to="/login/signin" replace>去注册</RouterLink>
@@ -70,13 +72,14 @@ const qqLogin = () => {
         <div class="icons">
           <img
             src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/wechat.png"
-            alt="QQ登录"
+            alt="微信登录"
           />
           <img
             src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/weibo.png"
-            alt="QQ登录"
+            alt="微博登录"
           />
           <img
+            @click="qqLogin"
             src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/qq.png"
             alt="QQ登录"
           />

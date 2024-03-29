@@ -32,10 +32,13 @@ export const getUserByToken = (data: { token: string }): Promise<User> => {
 
 /**
  * 查用户名有没有，返回0或1，不区分大小写
+ * name 优先级高于 openId
  *
  * @augments data { name: string }
  */
-export const getHaveUser = (data: { name: string }): Promise<number> => {
+export const getHaveUser = (
+  data: { name: string } | { openIdQ: string }
+): Promise<number> => {
   return request({
     url: 'user/have_user',
     method: 'get',

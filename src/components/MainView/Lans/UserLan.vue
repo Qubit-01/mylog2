@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import useUserStore, { logout } from '@/stores/user'
 const User = useUserStore()
-console.log(User.img)
 </script>
 <!-- 可以加点数量统计 -->
 <template>

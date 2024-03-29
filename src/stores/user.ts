@@ -54,18 +54,15 @@ export const useUserStore: () => UserStroe = defineStore('user', () => {
   // 云端获取用户信息
   getUser.then(
     res => {
-      console.log(res)
       const userdata = clone(res)
       // 临时删掉东西
       const setting = res.setting
       // @ts-ignore 这里用deepMerge会有意想不到得bug，慎用
       delete userdata.setting
-      console.log('🐤 用户信息获取成功', userdata)
       Object.assign(user, userdata)
       Object.assign(user.setting.page, setting.page)
       Object.assign(user.setting.mylog, setting.mylog)
       isLogined.value = true
-      console.log(user)
       // 获取到远端用户setting在注册监视，同步双端
       watch(user.setting, () => {
         const settingJson = JSON.stringify(user.setting)

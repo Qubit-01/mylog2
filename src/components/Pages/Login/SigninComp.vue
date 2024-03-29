@@ -76,7 +76,7 @@ const doSignin = async () => {
           <img ref="captchaDom" alt="验证码看不清，换一张" @click="changeImg" />
         </div>
 
-        <ElButton @click="doSignin">登录</ElButton>
+        <ElButton @click="doSignin" size="large">登录</ElButton>
         <div class="toSignin">
           有账号？
           <RouterLink to="/login" replace>去登录</RouterLink>
