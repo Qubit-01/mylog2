@@ -150,7 +150,6 @@ export const useLogStore = defineStore('log', () => {
         handleLog(log)
         log.type === 'tag' ? tags.push(log) : logs.push(log)
       })
-      console.log('🐤1', logs, tags)
       mylog.listAll = logs
       mylog.tagsAll = tags
       mylog.addLogs() // 加载完成后立即加载几个数据

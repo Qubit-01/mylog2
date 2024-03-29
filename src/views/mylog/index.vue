@@ -3,13 +3,15 @@ import { getUser } from '@/stores/global'
 import useLogStore from '@/stores/log'
 
 const router = useRouter()
+const route = useRoute()
 const Mylog = useLogStore().mylog
-
 getUser.then(user => Mylog.getLogs!(), null) // 进入页面再获取数据
 
-const tab = ref<string>('timeline')
-watch(tab, () => {
-  router.push({ name: tab.value })
+const tab = computed<string>({
+  get: () => route.name as string,
+  set: v => {
+    router.push({ name: v })
+  },
 })
 </script>
 
