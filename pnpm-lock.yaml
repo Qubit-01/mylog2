@@ -43,7 +43,7 @@ dependencies:
     version: 1.11.6
   vis-network:
     specifier: ^9.1.9
-    version: 9.1.9(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(keycharm@0.4.0)(uuid@9.0.1)(vis-data@7.1.9)(vis-util@5.0.7)
+    version: 9.1.9(@egjs/hammerjs@2.0.17)(component-emitter@1.3.1)(keycharm@0.4.0)(uuid@9.0.1)(vis-data@7.1.9)(vis-util@5.0.7)
   vue:
     specifier: ^3.4.21
     version: 3.4.21(typescript@5.4.3)
@@ -1136,9 +1136,8 @@ packages:
       delayed-stream: 1.0.0
     dev: false
 
-  /component-emitter@2.0.0:
-    resolution: {integrity: sha512-4m5s3Me2xxlVKG9PkZpQqHQR7bgpnN7joDMJ4yvVkVXngjoITG76IaZmzmywSeRTeTpc6N6r3H3+KyUurV8OYw==}
-    engines: {node: '>=18'}
+  /component-emitter@1.3.1:
+    resolution: {integrity: sha512-T0+barUSQRTUQASh8bx02dl+DhF54GtIDY13Y3m9oWTklKbb3Wv974meRpeZ3lp1JpLVECWWNHC4vaG2XHXouQ==}
     dev: false
 
   /computeds@0.0.1:
@@ -2450,10 +2449,10 @@ packages:
       vis-util: ^5.0.1
     dependencies:
       uuid: 9.0.1
-      vis-util: 5.0.7(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)
+      vis-util: 5.0.7(@egjs/hammerjs@2.0.17)(component-emitter@1.3.1)
     dev: false
 
-  /vis-network@9.1.9(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(keycharm@0.4.0)(uuid@9.0.1)(vis-data@7.1.9)(vis-util@5.0.7):
+  /vis-network@9.1.9(@egjs/hammerjs@2.0.17)(component-emitter@1.3.1)(keycharm@0.4.0)(uuid@9.0.1)(vis-data@7.1.9)(vis-util@5.0.7):
     resolution: {integrity: sha512-Ft+hLBVyiLstVYSb69Q1OIQeh3FeUxHJn0WdFcq+BFPqs+Vq1ibMi2sb//cxgq1CP7PH4yOXnHxEH/B2VzpZYA==}
     peerDependencies:
       '@egjs/hammerjs': ^2.0.0
@@ -2464,14 +2463,14 @@ packages:
       vis-util: ^5.0.1
     dependencies:
       '@egjs/hammerjs': 2.0.17
-      component-emitter: 2.0.0
+      component-emitter: 1.3.1
       keycharm: 0.4.0
       uuid: 9.0.1
       vis-data: 7.1.9(uuid@9.0.1)(vis-util@5.0.7)
-      vis-util: 5.0.7(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)
+      vis-util: 5.0.7(@egjs/hammerjs@2.0.17)(component-emitter@1.3.1)
     dev: false
 
-  /vis-util@5.0.7(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0):
+  /vis-util@5.0.7(@egjs/hammerjs@2.0.17)(component-emitter@1.3.1):
     resolution: {integrity: sha512-E3L03G3+trvc/X4LXvBfih3YIHcKS2WrP0XTdZefr6W6Qi/2nNCqZfe4JFfJU6DcQLm6Gxqj2Pfl+02859oL5A==}
     engines: {node: '>=8'}
     peerDependencies:
@@ -2479,7 +2478,7 @@ packages:
       component-emitter: ^1.3.0 || ^2.0.0
     dependencies:
       '@egjs/hammerjs': 2.0.17
-      component-emitter: 2.0.0
+      component-emitter: 1.3.1
     dev: false
 
   /vite@5.2.7(@types/node@20.12.2)(less@4.2.0):

@@ -1,7 +1,7 @@
 import { updateSetting } from '@/api/user'
 import type { User } from '@/types'
 import { getUser } from './global'
-import { clone } from '@/utils'
+import { cloneDeep } from 'lodash'
 
 /**
  * 哪些信息需要存入本地？
@@ -54,7 +54,7 @@ export const useUserStore: () => UserStroe = defineStore('user', () => {
   // 云端获取用户信息
   getUser.then(
     res => {
-      const userdata = clone(res)
+      const userdata = cloneDeep(res)
       // 临时删掉东西
       const setting = res.setting
       // @ts-ignore 这里用deepMerge会有意想不到得bug，慎用

@@ -22,24 +22,27 @@ export function deepMerge(
 
 /**
  * 使用递归的方式实现数组、对象的深拷贝
+ * 有bug，不会复制对象的原型链，只会复制对象自身的属性
+ * 用在dayjs上然后JSON转换会出错
  * @param obj 拷贝的对象
  * @returns 深拷贝后的对象
+ * @deprecated
  */
 export function clone<T>(obj: T): T {
-  const objClone: any = Array.isArray(obj) ? [] : {}
+  const newObj: any = Array.isArray(obj) ? [] : {}
 
   if (obj && typeof obj === 'object') {
     for (const k in obj) {
       if (obj.hasOwnProperty(k)) {
         //判断ojb子元素是否为对象，如果是，递归复制
-        if (obj[k] && typeof obj[k] === 'object') objClone[k] = clone(obj[k])
+        if (obj[k] && typeof obj[k] === 'object') newObj[k] = clone(obj[k])
         //如果不是，简单复制
-        else objClone[k] = obj[k]
+        else newObj[k] = obj[k]
       }
     }
   }
 
-  return objClone
+  return newObj
 }
 
 // 获取链接后的参数(不带#号)

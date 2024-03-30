@@ -2,7 +2,7 @@
 import type { LogFilter } from '@/types'
 import useUserStore from '@/stores/user'
 import useLogStore from '@/stores/log'
-import { clone } from '@/utils'
+import { cloneDeep } from 'lodash'
 import dayjs from 'dayjs'
 
 const mylog = useLogStore().mylog
@@ -51,7 +51,7 @@ const addFilter = () => {
     ElMessage('给你的过滤器取个名字哦')
     return
   }
-  filters.value.push(clone(diyFilter))
+  filters.value.push(cloneDeep(diyFilter))
   curFilter.value = filters.value.length - 1
 }
 

@@ -8,8 +8,8 @@ import type {
   LogItem,
 } from '@/types'
 import { logInit, rlsLog } from '@/stores/log'
-import { clone } from '@/utils'
 import { getCosFiles } from '@/utils/cos'
+import { cloneDeep } from 'lodash'
 
 // 换一种方式，父组件管理files，不再用组件暴露的files了，主要是为了一个组件上传其他类型文件可以兼容
 const files = reactive<LogFiles>({
@@ -46,7 +46,7 @@ const visible = reactive<{ [key in LogItem]?: boolean }>(visibleInit())
  */
 const setItem = <T extends LogItem>(item: T, data?: LogEdit[T]) => {
   if (item === 'logtime') logEdit.logtime = (data as dayjs.Dayjs) || dayjs()
-  else logEdit[item] = data || clone(logInit[item])
+  else logEdit[item] = data || cloneDeep(logInit[item])
   visible[item] = true
 }
 
@@ -59,7 +59,7 @@ const setItem = <T extends LogItem>(item: T, data?: LogEdit[T]) => {
  */
 const addFile = (item: LogFileItem, file: KeyFile) => {
   // 如果组件没显示，说明数据没有
-  if (!visible[item]) logEdit[item] = clone(logInit[item])
+  if (!visible[item]) logEdit[item] = cloneDeep(logInit[item])
   // 向flist加入文件
   files[item].push(file)
   visible[item] = true
@@ -78,7 +78,7 @@ const release = () => {
   upload.percent = 0
   const cosFiles = getCosFiles(files)
 
-  rlsLog(clone(logEdit), {
+  rlsLog(cloneDeep(logEdit), {
     files: cosFiles,
     onProgress: info => {
       upload.percent = Math.floor(info.percent * 100)

@@ -9,7 +9,7 @@ import type {
 } from '@/types'
 import { editLog } from '@/stores/log'
 import { getCosFiles } from '@/utils/cos'
-import { clone } from '@/utils'
+import { cloneDeep } from 'lodash'
 
 const emit = defineEmits(['onSuccess'])
 
@@ -47,12 +47,8 @@ const visible = reactive<{ [key in LogItem]: boolean }>({
  * @param item 设置项
  * @param data 设置数据，不传就是原数据
  */
-const setItem = <T extends LogItem>(
-  item: T,
-  data?: LogEdit[T]
-) => {
-  // @ts-ignore
-  logEdit[item] = data || clone(log[item])
+const setItem = <T extends LogItem>(item: T, data?: LogEdit[T]) => {
+  logEdit[item] = data || cloneDeep(log[item])
   visible[item] = true
 }
 
@@ -65,7 +61,7 @@ const setItem = <T extends LogItem>(
  */
 const addFile = (item: LogFileItem, file: KeyFile) => {
   // 如果组件没显示，说明数据没有
-  if (!visible[item]) logEdit[item] = clone(log[item])
+  if (!visible[item]) logEdit[item] = cloneDeep(log[item])
   // 向flist加入文件
   files[item].push(file)
   visible[item] = true
