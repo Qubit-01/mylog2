@@ -143,7 +143,10 @@ export const useLogStore = defineStore('log', () => {
    * 删除逻辑也避免使用filter
    */
   const mylog: MylogStore = reactive({
-    list: computed<Log[]>(() => mylog.listFilter.slice(0, mylog.params.skip)),
+    list: computed<Log[]>(() => {
+      console.log(mylog.listFilter, mylog.params.skip)
+      return mylog.listFilter.slice(0, mylog.params.skip)
+    }),
     listAll: [],
     filter: undefined,
     listFilter: computed<Log[]>(() =>
@@ -151,7 +154,6 @@ export const useLogStore = defineStore('log', () => {
     ), // 由all筛选而来
     // 每次调用都会重置params，重新筛选
     setFilter: (filter?: LogFilter) => {
-      mylog.loading = true
       mylog.params.skip = 0
       mylog.filter = filter
       mylog.addLogs()
@@ -160,9 +162,7 @@ export const useLogStore = defineStore('log', () => {
     loading: true,
     noMore: false,
     addLogs: async () => {
-      mylog.loading = true
       mylog.params.skip += mylog.params.limit
-      mylog.loading = false
     },
     getLogs: async () => {
       mylog.loading = true
@@ -170,6 +170,7 @@ export const useLogStore = defineStore('log', () => {
       logs.forEach(handleLog)
       mylog.listAll = logs
       mylog.addLogs() // 加载完成后立即加载几个数据
+      mylog.loading = false
     },
   })
 

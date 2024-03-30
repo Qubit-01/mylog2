@@ -168,7 +168,6 @@ const delFilter = () => {
           v-model="diyFilter.name"
           style="max-width: 200px"
           placeholder="输入名称添加到预设"
-          size="small"
         >
           <template #append>
             <ElButton @click="addFilter">添加</ElButton>
@@ -202,9 +201,10 @@ const delFilter = () => {
     gap: 8px;
     position: relative;
 
+    // 添加输入框
     .add-filter {
       position: absolute;
-      top: -26px;
+      top: -32px;
       right: var(--padding);
     }
   }
