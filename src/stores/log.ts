@@ -143,10 +143,7 @@ export const useLogStore = defineStore('log', () => {
    * 删除逻辑也避免使用filter
    */
   const mylog: MylogStore = reactive({
-    list: computed<Log[]>(() => {
-      console.log(mylog.listFilter, mylog.params.skip)
-      return mylog.listFilter.slice(0, mylog.params.skip)
-    }),
+    list: computed<Log[]>(() => mylog.listFilter.slice(0, mylog.params.skip)),
     listAll: [],
     filter: undefined,
     listFilter: computed<Log[]>(() =>
