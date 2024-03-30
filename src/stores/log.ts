@@ -8,83 +8,79 @@ import {
   releaseLog,
   deleteLog,
   updateLog,
+  getTags,
 } from '@/api/log'
 import useUserStore from './user'
 
 const User = useUserStore()
 
-// 请求响应
-export type LogsResp = {
+/**
+ * 直接查全部的数据项
+ */
+export interface AllStore {
+  /**
+   * 存储所有数据
+   */
+  listAll: Log[]
+  /**
+   * 加载状态
+   */
+  loading: boolean
+  /**
+   * 获取所有mylog，会直接覆盖listAll
+   */
+  getLogs: () => Promise<void>
+}
+
+/**
+ * 要分页查询需要的数据项
+ */
+export interface PageStore {
   /**
    * 真正显示的数据
    */
-  list: Log[] | globalThis.ComputedRef<Log[]>
+  list: Log[]
   /**
    * 请求参数
    */
   params: { skip: number; limit: number }
   /**
-   * 状态
+   * 加载状态
    */
   loading: boolean
+  /**
+   * 是否还有数据
+   */
+  noMore: boolean
   /**
    * 分页添加log
    */
   addLogs: () => Promise<void>
-  [key: string]: any
 }
 
 // mylog的类型
-interface Mylog extends LogsResp {
+interface MylogStore extends AllStore, PageStore {
   /**
-   * 存储全部Log
+   * 通过参数显示的数据
+   */
+  // list: Log[]
+  /**
+   * 存储所有数据
    */
   listAll: Log[]
-  /**
-   * 存储全部Tag，日历的
-   */
-  tagsAll: Log[]
   /**
    * 过滤器
    */
   filter: LogFilter | undefined
   /**
+   * 经过筛选后的Log列表，计数属性
+   */
+  listFilter: Log[]
+  /**
    * 每次调用都会重置params，重新筛选
    * @param filter 过滤器
    */
   setFilter: (filter?: LogFilter) => void
-  /**
-   * 通过修改params参数，从listAll中截取，list会自动计算
-   */
-  addLogs: () => Promise<void>
-  /**
-   * 获取所有mylog，会直接覆盖listAll
-   */
-  getLogs: () => Promise<void>
-  /**
-   * 从all中获取真实的log对象
-   * @param id log的id
-   * @return 返回log对象，没找到就undefined
-   */
-  getLog: (id: string) => Log | undefined
-  /**
-   * 添加单个log，目前用于发布后。兼容Tag
-   * @param log log对象
-   */
-  addLog: (log: Log) => void
-  /**
-   * 删除单个log
-   * @param id 删除的logid
-   * @return 返回被删除的log
-   */
-  delLog: (id: string) => Log
-  /**
-   * 编辑单个log，逻辑是先删掉，浅覆盖，再添加
-   * 所以现在的逻辑是 先通过id找到这个元素，然后修改，如果修改了logtime再删除添加
-   * @param logEdit 一定要有id
-   * @return 编辑的log
-   */
-  editLog: (logEdit: Partial<Log>) => Log
 }
 
 /**
@@ -93,17 +89,51 @@ interface Mylog extends LogsResp {
  */
 export const useLogStore = defineStore('log', () => {
   // 首页的logs，每时每刻都是完好的数据
-  const home = reactive<LogsResp>({
+  const home = reactive<PageStore>({
     list: [],
     params: { skip: 0, limit: 20 },
-    loading: false,
+    loading: true,
+    noMore: false,
     addLogs: async () => {
+      if (home.noMore) return
       home.loading = true
       const data = await getPublics(home.params)
+      if (data.length < home.params.limit) home.noMore = true
       data.forEach(handleLog)
       home.list.push(...data)
       home.params.skip += home.params.limit
       home.loading = false
+    },
+  })
+
+  // 主页
+  const logger = reactive<PageStore>({
+    list: [],
+    params: { skip: 0, limit: 20 },
+    loading: true,
+    noMore: false,
+    addLogs: async () => {
+      if (logger.noMore) return
+      logger.loading = true
+      const data = await getPublics({ userid: User.id, ...logger.params })
+      if (data.length < logger.params.limit) logger.noMore = true
+      data.forEach(handleLog)
+      logger.list.push(...data)
+      logger.params.skip += logger.params.limit
+      logger.loading = false
+    },
+  })
+
+  // 日历Tags，不分页直接获取全部
+  const tags = reactive<AllStore>({
+    listAll: [],
+    loading: true,
+    getLogs: async () => {
+      tags.loading = true
+      const data = await getTags({})
+      data.forEach(handleLog)
+      tags.listAll = data
+      tags.loading = false
     },
   })
 
@@ -112,19 +142,12 @@ export const useLogStore = defineStore('log', () => {
    * 后端传来的数据就是排好的，前端插入逻辑尽量不用sort，编辑逻辑先删再插入
    * 删除逻辑也避免使用filter
    */
-  const mylog: Mylog = reactive<Mylog>({
-    list: computed<Log[]>(() =>
-      mylog.listFilter.slice(0, mylog.params.skip + mylog.params.limit)
-    ),
+  const mylog: MylogStore = reactive({
+    list: computed<Log[]>(() => mylog.listFilter.slice(0, mylog.params.skip)),
     listAll: [],
-    tagsAll: [],
     filter: undefined,
     listFilter: computed<Log[]>(() =>
-      mylog.listAll.filter(log => {
-        const f = filteLog(log, mylog.filter)
-        // console.log(f, log)
-        return f
-      })
+      mylog.listAll.filter(log => filteLog(log, mylog.filter))
     ), // 由all筛选而来
     // 每次调用都会重置params，重新筛选
     setFilter: (filter?: LogFilter) => {
@@ -135,6 +158,7 @@ export const useLogStore = defineStore('log', () => {
     },
     params: { skip: 0, limit: 15 },
     loading: true,
+    noMore: false,
     addLogs: async () => {
       mylog.loading = true
       mylog.params.skip += mylog.params.limit
@@ -142,56 +166,98 @@ export const useLogStore = defineStore('log', () => {
     },
     getLogs: async () => {
       mylog.loading = true
-      const logstags = await getMylogs({})
-      const logs: Log[] = []
-      const tags: Log[] = []
-      // 划分 logs 和 tags
-      logstags.forEach(log => {
-        handleLog(log)
-        log.type === 'tag' ? tags.push(log) : logs.push(log)
-      })
+      const logs = await getMylogs({})
+      logs.forEach(handleLog)
       mylog.listAll = logs
-      mylog.tagsAll = tags
       mylog.addLogs() // 加载完成后立即加载几个数据
-    },
-    getLog: (id: string) => mylog.listAll.find(log => log.id === id),
-    addLog(log: Log) {
-      if (log.type === 'tag') {
-        // 获取应该插入到的位置
-        const index = mylog.tagsAll.findIndex(l => l.logtime <= log.logtime)
-        // 如果没有找到（也就是新元素的 logtime 是最大的），就将新元素插入到列表的末尾
-        if (index === -1) mylog.tagsAll.push(log)
-        else mylog.tagsAll.splice(index, 0, log)
-      } else {
-        // 获取应该插入到的位置
-        const index = mylog.listAll.findIndex(l => l.logtime <= log.logtime)
-        // 如果没有找到（也就是新元素的 logtime 是最大的），就将新元素插入到列表的末尾
-        if (index === -1) mylog.listAll.push(log)
-        else mylog.listAll.splice(index, 0, log)
-      }
-    },
-    delLog(id: string): Log {
-      const index = mylog.listAll.findIndex(l => l.id === id)
-      if (index === -1) {
-        return mylog.tagsAll.splice(
-          mylog.tagsAll.findIndex(l => l.id === id),
-          1
-        )[0]
-      }
-      return mylog.listAll.splice(index, 1)[0]
-    },
-    editLog(logEdit: Partial<Log>): Log {
-      const log = mylog.getLog(logEdit.id!)!
-      Object.assign(log, logEdit)
-      // 如果修改的是logtime，就先删再加
-      if (logEdit.logtime) mylog.addLog(mylog.delLog(log.id!))
-      return log
     },
   })
 
+  /**
+   * 从all中获取真实的log对象
+   * @param id log的id
+   * @return 返回log对象，没找到就undefined
+   */
+  const getLog = (log: LogEdit) => mylog.listAll.find(l => l.id === log.id)
+
+  /**
+   * 添加单个log，目前用于发布后。
+   * 独立addLog方法，判断log应该加入哪个列表
+   * home和logger是分页查询，会被public影响
+   * @param log log对象
+   */
+  const addLog = (log: Log) => {
+    // 如果是tag
+    if (log.type === 'tag') {
+      const i = tags.listAll.findIndex(l => l.logtime <= log.logtime)
+      if (i === -1) tags.listAll.push(log) // 没有找到，插入末尾
+      else tags.listAll.splice(i, 0, log) // 插入
+      return
+    }
+    // 如果是public，会影响home和logger，重置两个
+    if (log.type === 'public') {
+      home.list = []
+      home.params.skip = 0
+      home.loading = true
+      home.noMore = false
+      logger.list = []
+      logger.params.skip = 0
+      logger.loading = true
+      logger.noMore = false
+    }
+    // 最后无论如何都要插入mylog的
+    const i = mylog.listAll.findIndex(l => l.logtime <= log.logtime)
+    // 如果没有找到（也就是新元素的 logtime 是最大的），就将新元素插入到列表的末尾
+    if (i === -1) mylog.listAll.push(log)
+    else mylog.listAll.splice(i, 0, log)
+  }
+
+  /**
+   * 删除单个log
+   * @param log 必须要包含id，和其他对象
+   * @return 返回被删除的log
+   */
+  const delLog = (log: LogEdit) => {
+    if (!log.id) return
+    let i: number
+    if (log.type === 'tag') {
+      i = tags.listAll.findIndex(l => l.id === log.id)
+      return tags.listAll.splice(i, 1)[0]
+    }
+    // 如果是公开的，就去两个地方删除，没有就不管
+    if (log.type === 'public') {
+      i = home.list.findIndex(l => l.id === log.id)
+      if (i !== -1) home.list.splice(i, 1)
+      i = logger.list.findIndex(l => l.id === log.id)
+      if (i !== -1) logger.list.splice(i, 1)
+    }
+    i = mylog.listAll.findIndex(l => l.id === log.id)
+    return mylog.listAll.splice(i, 1)[0]
+  }
+
+  /**
+   * 编辑单个log，逻辑是先删掉，浅覆盖，再添加
+   * 所以现在的逻辑是 先通过id找到这个元素，然后修改，如果修改了logtime再删除添加
+   * @param logEdit 一定要有id
+   * @return 编辑的log
+   */
+  const editLog = (logEdit: LogEdit) => {
+    const log = logStore.getLog(logEdit)!
+    Object.assign(log, logEdit)
+    // 如果修改的是logtime，就先删再加
+    if (logEdit.logtime) addLog(delLog(log)!)
+    return log
+  }
+
   return {
-    home,
-    mylog,
+    home, // 首页
+    logger, // 个人主页
+    mylog, // 记录页
+    tags, // 日历页-
+    getLog,
+    addLog,
+    delLog,
+    editLog,
   }
 })
 
@@ -284,7 +350,7 @@ export const rlsLog = (
     return releaseLog({ logJson: JSON.stringify(log) }).then(id => {
       if (id !== '0') {
         log.id = id
-        logStore.mylog.addLog(log)
+        logStore.addLog(log)
         ElMessage({ message: '发布成功：' + log.id, type: 'success' })
         return log
       }
@@ -303,7 +369,7 @@ export const editLog = (
   logEdit: LogEdit & { id: string },
   params: COS.UploadFilesParams = { files: [] }
 ): Promise<number> => {
-  const logOld = logStore.mylog.getLog(logEdit.id)!
+  const logOld = logStore.getLog(logEdit)!
 
   // 记录一下要上传的文件的Key，后面要去除
   const uploadImgs = params.files.map(i => i.Key)
@@ -334,7 +400,7 @@ export const editLog = (
       return updateLog({ logJson: JSON.stringify(logEdit) }).then(count => {
         if (count === 1) {
           ElMessage({ message: '编辑成功', type: 'success' })
-          logStore.mylog.editLog(logEdit)
+          logStore.editLog(logEdit)
         }
         return count
       })
@@ -374,7 +440,7 @@ export const delLog = async (log: Log): Promise<Log> => {
     .then(data => {
       return deleteLog({ id: log.id! }).then(count => {
         ElMessage({ message: '删除成功', type: 'success' })
-        logStore.mylog.delLog(log.id!)
+        logStore.delLog(log)
         return log
       })
     })

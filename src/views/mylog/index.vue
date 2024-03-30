@@ -4,8 +4,11 @@ import useLogStore from '@/stores/log'
 
 const router = useRouter()
 const route = useRoute()
-const Mylog = useLogStore().mylog
-getUser.then(user => Mylog.getLogs!(), null) // 进入页面再获取数据
+const Log = useLogStore()
+getUser.then(user => {
+  Log.mylog.getLogs()
+  Log.tags.getLogs()
+}, null) // 进入页面再获取数据
 
 const tab = computed<string>({
   get: () => route.name as string,

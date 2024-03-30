@@ -6,7 +6,7 @@ import { delLog, rlsLog } from '@/stores/log'
 import useLogStore from '@/stores/log'
 
 const Setting = useUserStore().setting
-const Mylog = useLogStore().mylog
+const Tags = useLogStore().tags
 
 // { "isSelected": true, "type": "current-month", "day": "2022-10-26", "date": "2022-10-26T01:21:04.150Z" }
 const valueCalendar = ref<Date>(new Date()) // 日历选中的日期
@@ -48,7 +48,7 @@ const tabNoteClose = (tag: Log) => {
             {{ dayjs(data.date).format('D') }}<br />
             <div class="cell-tags">
               <ElTag
-                v-for="tag in Mylog.tagsAll.filter(tag =>
+                v-for="tag in Tags.listAll.filter(tag =>
                   tag.logtime.isSame(dayjs(data.date), 'day')
                 )"
                 :key="tag.content"
