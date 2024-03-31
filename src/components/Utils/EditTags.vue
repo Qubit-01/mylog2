@@ -1,11 +1,11 @@
 <!-- 
   EditTags
-  封装的编辑tags控件
+  封装的编辑tags控件，默认可删除，可添加，无重复
   默认传入的列表是不重复的
  -->
 <script setup lang="ts">
 const tags = defineModel<string[]>({ required: true })
-const { label, size, repeatable, clickTag, closable } = defineProps<{
+const { label, size, repeatable, clickTag, noClose, noNew } = defineProps<{
   /**
    * 组件前面的文字
    */
@@ -25,7 +25,11 @@ const { label, size, repeatable, clickTag, closable } = defineProps<{
   /**
    * 是否可以删除
    */
-  closable?: boolean
+  noClose?: boolean
+  /**
+   * 是否不可以加，没有删除按钮，没有添加按钮
+   */
+  noNew?: boolean
 }>()
 
 const inputVisible = ref(false)
@@ -66,32 +70,35 @@ const inputConfirm = () => {
       v-for="tag in tags"
       :key="tag"
       class="tag"
-      :closable
+      :closable="!noClose"
       @close="del(tag)"
       @click="clickTag && clickTag(tag)"
       :size
     >
       {{ tag }}
     </ElTag>
+    <template v-if="!noNew">
+      <ElInput
+        v-if="inputVisible"
+        ref="inputDom"
+        v-model="inputValue"
+        maxlength="20"
+        :size="size === 'large' ? '' : 'small'"
+        @keyup.enter="inputConfirm"
+        @blur="inputConfirm"
+        style="width: 100px"
+      />
+      <ElButton
+        v-else
+        :size="size === 'large' ? '' : 'small'"
+        @click="showInput"
+        style="width: 100px"
+      >
+        + New Tag
+      </ElButton>
+    </template>
 
-    <ElInput
-      v-if="inputVisible"
-      ref="inputDom"
-      v-model="inputValue"
-      maxlength="20"
-      :size="size === 'large' ? '' : 'small'"
-      @keyup.enter="inputConfirm"
-      @blur="inputConfirm"
-      style="width: 100px"
-    />
-    <ElButton
-      v-else
-      :size="size === 'large' ? '' : 'small'"
-      @click="showInput"
-      style="width: 100px"
-    >
-      + New Tag
-    </ElButton>
+    <slot name="tail"></slot>
   </div>
 </template>
 

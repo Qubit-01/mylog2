@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import MainView from '../views/MainView.vue'
-import useGlobalStore from '@/stores/global'
+import LoginView from '../views/login/index.vue'
+// import HomeView from '../views/home/index.vue'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -92,7 +93,7 @@ const router = createRouter({
     },
     {
       path: '/login',
-      component: () => import('../views/login/index.vue'),
+      component: LoginView,
       children: [
         {
           path: '',

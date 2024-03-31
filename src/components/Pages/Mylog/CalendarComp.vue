@@ -10,6 +10,7 @@ const Tags = useLogStore().tags
 
 // { "isSelected": true, "type": "current-month", "day": "2022-10-26", "date": "2022-10-26T01:21:04.150Z" }
 const valueCalendar = ref<Date>(new Date()) // 日历选中的日期
+const inputValue = ref('')
 
 // 给选中日期绑定对应tag
 const clickTag = (tag: string) => {
@@ -18,6 +19,18 @@ const clickTag = (tag: string) => {
     content: tag,
     type: 'tag',
   })
+}
+
+// 临时添加框提交
+const inputConfirm = () => {
+  if (inputValue.value) {
+    rlsLog({
+      logtime: dayjs(valueCalendar.value),
+      content: inputValue.value,
+      type: 'tag',
+    })
+  }
+  inputValue.value = ''
 }
 
 // 点击日历格子里的标签关闭
@@ -32,14 +45,24 @@ const tabNoteClose = (tag: Log) => {
     <!-- {{dayjs(valueCalendar).format("YYYY-MM-DD HH:mm:ss")}} -->
 
     <div class="calendar-main" v-m>
-      <div>
-        <EditTags
-          v-model="Setting.mylog.calendarTags"
-          :clickTag="clickTag"
-          size="large"
-          closable
-        />
-      </div>
+      <EditTags
+        v-model="Setting.mylog.calendarTags"
+        :clickTag="clickTag"
+        size="large"
+        no-close
+        no-new
+      >
+        <template #tail>
+          <ElInput
+            placeholder="临时添加"
+            v-model="inputValue"
+            maxlength="20"
+            @keyup.enter="inputConfirm"
+            @blur="inputConfirm"
+            style="width: 100px"
+          />
+        </template>
+      </EditTags>
       <!-- 日历 -->
       <ElCalendar v-model="valueCalendar">
         <!-- 单元格 -->

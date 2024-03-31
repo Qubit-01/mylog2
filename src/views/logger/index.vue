@@ -39,7 +39,9 @@ const tab = computed<string>({
           </div>
           <div v-if="isExpand" class="more">
             <div>info: {{ User.info }}</div>
-            <div>setting: {{ User.setting }}</div>
+            <div>setting.mylog: {{ User.setting.mylog }}</div>
+            <div>setting.page: {{ User.setting.page }}</div>
+            <div>setting: {{ Object.keys(User.setting) }}</div>
           </div>
         </div>
         <ElButton

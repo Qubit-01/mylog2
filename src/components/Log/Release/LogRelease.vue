@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import type {
-  KeyFile,
-  LogEdit,
-  LogFileItem,
-  LogFiles,
-  LogItem,
-} from '@/types'
+import type { KeyFile, LogEdit, LogFileItem, LogFiles, LogItem } from '@/types'
 import { logInit, rlsLog } from '@/stores/log'
 import { getCosFiles } from '@/utils/cos'
 import { cloneDeep } from 'lodash'
@@ -139,7 +133,7 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
     </div>
 
     <div v-if="visible.tags">
-      <EditTags v-model="logEdit.tags!" closable />
+      <EditTags v-model="logEdit.tags!" />
     </div>
 
     <div v-if="visible.imgs">
