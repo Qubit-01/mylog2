@@ -22,7 +22,7 @@ interface UserStroe extends User {
   isLogined: boolean
 }
 
-export const useUserStore: () => UserStroe = defineStore('user', () => {
+export const useUserStore = defineStore('user', () => {
   // 当前默认用户数据，这里下面用了toRefs，所以要在这里把全部属性定义好
   const user = reactive<User>({
     id: '0',

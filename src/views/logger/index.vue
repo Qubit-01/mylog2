@@ -27,7 +27,7 @@ const tab = computed<string>({
         <div class="img"><img :src="User.img" /></div>
         <div class="text">
           <div class="name">
-            {{ User.name }}廖世强
+            {{ User.name }}
             <span class="info">
               <span>{{ User.id }}</span>
               <span>{{ User.info.sex }}</span>
@@ -36,10 +36,10 @@ const tab = computed<string>({
           </div>
           <div class="info">
             <div>{{ User.info.text }}</div>
-            <!-- <div>{{ User.setting }}</div> -->
           </div>
           <div v-if="isExpand" class="more">
-            {{ User }}
+            <div>info: {{ User.info }}</div>
+            <div>setting: {{ User.setting }}</div>
           </div>
         </div>
         <ElButton
