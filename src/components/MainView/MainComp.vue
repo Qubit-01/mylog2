@@ -13,6 +13,7 @@
       </div>
       <div class="left">
         <UserLan />
+        <NoteLan />
       </div>
       <div class="right">
         <OneSentence />
@@ -58,6 +59,9 @@
 
     .left,
     .right {
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
       >* {
         border-radius: var(--border-radius);
       }

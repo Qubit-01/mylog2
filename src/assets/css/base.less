@@ -1,8 +1,12 @@
 /**
  * :root 是全局的，无关明暗主题的
  * html 和 html.dark 是单独为主题设置的
+ * 日间模式时，要覆盖element样式要加在:root中，要覆盖dark样式要加在html.dark中
+ * element是日间模式全加在 :root 中，如果开了dark，就用html.dark去覆盖
  */
+
 :root {
+  /* 无关主题，通用样式========================= */
   /* 各个模块间的间距 */
   --gap: 20px;
   /* 页面宽度在最大挡位时的宽度 */
@@ -31,11 +35,14 @@
     /* 主体内容的上边距 */
     --header-top: calc((var(--header-height) * 2) + var(--gap));
   }
-}
 
-html {
+  /* light下的样式========================= */
+
   --body-background-color: #ccc;
-  --body-background-image: url(https://pic1.zhimg.com/v2-8a4275beeee5d3798a647db30b96e9d8_r.jpg);
+  --body-background-image: url(https://cos.mylog.cool/web-files/bg-light.jpg);
+
+  /* 二级字体颜色 */
+  --color-2: #111a;
 
   /* -m 模块 */
   // --m-background-color: #eee5;
@@ -49,14 +56,16 @@ html {
   /* 滚动滑块颜色 */
   --scrollbar-thumb-background: #999a;
 
-  /* 覆盖El的样式 */
-  // --el-fill-color-blank: #fff8;
-  // --el-fill-color-lighter: #fff1;
+  /* 修改element一些的样式 */
+  --el-fill-color-blank: #fff5;
 }
 
 html.dark {
   --body-background-color: #333;
-  --body-background-image: url(https://cos.mylog.cool/web-files/1666594529103-6.jpg);
+  --body-background-image: url(https://cos.mylog.cool/web-files/bg-dark.jpg);
+
+  /* 二级字体颜色 */
+  --color-2: #eeea;
 
   /* -m 模块 */
   --m-background-color: #4444;
@@ -68,6 +77,9 @@ html.dark {
   --scrollbar-background: #3335;
   /* 滚动滑块颜色 */
   --scrollbar-thumb-background: #333a;
+
+  /* 修改element一些的样式 */
+  --el-fill-color-blank: #6667;
 }
 
 /* 中间模块通用 */

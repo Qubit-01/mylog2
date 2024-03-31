@@ -30,7 +30,7 @@ import type {
   LogItem,
 } from '@/types'
 import { fileType, logFileItem } from '@/stores/log'
-import { getExifByFile, compressImg } from '@/utils/img'
+import { compressImg, getExif, getLnglatByExif } from '@/utils/img'
 import AMap, { l2v } from '@/utils/map'
 import { getKey, toFileUrl } from '@/utils/cos'
 
@@ -93,20 +93,18 @@ const handleImg = async (file: LogImgFile) => {
   if (!file.url) file.url = URL.createObjectURL(raw)
 
   // exifdata 直接被写入了file.raw中
-  await getExifByFile(raw)
+  await getExif(raw)
 
   // raw原始文件，compressImg压缩文件，compressImg95轻微压缩
   count.value++
   compressImg(raw).then((res: any) => {
     res.exifdata = raw.exifdata
-    res.iptcdata = raw.iptcdata
     file.compressImg = res
     count.value--
   })
   count.value++
   compressImg(raw, 0.98).then((res: any) => {
     res.exifdata = raw.exifdata
-    res.iptcdata = raw.iptcdata
     file.compressImg95 = res
     count.value--
   })
@@ -138,9 +136,11 @@ const useExif = () => {
 
     if (!flag.logtime) {
       let dateTime =
-        exif.DateTimeOriginal || // 照片在被拍下来的日期/时间，通常和DateTime一样
-        exif.DateTime || // 图像最后一次被修改时的日期/时间 "YYYY:MM:DD HH:MM:SS"
-        exif.DateTimeDigitized // 照片被数字化时的日期/时间
+        exif.DateTimeOriginal.value[0] || // 照片在被拍下来的日期/时间，通常和DateTime一样
+        exif.DateTime.value[0] || // 图像最后一次被修改时的日期/时间 "YYYY:MM:DD HH:MM:SS"
+        exif.DateTimeDigitized.value[0] // 照片被数字化时的日期/时间
+
+      console.log(dateTime)
       if (dateTime) {
         // 'YYYY:MM:DD HH:MM:SS' 转为 'YYYY-MM-DD HH:mm:ss'
         dateTime = dateTime.replace(':', '-').replace(':', '-')
@@ -150,12 +150,11 @@ const useExif = () => {
     }
 
     if (!flag.location) {
-      let [lng, lat] = [exif.GPSLongitude, exif.GPSLatitude]
+      let [lng, lat] = [exif.GPSLongitude.value, exif.GPSLatitude.value]
       if (lng && lat) {
-        lng = lng[0] + lng[1] / 60 + lng[2] / 3600
-        lat = lat[0] + lat[1] / 60 + lat[2] / 3600
+        const lnglat = getLnglatByExif(lng, lat)
         // 图片里面是GPS坐标，要转
-        AMap.convertFrom([lng, lat], 'gps', (status: string, result: any) => {
+        AMap.convertFrom(lnglat, 'gps', (status: string, result: any) => {
           // status：complete 查询成功，no_data 无结果，error 错误
           // 查询成功时，result.locations 即为转换后的高德坐标系
           if (status === 'complete' && result.info === 'ok') {

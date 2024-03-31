@@ -26,10 +26,7 @@ watch(files, () => {
 const download = (file: string) => {
   const key = cosPath(log.userid) + 'files/' + file
   // console.log(key)
-  myGetObjectUrl(key).then(url => {
-    // console.log(url)
-    window.open(url)
-  })
+  myGetObjectUrl(key)
 }
 </script>
 

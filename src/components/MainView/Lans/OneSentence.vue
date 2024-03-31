@@ -12,8 +12,8 @@ onMounted(getHitoketo)
 
 <template>
   <div class="one-sentence" @click="getHitoketo()" v-m>
-    <div class="tittle">一言</div>
-    <div class="lanitems">{{ hitokoto }}</div>
+    <div class="title">一言</div>
+    <div class="items">{{ hitokoto }}</div>
   </div>
 </template>
 
@@ -26,7 +26,7 @@ onMounted(getHitoketo)
   padding: var(--border-radius);
   font-size: 14px;
 
-  .tittle {
+  .title {
     font-weight: bolder;
     margin-bottom: 8px;
   }

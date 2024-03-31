@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { signin } from '@/api/user'
-import useGlobalStore from '@/stores/global'
 import { baseURL } from '@/stores/constant'
 
-const Global = useGlobalStore()
-const User = Global.user
 const router = useRouter()
 
 const captchaDom = ref<HTMLImageElement | null>(null)
@@ -79,7 +76,7 @@ const doSignin = async () => {
           <img ref="captchaDom" alt="验证码看不清，换一张" @click="changeImg" />
         </div>
 
-        <ElButton @click="doSignin">登录</ElButton>
+        <ElButton @click="doSignin" size="large">登录</ElButton>
         <div class="toSignin">
           有账号？
           <RouterLink to="/login" replace>去登录</RouterLink>

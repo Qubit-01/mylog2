@@ -25,6 +25,8 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(ElementPlus, { locale: zhCn })
 app.use(router)
+
+
 // 注册所有element图标组件
 for (const [k, c] of Object.entries(Icons)) app.component(k, c)
 // 注册指令：给元素加-m的class

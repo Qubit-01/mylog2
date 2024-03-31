@@ -1,18 +1,9 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import type {
-  KeyFile,
-  Log,
-  LogEdit,
-  LogFileItem,
-  LogFiles,
-  LogItem,
-} from '@/types'
-import { Bucket, Region } from '@/stores/constant'
+import type { KeyFile, LogEdit, LogFileItem, LogFiles, LogItem } from '@/types'
 import { logInit, rlsLog } from '@/stores/log'
+import { getCosFiles } from '@/utils/cos'
 import { cloneDeep } from 'lodash'
-import { cosPath, getCosFiles } from '@/utils/cos'
-import type COS from 'cos-js-sdk-v5'
 
 // 换一种方式，父组件管理files，不再用组件暴露的files了，主要是为了一个组件上传其他类型文件可以兼容
 const files = reactive<LogFiles>({

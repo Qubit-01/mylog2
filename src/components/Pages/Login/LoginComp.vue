@@ -1,30 +1,40 @@
 <script setup lang="ts">
 import type { User } from '@/types'
-import { loginPswd } from '@/api/user'
+import { login } from '@/api/user'
 import useGlobalStore from '@/stores/global'
-import { deepMerge } from '@/utils'
+import { appId, redirectURI } from '@/utils/QQConnect'
 
 const Global = useGlobalStore()
-const User = Global.user
-const router = useRouter()
+const route = useRoute()
 
-const login = reactive({
+const loginData = reactive({
   name: '',
   pswd: '',
 })
 
 const doLogin = async () => {
   let user: User
-  user = await loginPswd(login)
+  user = await login(loginData)
   if (user) {
     ElMessage.success(`欢迎你，${user.name} ！`)
-    router.push('/').then(a => {
-      deepMerge(User, user!)
-      localStorage.setItem('token', user!.token!)
-    })
+    Global.token = user.token!
+    // 跳转并刷新
+    location.replace('/#' + (route.query.redirect || ''))
+    location.reload()
   } else {
     ElMessage.error('用户名或密码错误')
   }
+}
+
+/**
+ * QQ登录
+ */
+const qqLogin = () => {
+  // 防止CSRF攻击的随机参数，必传，登录成功之后会回传，最好后台自己生成然后校验合法性
+  let state = 'login'
+  location.href = `https://graph.qq.com/oauth2.0/authorize?response_type=token&client_id=${appId}&redirect_uri=${encodeURIComponent(
+    redirectURI
+  )}&state=${state}`
 }
 </script>
 
@@ -33,11 +43,20 @@ const doLogin = async () => {
     <div class="title">登录</div>
 
     <div class="login">
-
       <form>
-        <input v-model="login.name" placeholder="用户名" type="text" autocomplete="on" />
-        <input v-model="login.pswd" placeholder="密码" type="password" autocomplete="on" />
-        <ElButton @click="doLogin">登录</ElButton>
+        <input
+          v-model="loginData.name"
+          placeholder="用户名"
+          type="text"
+          autocomplete="on"
+        />
+        <input
+          v-model="loginData.pswd"
+          placeholder="密码"
+          type="password"
+          autocomplete="on"
+        />
+        <ElButton @click="doLogin" size="large">登录</ElButton>
         <div class="toSignin">
           没有账号？
           <RouterLink to="/login/signin" replace>去注册</RouterLink>
@@ -51,12 +70,21 @@ const doLogin = async () => {
           <div></div>
         </div>
         <div class="icons">
-          <img src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/wechat.png" alt="QQ登录">
-          <img src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/weibo.png" alt="QQ登录">
-          <img src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/qq.png" alt="QQ登录">
+          <img
+            src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/wechat.png"
+            alt="微信登录"
+          />
+          <img
+            src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/weibo.png"
+            alt="微博登录"
+          />
+          <img
+            @click="qqLogin"
+            src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/qq.png"
+            alt="QQ登录"
+          />
         </div>
       </div>
-
     </div>
   </StructLogin>
 </template>
@@ -68,14 +96,13 @@ const doLogin = async () => {
   margin-bottom: 20px;
 }
 
-
 .login {
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 
-  >form {
+  > form {
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -96,8 +123,7 @@ const doLogin = async () => {
       &:-webkit-autofill:focus,
       &:-webkit-autofill:active {
         -webkit-transition-delay: 99999s;
-        -webkit-transition:
-          color 99999s ease-out,
+        -webkit-transition: color 99999s ease-out,
           background-color 99999s ease-out;
       }
 
@@ -113,7 +139,7 @@ const doLogin = async () => {
   }
 
   // 选中最后一个div
-  >div:last-child {
+  > div:last-child {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -123,11 +149,11 @@ const doLogin = async () => {
       align-items: center;
       opacity: 0.6;
 
-      >span {
+      > span {
         margin: 0 20px;
       }
 
-      >div {
+      > div {
         display: inline-block;
         height: 0;
         flex: 1;

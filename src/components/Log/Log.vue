@@ -54,7 +54,7 @@ const expand = () => {
     </template>
 
     <div class="tags">
-      <!-- <ElTag v-if="log.type != 'log'" size="small" type="warning">公开</ElTag> -->
+      <!-- <ElTag v-if="log.type === 'public'" size="small" type="warning">公开</ElTag> -->
       <ElTag v-for="p in log.people" :key="p" size="small">{{ p }}</ElTag>
       <ElTag v-for="t in log.tags" :key="t" size="small" type="success">
         {{ t }}
@@ -152,11 +152,13 @@ const expand = () => {
   .bottom {
     display: flex;
     gap: 4px;
+    font-size: 0.9rem;
+    color: var(--color-2);
   }
 
   .buttons {
     position: absolute;
-    top: -20px;
+    top: -26px;
     right: var(--padding);
   }
 }

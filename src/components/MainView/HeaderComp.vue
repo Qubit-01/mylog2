@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { BucketCDN } from '@/stores/constant'
-import useGlobalStore from '@/stores/global'
-const Global = useGlobalStore()
-const User = Global.user
+import useUserStore from '@/stores/user'
+const User = useUserStore()
 const router = useRouter()
 </script>
 
@@ -17,14 +16,16 @@ const router = useRouter()
           </div>
         </div>
         <nav>
-          <RouterLink to="/logger">主页</RouterLink>
           <!-- 我的主页（别人看见的） -->
-          <RouterLink to="/mylog">记录</RouterLink>
+          <RouterLink to="/logger" v-overflowEllipsis>主页</RouterLink>
           <!-- 我的记录（自己看见的） -->
-          <RouterLink to="/map">地图</RouterLink>
+          <RouterLink to="/mylog" v-overflowEllipsis>记录</RouterLink>
+          <RouterLink to="/album" v-overflowEllipsis>相册</RouterLink>
+          <RouterLink to="/map" v-overflowEllipsis>地图</RouterLink>
+          <RouterLink to="/relation" v-overflowEllipsis>人脉</RouterLink>
         </nav>
         <div class="right">
-          <div v-if="Global.isLogined" class="user">{{ User.name }}</div>
+          <div v-if="User.isLogined" class="user">{{ User.name }}</div>
           <RouterLink v-else to="/login">去登录</RouterLink>
           <ThemeSwitch />
         </div>
@@ -80,7 +81,7 @@ const router = useRouter()
       > .left {
         .logo {
           position: relative;
-          font-size: 22px;
+          font-size: 1.5rem;
           width: var(--lan-width);
           height: var(--header-height);
           padding-left: 20px;
@@ -127,6 +128,7 @@ const router = useRouter()
 
         > nav {
           order: 2;
+          font-size: 1rem;
         }
       }
     }
