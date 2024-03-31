@@ -25,6 +25,8 @@ const curTab = ref('user')
             <ElDatePicker
               v-model="User.info.birth"
               type="date"
+              :clearable="false"
+              :editable="false"
               placeholder="选择你的生日"
               value-format="YYYY-MM-DD"
             />
@@ -65,10 +67,7 @@ const curTab = ref('user')
             </ElRadioGroup>
           </ElFormItem>
           <ElFormItem label="日历标签">
-            <EditTags
-              v-model="Setting.mylog.calendarTags"
-              size="large"
-            />
+            <EditTags v-model="Setting.mylog.calendarTags" size="large" />
           </ElFormItem>
         </ElForm>
       </ElTabPane>
