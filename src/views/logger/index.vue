@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { BucketCDN } from '@/stores/constant'
-import useUserStore from '@/stores/user'
+import useUserStore, { logout } from '@/stores/user'
 import { ArrowDownBold, ArrowUpBold } from '@element-plus/icons-vue'
 
 const User = useUserStore()
@@ -22,9 +22,12 @@ const tab = computed<string>({
     <div class="logger-model" v-m>
       <div class="carousel">
         <img :src="BucketCDN + 'web-files/carousel-0.jpg'" />
+        <div class="logout" @click="logout()">退出登录</div>
       </div>
       <div class="logger-info">
-        <div class="img"><img :src="User.img" /></div>
+        <div class="img">
+          <img :src="User.img" />
+        </div>
         <div class="text">
           <div class="name">
             {{ User.name }}
@@ -77,10 +80,23 @@ const tab = computed<string>({
     // 背景图片
     .carousel {
       height: 270px;
+      position: relative;
       img {
         height: 100%;
         width: 100%;
         object-fit: cover;
+      }
+      .logout {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+
+        border-radius: var(--border-radius);
+        padding: 8px 12px;
+        background-color: var(--m-background-color);
+        backdrop-filter: blur(16px);
+
+        cursor: pointer;
       }
     }
 

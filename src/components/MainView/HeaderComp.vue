@@ -25,7 +25,7 @@ const router = useRouter()
           <RouterLink to="/relation" v-overflowEllipsis>人脉</RouterLink>
         </nav>
         <div class="right">
-          <div v-if="User.isLogined" class="user">{{ User.name }}</div>
+          <div v-if="User.isLogined" class="user" @click="router.push('/logger')">{{ User.name }}</div>
           <RouterLink v-else to="/login">去登录</RouterLink>
           <ThemeSwitch />
         </div>

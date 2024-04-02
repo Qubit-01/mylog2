@@ -17,6 +17,7 @@ const share: AllStore & PageStore = reactive({
     const data = await getMylogs({ share: route.query.share as string })
     data.forEach(handleLog)
     share.listAll = data
+    share.addLogs()
     share.loading = false
   },
   addLogs: async () => {

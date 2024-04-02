@@ -1,10 +1,25 @@
 <script setup lang="ts">
-
 import useLogStore from '@/stores/log'
+import type { Log } from '@/types'
 const Mylog = useLogStore().mylog
 
 // 拿到编辑的数据
 const logReleaseDom = ref()
+
+// 要对数据进行重组，在组件里面进行
+// const showList = computed(() => {
+//   const res: Log[][] = []
+//   let temp: Log[] = []
+//   Mylog.list.forEach((log, i) => {
+//     if (i === 0 || log.logtime.isSame(Mylog.list[i - 1].logtime, 'day')) {
+//       temp.push(log)
+//     } else {
+//       res.push(temp)
+//       temp = [log]
+//     }
+//   })
+//   return res
+// })
 </script>
 
 <template>
@@ -28,19 +43,25 @@ const logReleaseDom = ref()
 
       <!-- 时间线开始 -->
       <template v-for="(log, i) in Mylog.list">
+        <!-- 年份节点 -->
         <ElTimelineItem
-          v-if="i != 0 && log.logtime!.year() !== Mylog.list[i - 1].logtime!.year()"
+          v-if="i == 0 || !log.logtime!.isSame(Mylog.list[i - 1].logtime!, 'year')"
           :timestamp="log.logtime!.year().toString()"
-          type="danger"
+          type="success"
+          size="large"
           placement="top"
         />
 
+        <!-- 日期节点 -->
         <ElTimelineItem
-          :timestamp="log.logtime!.format('YYYY-MM-DD HH:mm')"
-          :type="log.type === 'public' ? 'warning' : undefined"
+          v-if="i == 0 || !log.logtime!.isSame(Mylog.list[i - 1].logtime!, 'day')"
+          :timestamp="log.logtime!.format('YYYY-MM-DD')"
           placement="top"
-        >
-          <LogMylog :log="log" :key="log.id" />
+        />
+
+        <!-- Log节点  :color="log.type === 'public' ? 'var(--el-color-warning)' : 'transparent'"-->
+        <ElTimelineItem hide-timestamp center color="transparent">
+          <LogMylog :log="log" />
         </ElTimelineItem>
       </template>
 
