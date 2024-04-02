@@ -134,7 +134,7 @@ const expand = () => {
   }
 
   .block-media {
-    --block-height: 100px;
+    --block-height: 6rem;
     --block-border-radius: 6px;
     --block-gap: 2px;
 
