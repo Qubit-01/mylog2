@@ -72,23 +72,6 @@ export const signin = (data: {
   })
 }
 
-/**
- * 更新用户设置 user/update_img
- *
- * @augments setting 用户设置的JSON字符串
- * @return 受影响的条数
- */
-export const updateImg = (data: {
-  token?: string
-  img: string
-}): Promise<number> => {
-  return request({
-    url: 'user/update_img',
-    method: 'post',
-    data: { token: localStorage.getItem('token'), ...data },
-  })
-}
-
 
 /**
  * 更新用户设置 user/update_setting
@@ -102,23 +85,6 @@ export const updateSetting = (data: {
 }): Promise<number> => {
   return request({
     url: 'user/update_setting',
-    method: 'post',
-    data: { token: localStorage.getItem('token'), ...data },
-  })
-}
-
-/**
- * 更新用户openidQ user/update_openid_q
- *
- * @augments setting 用户设置的JSON字符串
- * @return 受影响的条数
- */
-export const updateOpenidQ = (data: {
-  token?: string
-  openidQ: string
-}): Promise<number> => {
-  return request({
-    url: 'user/update_openid_q',
     method: 'post',
     data: { token: localStorage.getItem('token'), ...data },
   })

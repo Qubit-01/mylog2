@@ -15,7 +15,7 @@
  -->
 <script setup lang="ts">
 import QC from '@/utils/QQConnect'
-import { haveUser, login, signin, updateOpenidQ, updateUser } from '@/api/user'
+import { haveUser, login, signin, updateUser } from '@/api/user'
 import { ArrowLeftBold } from '@element-plus/icons-vue'
 import { baseURL } from '@/stores/constant'
 
