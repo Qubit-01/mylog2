@@ -2,6 +2,7 @@
 import useLogStore from '@/stores/log'
 import type { Log } from '@/types'
 const Mylog = useLogStore().mylog
+const Tags = useLogStore().tags
 
 // 拿到编辑的数据
 const logReleaseDom = ref()
@@ -57,7 +58,19 @@ const logReleaseDom = ref()
           v-if="i == 0 || !log.logtime!.isSame(Mylog.list[i - 1].logtime!, 'day')"
           :timestamp="log.logtime!.format('YYYY-MM-DD')"
           placement="top"
-        />
+        >
+          <!-- closable @close="tabNoteClose(tag)" -->
+          <div class="tags">
+            <ElTag
+              v-for="tag in Tags.listAll.filter(tag =>
+                tag.logtime.isSame(log.logtime, 'day')
+              )"
+              :key="tag.content"
+            >
+              {{ tag.content }}
+            </ElTag>
+          </div>
+        </ElTimelineItem>
 
         <!-- Log节点  :color="log.type === 'public' ? 'var(--el-color-warning)' : 'transparent'"-->
         <ElTimelineItem hide-timestamp center color="transparent">
@@ -88,6 +101,11 @@ const logReleaseDom = ref()
     padding: var(--padding);
     border-radius: var(--border-radius);
     // backdrop-filter: blur(4px);
+  }
+
+  .tags {
+    display: flex;
+    gap: 8px;
   }
 
   .loading {
