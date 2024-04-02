@@ -30,6 +30,8 @@ export const getMylogs = (data: {
   token?: string
   skip?: number
   limit?: number
+} | {
+  share: string
 }): Promise<Log[]> => {
   return request({
     url: 'log/get_mylogs',
@@ -108,6 +110,21 @@ export const deleteLog = (data: {
 }): Promise<number> => {
   return request({
     url: 'log/delete_log',
+    method: 'post',
+    data: { token: Global.token, ...data },
+  })
+}
+
+/**
+ * 获取link密文
+ * 
+ */
+export const getShare = (data: {
+  token?: string
+  logIdsJson: string
+}): Promise<string> => {
+  return request({
+    url: 'log/get_share',
     method: 'post',
     data: { token: Global.token, ...data },
   })

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { UploadFiles } from 'element-plus'
-import { fileType, logFileItem } from '@/stores/log'
+import { fileType, logFileItem } from '@/stores/constant'
 import type { KeyFile, LogFileItem } from '@/types'
 import { getKey } from '@/utils/cos'
 

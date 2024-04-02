@@ -75,7 +75,7 @@ export function clone<T>(obj: T): T {
 // }
 
 // 将字符串传入剪贴板
-export function writeClipboard(str: string) {
+export function writeClipboard(str: string): Promise<void> {
   const clipboardObj = navigator.clipboard
   if (!clipboardObj) return Promise.reject('浏览器不支持 navigator.clipboard')
   return clipboardObj.writeText(str)

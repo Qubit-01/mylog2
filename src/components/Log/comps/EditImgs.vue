@@ -29,7 +29,7 @@ import type {
   LogImgFile,
   LogItem,
 } from '@/types'
-import { fileType, logFileItem } from '@/stores/log'
+import { fileType, logFileItem } from '@/stores/constant'
 import { compressImg, getExif, getLnglatByExif } from '@/utils/img'
 import AMap, { l2v } from '@/utils/map'
 import { getKey, toFileUrl } from '@/utils/cos'

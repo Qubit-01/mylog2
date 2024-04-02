@@ -89,6 +89,12 @@ const router = createRouter({
           component: () => import('../views/relation/index.vue'),
           meta: { title: '人脉 - 多元记', requiresAuth: true },
         },
+        {
+          path: 'share',
+          name: 'share', // 分享
+          component: () => import('../views/share/index.vue'),
+          meta: { title: '分享 - 多元记', requiresAuth: true },
+        },
       ],
     },
     {
