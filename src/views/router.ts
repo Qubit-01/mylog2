@@ -26,11 +26,11 @@ const router = createRouter({
         {
           path: '',
           name: 'home', // 主页
-          component: () => import('../views/home/index.vue'),
+          component: () => import('./home/index.vue'),
         },
         {
           path: 'logger', // 我的主页（别人看的）
-          component: () => import('../views/logger/index.vue'),
+          component: () => import('./logger/index.vue'),
           meta: { title: '主页 - 多元记' },
           children: [
             {
@@ -49,7 +49,7 @@ const router = createRouter({
         },
         {
           path: 'mylog', // 我的记录（自己看的）
-          component: () => import('../views/mylog/index.vue'),
+          component: () => import('./mylog/index.vue'),
           meta: { title: '记录 - 多元记', requiresAuth: true },
           children: [
             {
@@ -74,25 +74,25 @@ const router = createRouter({
         {
           path: 'album',
           name: 'album', // 相册
-          component: () => import('../views/album/index.vue'),
+          component: () => import('./album/index.vue'),
           meta: { title: '相册 - 多元记', requiresAuth: true },
         },
         {
           path: 'map',
           name: 'map', // 地图
-          component: () => import('../views/map/index.vue'),
+          component: () => import('./map/index.vue'),
           meta: { title: '地图 - 多元记' },
         },
         {
           path: 'relation',
           name: 'relation', // 人脉
-          component: () => import('../views/relation/index.vue'),
+          component: () => import('./relation/index.vue'),
           meta: { title: '人脉 - 多元记', requiresAuth: true },
         },
         {
           path: 'share',
           name: 'share', // 分享
-          component: () => import('../views/share/index.vue'),
+          component: () => import('./share/index.vue'),
           meta: { title: '分享 - 多元记', requiresAuth: true },
         },
       ],
@@ -124,7 +124,7 @@ const router = createRouter({
     {
       path: '/:pathMatch(.*)*',
       name: '404',
-      component: () => import('../views/404/index.vue'),
+      component: () => import('./404/index.vue'),
       meta: { title: '404 - 多元记' },
     },
   ],
