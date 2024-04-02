@@ -120,7 +120,7 @@ const toggleType = (log: Log) => {
 
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 
   // 空div应该不占用gap
   > div:empty {

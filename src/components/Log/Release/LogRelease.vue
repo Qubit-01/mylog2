@@ -133,7 +133,7 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
     </div>
 
     <div v-if="visible.tags">
-      <EditTags v-model="logEdit.tags!" />
+      <EditTags v-model="logEdit.tags!" select-list />
     </div>
 
     <div v-if="visible.imgs">
