@@ -22,6 +22,11 @@ const changeImg = () => {
 onMounted(changeImg)
 
 const doSignin = async () => {
+  // 普通校验
+  if (!login.name.trim() || !login.pswd.trim() || !pswd2.value.trim()) {
+    ElMessage.error('请输入相关信息')
+    return false
+  }
   // 先确认密码
   if (login.pswd !== pswd2.value) {
     ElMessage.error('两次密码不一致')
@@ -76,7 +81,7 @@ const doSignin = async () => {
           <img ref="captchaDom" alt="验证码看不清，换一张" @click="changeImg" />
         </div>
 
-        <ElButton @click="doSignin" size="large">登录</ElButton>
+        <ElButton @click="doSignin" size="large">注册</ElButton>
         <div class="toSignin">
           有账号？
           <RouterLink to="/login" replace>去登录</RouterLink>

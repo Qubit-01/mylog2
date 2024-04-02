@@ -7,48 +7,64 @@
     让用户输入账号密码
    ② 不是网站用户，启动注册流程
     让用户注册
+
+  https://mylog.cool/#/login/qq-redirect
+  #access_token=C8CB48CFEF31E123EA660E14218B493E
+  &expires_in=7776000
+  &state=login
  -->
 <script setup lang="ts">
 import QC from '@/utils/QQConnect'
-import { haveUser, login } from '@/api/user'
+import { haveUser, login, signin, updateOpenidQ } from '@/api/user'
 import { ArrowLeftBold } from '@element-plus/icons-vue'
+import { baseURL } from '@/stores/constant'
+
 const route = useRoute()
 const state = ref(0)
-const user = reactive({ name: '', pswd: '', pswd2: '', data: {} })
-console.log('🐤', route)
+const user = reactive({ name: '', pswd: '', captcha: '' })
+// 确认密码独立出来
+const pswd2 = ref('')
+const userdata = reactive<{
+  info: any
+  openidQ: string
+  accessToken: string
+}>({
+  info: {},
+  openidQ: '',
+  accessToken: '',
+})
+
+const captchaDom = ref<HTMLImageElement | null>(null)
 
 onMounted(() => {
-  console.log('🐤',QC.Login.check(), QC)
   if (QC.Login.check()) {
     // 如果是登录状态
-    QC.api('get_user_info').success((res: any) => (user.data = res.data)) // 先拿到用户信息
-    if (route.query.state == 'login') {
-      console.log('🐤 登录')
-      // 登录
-      QC.Login.getMe((openid, accessToken) => {
-        // 拿到openId和accessToken
+    QC.api('get_user_info').success((res: any) => {
+      userdata.info = res.data // 用户头像
+      console.log('🐤user info: ', res.data)
+
+      QC.Login.getMe(async (openidQ, accessToken) => {
+        userdata.openidQ = openidQ
+        userdata.accessToken = accessToken
         // accessToken有有效时间，存入浏览器。openId唯一，存入数据库和账号绑定
-        localStorage.setItem('accessToken', accessToken)
-        user.openid = openid
+        // localStorage.setItem('accessToken', accessToken)
         // 先看数据库有没有这个openId
-        myPost('/user/getUsersCountByOpenidQ', { openid }, data => {
-          if (data == 0) {
-            // 没有就说明新人，①选择已有账户 ②新建账户
-            state.value = 1 // 选择
-          } else {
-            // 1说明注册了，返回的是usertoken
-            localStorage.setItem('username', user.name) // 只保存一个临时name
-            localStorage.setItem('usertoken', data)
-            console.log('登录成功')
+        const count = await haveUser({ openidQ })
+        if (count === 0) {
+          state.value = 1 // ①选择已有账户 ②新建账户
+        } else {
+          console.log('🐤找到账号直接登录')
+          login({ openidQ }).then(user => {
+            localStorage.setItem('token', user.token!)
+            // location.replace('/#' + (route.query.redirect || ''))
             location.href = '/'
-          }
-        })
+          })
+        }
       })
-    } else {
-    } // 非登录，可能是绑定
+    })
   } else {
     // 用户没有QQ登录直接进入此页面
-    // location.href = '/#/login'
+    location.replace('/#/login')
   }
 })
 
@@ -64,20 +80,24 @@ const bd = () => {
     pswd: user.pswd,
   }).then(user => {
     const token = user.token
-    if (token == '0') {
+
+    console.log('🐤绑定')
+    if (token) {
+      updateOpenidQ({
+        token,
+        openidQ: userdata.openidQ,
+      }).then(count => {
+        if (count === 1) {
+          ElMessage({ message: '绑定成功', type: 'success' })
+          localStorage.setItem('token', token)
+          location.replace('/')
+        } else {
+          ElMessage({ message: '绑定失败', type: 'error' })
+        }
+      })
+    } else {
       ElMessage.error('用户名或密码不正确')
       return false
-    } else {
-      myPost(
-        '/user/bind_openid',
-        { usertoken: token, openid: user.openid },
-        date => {
-          ElMessage({ message: '绑定成功', type: 'success' })
-          localStorage.setItem('username', user.name)
-          localStorage.setItem('usertoken', token)
-          window.location = '/'
-        }
-      )
     }
   })
 }
@@ -86,59 +106,73 @@ const bd = () => {
 // 获取QQ名作为默认名字，叫他设置用户名（万一被占用了）和密码
 const handleNew = () => {
   state.value = 3
-  user.name = user.data.nickname
+  user.name = userdata.info.nickname
   haveUser({ name: user.name }).then(count => {
     if (count) ElMessage.error('该用户名被占用了哦')
   })
 }
 // 点击注册
-const zc = () => {
+const zc = async () => {
   // 普通校验
-  if (!user.name.trim() || !user.pswd.trim() || !user.pswd2.trim()) {
+  if (!user.name.trim() || !user.pswd.trim() || !pswd2.value.trim()) {
     ElMessage.error('请输入相关信息')
     return false
   }
-  if (user.pswd.trim() != user.pswd2.trim()) {
+  if (user.pswd.trim() != pswd2.value.trim()) {
     ElMessage.error('两次密码不一致')
     return false
   }
+  const userid = await signin(user)
+  console.log(userid)
+  if (userid === 0) {
+    ElMessage.error('用户名已存在')
+    return
+  }
+  if (userid === -1) {
+    ElMessage.error('验证码错误')
+    return
+  }
 
-  haveUser({ name: user.name.trim() }).then(count => {
-    if (count) {
-      ElMessage.error('该用户名被占用了哦')
-      return false
-    } else {
-      // 没被占用，可以注册
-      myPost(
-        '/user/regist_qq',
-        { username: user.name.trim(), password: user.pswd.trim() },
-        usertoken => {
-          myPost(
-            '/user/bind_openid',
-            {
-              usertoken,
-              openid: user.openid,
-              userInfoQQ: JSON.stringify(user.data),
-            },
-            date => {
-              ElMessage({ message: '注册成功', type: 'success' })
-              // 设置用户头像为QQ头像
-              localStorage.setItem('username', user.name)
-              localStorage.setItem('usertoken', usertoken)
-              myPost(
-                '/user/set/img',
-                { usertoken, value: user.data.figureurl_qq },
-                () => {
-                  window.location = '/'
-                }
-              )
-            }
-          )
+  // 先登录获取token，再token和openid一起绑定
+  login({
+    name: user.name,
+    pswd: user.pswd,
+  }).then(user => {
+    const token = user.token
+    console.log('🐤绑定')
+    if (token) {
+      updateOpenidQ({
+        token,
+        openidQ: userdata.openidQ,
+      }).then(count => {
+        if (count === 1) {
+          ElMessage({ message: '绑定成功', type: 'success' })
+          localStorage.setItem('token', token)
+          // 设置用户头像为QQ头像
+          // myPost(
+          //   '/user/set/img',
+          //   { usertoken, value: user.data.figureurl_qq },
+          //   () => {
+          //     location.href = '/'
+          //   }
+          // )
+          location.replace('/')
+        } else {
+          ElMessage({ message: '绑定失败', type: 'error' })
         }
-      )
+      })
+    } else {
+      ElMessage.error('用户名或密码不正确')
+      return false
     }
   })
 }
+
+//刷新验证码
+const changeImg = () => {
+  captchaDom.value!.src = baseURL + '/user/signin/captcha_img?' + Math.random()
+}
+onMounted(changeImg)
 </script>
 
 <template>
@@ -154,10 +188,14 @@ const zc = () => {
       />QQ登录
     </div>
 
-    <div class="qq-redirect" v-loading="state === 0" element-loading-background="transparent">
-      
+    <div
+      class="qq-redirect"
+      v-loading="state === 0"
+      element-loading-background="transparent"
+    >
       <form v-if="state === 1">
         <div class="title2">没有找到对应的用户</div>
+        <div>以前有注册过本网站吗？有的话我们直接给您绑定QQ</div>
         <ElButton @click="state = 2" size="large">绑定已有账号</ElButton>
         <ElButton @click="handleNew" size="large">注册新用户</ElButton>
       </form>
@@ -199,10 +237,19 @@ const zc = () => {
         />
         <input
           type="password"
-          v-model="user.pswd2"
+          v-model="pswd2"
           autocomplete="off"
           placeholder="确认密码"
         />
+        <div class="captcha">
+          <input
+            v-model="user.captcha"
+            placeholder="验证码"
+            type="text"
+            autocomplete="off"
+          />
+          <img ref="captchaDom" alt="验证码看不清，换一张" @click="changeImg" />
+        </div>
         <ElButton class="btn" @click="zc">注册并登录</ElButton>
       </form>
     </div>

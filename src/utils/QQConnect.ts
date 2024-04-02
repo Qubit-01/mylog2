@@ -1,6 +1,6 @@
 export const appId = '102099147'
 export const appKey = 'RnwueATZXHm23pNh'
-export const redirectURI = 'https://mylog.cool/#/login/qq-redirect'
+export const redirectURI = 'https://mylog.cool/#/login/qq-redirect?q=1' // 可以自己加参数
 
 /**
  * 用户身份的唯一标识。保存在服务器和用户绑定，以便用户下次登录时可对应到其之前的身份信息，不需要重新授权。
