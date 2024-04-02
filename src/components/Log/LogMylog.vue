@@ -137,6 +137,7 @@ const toggleType = (log: Log) => {
     flex-wrap: wrap;
 
     .content {
+      font-size: 1rem;
       width: fit-content;
       white-space: pre-wrap;
       // 继承父元素的字体

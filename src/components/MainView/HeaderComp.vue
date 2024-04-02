@@ -81,7 +81,7 @@ const router = useRouter()
       > .left {
         .logo {
           position: relative;
-          font-size: 1.5rem;
+          font-size: 22px;
           width: var(--lan-width);
           height: var(--header-height);
           padding-left: 20px;
