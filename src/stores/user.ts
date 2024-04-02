@@ -2,6 +2,7 @@ import { updateSetting } from '@/api/user'
 import type { User } from '@/types'
 import { getUser } from './global'
 import { cloneDeep } from 'lodash'
+import QC from '@/utils/QQConnect'
 
 /**
  * 哪些信息需要存入本地？
@@ -97,6 +98,7 @@ export default useUserStore
 export const logout = (to: string = '/') => {
   localStorage.removeItem('token')
   localStorage.removeItem('pageSetting')
+  QC.Login.signOut()
   if (to !== '') location.href = to
   location.reload()
 }
