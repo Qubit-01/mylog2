@@ -194,8 +194,8 @@ const shareLogs = async () => {
         <ElInput
           v-if="curFilter === -2"
           v-model="diyFilter.name"
-          style="max-width: 200px"
-          placeholder="输入名称添加到预设"
+          style="max-width: 160px"
+          placeholder="预设名称"
         >
           <template #append>
             <ElButton @click="addFilter">添加</ElButton>
@@ -232,7 +232,8 @@ const shareLogs = async () => {
     // 添加输入框
     .add-filter {
       position: absolute;
-      top: -32px;
+      // top: -32px;
+      bottom: var(--padding);
       right: var(--padding);
     }
   }
