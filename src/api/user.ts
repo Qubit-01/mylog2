@@ -29,7 +29,7 @@ export const login = (
  * @augments data { name: string, pswd: string }
  */
 export const getUser = (
-  data: { token: string } | { openidQ: string }
+  data: { token: string } | { openidQ: string } | { id: string }
 ): Promise<User> => {
   return request({
     url: 'user/get_user',

@@ -11,6 +11,8 @@
 import type { Log } from '@/types'
 import { Star, Edit, Share } from '@element-plus/icons-vue'
 
+const router = useRouter()
+
 const { log } = defineProps<{ log: Log }>()
 provide('log', log) // 暴露给子组件
 
@@ -69,7 +71,12 @@ const expand = () => {
     </div>
 
     <div class="bottom">
-      <div>{{ log.username }}</div>
+      <div
+        @click="router.push({ name: 'logger', query: { id: log.userid } })"
+        style="cursor: pointer"
+      >
+        {{ log.username }}
+      </div>
       ·
       <ElTooltip effect="light" placement="top">
         <div>{{ log.logtime.format('YYYY-MM-DD HH:mm') }}</div>

@@ -31,6 +31,7 @@ const router = createRouter({
         {
           path: 'logger', // 我的主页（别人看的）
           component: () => import('./logger/index.vue'),
+          props: ({ query: { id } }) => ({ id }),
           meta: { title: '主页 - 多元记' },
           children: [
             {
@@ -38,6 +39,7 @@ const router = createRouter({
               name: 'logger', // 时间线
               component: () =>
                 import('../components/Pages/Logger/LoggerComp.vue'),
+              props: ({ query: { id } }) => ({ id }),
             },
             {
               path: 'setting',

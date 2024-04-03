@@ -107,24 +107,6 @@ export const useLogStore = defineStore('log', () => {
     },
   })
 
-  // 主页
-  const logger = reactive<PageStore>({
-    list: [],
-    params: { skip: 0, limit: 20 },
-    loading: true,
-    noMore: false,
-    addLogs: async () => {
-      if (logger.noMore) return
-      logger.loading = true
-      const data = await getPublics({ userid: User.id, ...logger.params })
-      if (data.length < logger.params.limit) logger.noMore = true
-      data.forEach(handleLog)
-      logger.list.push(...data)
-      logger.params.skip += logger.params.limit
-      logger.loading = false
-    },
-  })
-
   // 日历Tags，不分页直接获取全部
   const tags = reactive<AllStore>({
     listAll: [],
@@ -199,10 +181,6 @@ export const useLogStore = defineStore('log', () => {
       home.params.skip = 0
       home.loading = true
       home.noMore = false
-      logger.list = []
-      logger.params.skip = 0
-      logger.loading = true
-      logger.noMore = false
     }
     // 最后无论如何都要插入mylog的
     const i = mylog.listAll.findIndex(l => l.logtime <= log.logtime)
@@ -227,8 +205,6 @@ export const useLogStore = defineStore('log', () => {
     if (log.type === 'public') {
       i = home.list.findIndex(l => l.id === log.id)
       if (i !== -1) home.list.splice(i, 1)
-      i = logger.list.findIndex(l => l.id === log.id)
-      if (i !== -1) logger.list.splice(i, 1)
     }
     i = mylog.listAll.findIndex(l => l.id === log.id)
     return mylog.listAll.splice(i, 1)[0]
@@ -250,7 +226,6 @@ export const useLogStore = defineStore('log', () => {
 
   return {
     home, // 首页
-    logger, // 个人主页
     mylog, // 记录页
     tags, // 日历页-
     getLog,
