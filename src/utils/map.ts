@@ -39,43 +39,43 @@ export async function getLocation(): Promise<AMap.LngLat> {
  */
 export function useMap(
   domRef: globalThis.Ref<HTMLDivElement | undefined>,
-  opts: any = {},
-  callback: (map: AMap.Map, p: AMap.LngLat) => void = () => {}
+  opts: any = {}
 ) {
   const global = useGlobalStore()
-  let curLocation = ref<AMap.LngLat>()
-  let map = shallowRef<AMap.Map>() // 地图对象
 
-  onMounted(() => {
-    getLocation().then(p => {
-      curLocation.value = p
-      // 会有 Canvas2D 警告
-      map.value = new AMap.Map(domRef.value!, {
-        zoom: 15, // 地图级别
-        center: p,
-        // mapStyle: 'amap://styles/whitesmoke', // 设置地图的显示样式
-        ...opts,
-      })
+  const initMap = new Promise<{
+    map: AMap.Map
+    curLocation: AMap.LngLat
+  }>((resolve, reject) => {
+    onMounted(() => {
+      getLocation().then(curLocation => {
+        // 会有 Canvas2D 警告
+        const map = new AMap.Map(domRef.value!, {
+          zoom: 15, // 地图级别
+          center: curLocation,
+          // mapStyle: 'amap://styles/whitesmoke', // 设置地图的显示样式
+          ...opts,
+        })
+        resolve({ map, curLocation })
 
-      callback(map.value, p)
-    })
-
-    // 监听全局主题变化，自动切换地图样式
-    watch(
-      () => global.isDark,
-      () => {
-        map.value!.setMapStyle(
-          global.isDark ? 'amap://styles/dark' : 'amap://styles/normal'
+        // 监听全局主题变化，自动切换地图样式
+        watch(
+          () => global.isDark,
+          () => {
+            map.setMapStyle(
+              global.isDark ? 'amap://styles/dark' : 'amap://styles/normal'
+            )
+          }
         )
-      }
-    )
+
+        onUnmounted(() => {
+          map.destroy()
+        })
+      })
+    })
   })
 
-  onUnmounted(() => {
-    map.value!.destroy()
-  })
-
-  return { map, curLocation }
+  return initMap
 }
 
 type LayerName = 'default' | 'tile' | 'satellite' | 'roadNet' | 'traffic'
@@ -140,8 +140,8 @@ export const Markers = {
     opts?: AMap.MarkerOptions
   ) =>
     new AMap.Marker({
-      content: `<div style="width: ${config?.size || '12px'}; height: ${
-        config?.size || '12px'
+      content: `<div style="width: ${config?.size || '16px'}; height: ${
+        config?.size || '16px'
       }; border-radius: 50%; background-color: ${
         config?.color || 'blue'
       };"></div>`,

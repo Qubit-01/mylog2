@@ -15,22 +15,23 @@ const marker = new AMap.Marker({
   // content: '📍',
 })
 
-const { map } = useMap(
+const { map, initMap } = useMap(
   mapDom,
-  location.value[0] ? { center: location.value[0] } : {},
-  (map, p) => {
-    // 如果没有坐标，就使用定位
-    if (!location.value[0]) location.value = [l2v(p), '']
-    marker.setPosition(location.value[0]!)
-
-    map.add(marker)
-
-    // 点击地图时，设置坐标
-    map.on('click', (ev: any) => {
-      location.value = [l2v(ev.lnglat), '']
-    })
-  }
+  location.value[0] ? { center: location.value[0] } : {}
 )
+
+initMap.then(res => {
+  // 如果没有坐标，就使用定位
+  if (!location.value[0]) location.value = [l2v(res.curLocation), '']
+  marker.setPosition(location.value[0]!)
+
+  map.add(marker)
+
+  // 点击地图时，设置坐标
+  map.on('click', (ev: any) => {
+    location.value = [l2v(ev.lnglat), '']
+  })
+})
 
 // 当坐标变化时，保持同步
 watch(

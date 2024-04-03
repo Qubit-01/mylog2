@@ -9,7 +9,7 @@
  -->
 <script setup lang="ts">
 import type { Log } from '@/types'
-import { Star, Edit, Share } from '@element-plus/icons-vue'
+import { Star, Share } from '@element-plus/icons-vue'
 
 const router = useRouter()
 

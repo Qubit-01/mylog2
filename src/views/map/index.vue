@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Log } from '@/types'
 import useLogStore from '@/stores/log'
 import AMap, {
   useMap,
@@ -10,6 +11,8 @@ import AMap, {
 
 const Mylog = useLogStore().mylog
 const mapDom = ref<HTMLDivElement>()
+// 当前显示的log
+const log = ref<Log>()
 
 /**
  * 分类的marker
@@ -63,8 +66,16 @@ const { map, curLocation } = useMap(
 
     Mylog.listFilter
       .filter(log => log.location.length)
-      .map(log => log.location[0])
-      .forEach(p => Markers.point({ color: 'green' }, { position: p, map }))
+      // .map(log => log.location[0])
+      .forEach(l => {
+        const marker = Markers.point(
+          { color: 'green' },
+          { position: l.location[0], map }
+        )
+        marker.on('click', e => {
+          log.value = l
+        })
+      })
   }
 )
 
@@ -149,6 +160,14 @@ const setMarker = () => {
       </ElButton>
       <ElButton @click="setMarker">打标</ElButton>
     </div>
+    <div class="diy-lnglat">
+      <ElInput v-model="data.input[0]" placeholder="lng经度" />
+      <ElInput v-model="data.input[1]" placeholder="lat纬度" />
+      <ElButton @click="panTo" :disabled="!data.input[0] || !data.input[1]">
+        转到
+      </ElButton>
+      <ElButton @click="setMarker">打标</ElButton>
+    </div>
 
     <div class="control-layer">
       <ElSwitch
@@ -175,17 +194,22 @@ const setMarker = () => {
     </div>
 
     <div class="map" ref="mapDom"></div>
+
+    <div v-if="log" class="log">
+      <Log v-if="log" :log />
+    </div>
   </div>
 </template>
 
 <style scoped lang="less">
 .map-page {
+  position: relative;
   border-radius: var(--border-radius);
   padding: var(--padding);
   display: flex;
   flex-direction: column;
   gap: 8px;
-  height: calc(100vh - var(--header-top) - var(--padding) - 10px);
+  height: calc(100vh - var(--header-top) - var(--padding) - 60px);
 
   .lnglat-input {
     display: flex;
@@ -203,6 +227,14 @@ const setMarker = () => {
   .map {
     flex: 1;
     // height: calc(100vh - var(--header-top));
+  }
+
+  .log {
+    position: absolute;
+    bottom: var(--padding);
+    left: var(--padding);
+    right: var(--padding);
+    // width: 100%;
   }
 }
 </style>

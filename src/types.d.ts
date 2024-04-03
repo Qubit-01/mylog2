@@ -42,6 +42,8 @@ export interface User {
        */
       calendarTags: string[]
     }
+    map?: {
+    }
   }
   createtime?: Date
   openidQ?: string
