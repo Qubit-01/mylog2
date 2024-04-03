@@ -173,3 +173,25 @@ const QC = window.QC as QQConnect
 // }
 
 export default QC
+
+
+/**
+ * 有跨域限制
+ * @see https://wiki.connect.qq.com/unionid介绍
+ * @param params 
+ * @returns 
+ */
+// export const getMe = (params: {
+//   access_token: string
+//   unionid?: number
+//   fmt?: 'jsonpb' | 'json'
+// }): Promise<any> => {
+//   return request({
+//     url: 'https://graph.qq.com/oauth2.0/me',
+//     method: 'post',
+//     params: {
+//       fmt: 'json',
+//       ...params,
+//     },
+//   })
+// }

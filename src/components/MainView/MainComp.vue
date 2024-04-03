@@ -1,9 +1,7 @@
 <!--
   垂直方向的中间部分，包含左右栏，和主要展示内容（是个路由组件）
 -->
-<script setup lang="ts">
-
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div class="main">
@@ -18,7 +16,6 @@
       <div class="right">
         <OneSentence />
       </div>
-
     </div>
   </div>
 </template>
@@ -32,8 +29,7 @@
     width: var(--center-width);
     display: flex;
     gap: var(--gap);
-    transition:
-      width 0.5s;
+    transition: width 0.5s;
 
     .middle {
       width: 0;
@@ -46,7 +42,7 @@
       width: var(--lan-width);
 
       // 栏固定
-      >div:nth-child(1) {
+      > div:nth-child(1) {
         position: sticky;
         top: calc(var(--header-height) + var(--gap));
       }
@@ -62,19 +58,17 @@
       display: flex;
       flex-direction: column;
       gap: var(--gap);
-      >* {
+      > * {
         border-radius: var(--border-radius);
       }
     }
 
     @media (max-width: 700px) {
-
       .left,
       .right {
         display: none;
       }
     }
   }
-
 }
 </style>

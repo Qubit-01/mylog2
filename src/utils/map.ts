@@ -17,7 +17,7 @@ interface AMap extends AMapType {
 }
 
 // 定位当前位置的Promise
-const currentLocationPromise = getLocation()
+// const currentLocationPromise = getLocation()
 
 /**
  * 同时IP和浏览器定位，优先选择浏览器定位结果
@@ -47,7 +47,7 @@ export function useMap(
   let map = shallowRef<AMap.Map>() // 地图对象
 
   onMounted(() => {
-    currentLocationPromise.then(p => {
+    getLocation().then(p => {
       curLocation.value = p
       // 会有 Canvas2D 警告
       map.value = new AMap.Map(domRef.value!, {
@@ -79,6 +79,7 @@ export function useMap(
 }
 
 type LayerName = 'default' | 'tile' | 'satellite' | 'roadNet' | 'traffic'
+
 /**
  * 获取新图层对象
  * https://lbs.amap.com/api/javascript-api-v2/guide/layers/official-layers
@@ -119,6 +120,34 @@ export function createLayer(layerName: LayerName, opts: any = {}) {
         ...opts,
       })
   }
+}
+
+/**
+ * 获取预设Maker
+ * @see https://lbs.amap.com/api/javascript-api-v2/tutorails/add-marker
+ * @see https://lbs.amap.com/api/javascript-api-v2/documentation#marker
+ * @returns Marker对象
+ */
+export const Markers = {
+  red: (opts?: AMap.MarkerOptions) =>
+    new AMap.Marker({
+      content: `<img style="height: 34px; width: 25px" src="//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png">`,
+      offset: new AMap.Pixel(-13, -30),
+      ...opts,
+    }),
+  point: (
+    config?: { color?: string; size?: string },
+    opts?: AMap.MarkerOptions
+  ) =>
+    new AMap.Marker({
+      content: `<div style="width: ${config?.size || '12px'}; height: ${
+        config?.size || '12px'
+      }; border-radius: 50%; background-color: ${
+        config?.color || 'blue'
+      };"></div>`,
+      offset: new AMap.Pixel(-6, -6),
+      ...opts,
+    }),
 }
 
 /**
