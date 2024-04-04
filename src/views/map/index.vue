@@ -39,45 +39,43 @@ const layers = {
   roadNet: createLayer('roadNet'),
 }
 
-const { map, curLocation } = useMap(
-  mapDom,
-  {
-    layers: [
-      layers.default,
-      layers.tile,
-      layers.satellite,
-      layers.traffic,
-      layers.roadNet,
-    ],
-  },
-  async (map, p) => {
-    data.location = l2v(p)
-    markers.cur.setPosition(l2v(p))
-    map.add(markers.cur)
-    map.add(markers.act)
+const { map, init, curLocation } = useMap(mapDom, {
+  layers: [
+    layers.default,
+    layers.tile,
+    layers.satellite,
+    layers.traffic,
+    layers.roadNet,
+  ],
+})
 
-    // 点击地图时，设置坐标
-    map.on('click', ev => {
-      data.input = l2v(ev.lnglat)
-      markers.act.setPosition(ev.lnglat)
-    })
+init.then(async map => {
+  data.location = l2v(await curLocation)
+  markers.cur.setPosition(data.location)
+  map.add(markers.cur)
+  map.add(markers.act)
 
-    if (!Mylog.listAll.length) await Mylog.getLogs()
+  // 点击地图时，设置坐标
+  map.on('click', ev => {
+    data.input = l2v(ev.lnglat)
+    markers.act.setPosition(ev.lnglat)
+  })
 
-    Mylog.listFilter
-      .filter(log => log.location.length)
-      // .map(log => log.location[0])
-      .forEach(l => {
-        const marker = Markers.point(
-          { color: 'green' },
-          { position: l.location[0], map }
-        )
-        marker.on('click', e => {
-          log.value = l
-        })
+  if (!Mylog.listAll.length) await Mylog.getLogs()
+
+  Mylog.listFilter
+    .filter(log => log.location.length)
+    // .map(log => log.location[0])
+    .forEach(l => {
+      const marker = Markers.point(
+        { color: 'green' },
+        { position: l.location[0], map }
+      )
+      marker.on('click', e => {
+        log.value = l
       })
-  }
-)
+    })
+})
 
 // 添加标记方法封装
 const addMarker = (lnglat: [number, number]) => {

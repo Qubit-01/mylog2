@@ -34,48 +34,55 @@ export async function getLocation(): Promise<AMap.LngLat> {
  * 自定义高德地图hook
  * @param domRef Dom的Ref对象
  * @param opts 地图初始化的配置
+ * @param config 配置项，默认开启浏览器定位，getCenter就是精确点
  * @param callback 初始化后的回调，传入地图对象
- * @returns 地图对象
  */
 export function useMap(
   domRef: globalThis.Ref<HTMLDivElement | undefined>,
-  opts: any = {}
+  opts: any = {},
+  config: {
+    /**
+     * 是否禁用浏览器定位，默认开启
+     */
+    disableGeolocation?: boolean
+  } = {}
 ) {
   const global = useGlobalStore()
 
-  const initMap = new Promise<{
-    map: AMap.Map
-    curLocation: AMap.LngLat
-  }>((resolve, reject) => {
-    onMounted(() => {
-      getLocation().then(curLocation => {
-        // 会有 Canvas2D 警告
-        const map = new AMap.Map(domRef.value!, {
-          zoom: 15, // 地图级别
-          center: curLocation,
-          // mapStyle: 'amap://styles/whitesmoke', // 设置地图的显示样式
-          ...opts,
-        })
-        resolve({ map, curLocation })
+  const map = ref<AMap.Map>()
 
-        // 监听全局主题变化，自动切换地图样式
-        watch(
-          () => global.isDark,
-          () => {
-            map.setMapStyle(
-              global.isDark ? 'amap://styles/dark' : 'amap://styles/normal'
-            )
-          }
-        )
+  const curLocation = config.disableGeolocation ? citySearch() : geolocation()
+  
+  const init = new Promise<AMap.Map>((resolve, reject) => {
+    onMounted(async () => {
+      if (!opts.center) opts.center = await curLocation
 
-        onUnmounted(() => {
-          map.destroy()
-        })
+      // 会有 Canvas2D 警告
+      const rawMap = new AMap.Map(domRef.value!, {
+        zoom: 15, // 地图级别
+        // center: curLocation,
+        // mapStyle: 'amap://styles/whitesmoke', // 设置地图的显示样式
+        ...opts,
       })
+
+      map.value = rawMap
+      resolve(rawMap)
+
+      // 监听全局主题变化，自动切换地图样式
+      watch(
+        () => global.isDark,
+        () => {
+          rawMap.setMapStyle(
+            global.isDark ? 'amap://styles/dark' : 'amap://styles/normal'
+          )
+        }
+      )
+
+      onUnmounted(rawMap.destroy)
     })
   })
 
-  return initMap
+  return { map, init, curLocation }
 }
 
 type LayerName = 'default' | 'tile' | 'satellite' | 'roadNet' | 'traffic'
@@ -169,7 +176,7 @@ export function citySearch(): Promise<any> {
 }
 
 /**
- * 浏览器定位
+ * 浏览器定位，更精确
  * @returns
  */
 export function geolocation(): Promise<any> {

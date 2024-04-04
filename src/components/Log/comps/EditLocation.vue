@@ -15,14 +15,14 @@ const marker = new AMap.Marker({
   // content: '📍',
 })
 
-const { map, initMap } = useMap(
+const { map, init, curLocation } = useMap(
   mapDom,
   location.value[0] ? { center: location.value[0] } : {}
 )
 
-initMap.then(res => {
+init.then(async map => {
   // 如果没有坐标，就使用定位
-  if (!location.value[0]) location.value = [l2v(res.curLocation), '']
+  if (!location.value[0]) location.value = [l2v(await curLocation), '']
   marker.setPosition(location.value[0]!)
 
   map.add(marker)
@@ -31,24 +31,24 @@ initMap.then(res => {
   map.on('click', (ev: any) => {
     location.value = [l2v(ev.lnglat), '']
   })
-})
 
-// 当坐标变化时，保持同步
-watch(
-  () => location.value[0],
-  () => {
-    map.value!.panTo(location.value[0]!, 1000)
-    marker.setPosition(location.value[0]!)
-    // 解析坐标
-    getAddress(location.value[0]!).then((regeocode: any) => {
-      location.value[1] = regeocode.formattedAddress
-    })
-  }
-)
+  // 当坐标变化时，保持同步
+  watch(
+    () => location.value[0],
+    () => {
+      map.panTo(location.value[0]!, 1000)
+      marker.setPosition(location.value[0]!)
+      // 解析坐标
+      getAddress(location.value[0]!).then((regeocode: any) => {
+        location.value[1] = regeocode.formattedAddress
+      })
+    }
+  )
+})
 </script>
 
 <template>
-  <div class="edit-location">
+  <div class="edit-location" v-loading="!map">
     <div class="map" ref="mapDom"></div>
     <div class="search-input">
       <ElInput v-model="search" placeholder="搜索地址" clearable />
@@ -60,10 +60,12 @@ watch(
 <style scoped lang="less">
 .edit-location {
   position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 200px;
 
   .map {
-    border-radius: var(--border-radius);
-    height: 200px;
+    height: 100%;
     // width: 100%;
   }
 
