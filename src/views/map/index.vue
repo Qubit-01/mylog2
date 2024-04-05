@@ -2,7 +2,7 @@
 import type { Log } from '@/types'
 import useLogStore from '@/stores/log'
 import AMap, {
-  useMap,
+  useAMap,
   createLayer,
   getLocation,
   l2v,
@@ -39,18 +39,20 @@ const layers = {
   roadNet: createLayer('roadNet'),
 }
 
-const { map, init, curLocation } = useMap(mapDom, {
-  layers: [
-    layers.default,
-    layers.tile,
-    layers.satellite,
-    layers.traffic,
-    layers.roadNet,
-  ],
-})
+const aMap = reactive(
+  useAMap(mapDom, {
+    layers: [
+      layers.default,
+      layers.tile,
+      layers.satellite,
+      layers.traffic,
+      layers.roadNet,
+    ],
+  })
+)
 
-init.then(async map => {
-  data.location = l2v(await curLocation)
+aMap.init.then(async map => {
+  data.location = l2v(await aMap.curLocation)
   markers.cur.setPosition(data.location)
   map.add(markers.cur)
   map.add(markers.act)
@@ -80,7 +82,7 @@ init.then(async map => {
 // 添加标记方法封装
 const addMarker = (lnglat: [number, number]) => {
   const marker = new AMap.Marker({
-    map: map.value!,
+    map: aMap.map,
     position: lnglat,
   })
   markers.diy.push(marker)
@@ -123,7 +125,7 @@ const currentLocation = () => {
   getLocationLoading.value = true
   getLocation().then(p => {
     data.location = l2v(p)
-    map.value!.panTo(p)
+    aMap.map!.panTo(p)
     getLocationLoading.value = false
   })
 }
@@ -133,7 +135,7 @@ const currentLocation = () => {
  */
 const panTo = () => {
   markers.act.setPosition(data.input)
-  map.value!.panTo(data.input)
+  aMap.map!.panTo(data.input)
 }
 
 // 打标
@@ -143,11 +145,16 @@ const setMarker = () => {
 </script>
 
 <template>
-  <div class="map-page" v-m>
+  <div
+    class="map-page"
+    v-m
+    v-loading="!aMap.map"
+    element-loading-text="地图加载中..."
+  >
     <div>
-      <ElButton @click="currentLocation" :loading="getLocationLoading"
-        >定位</ElButton
-      >
+      <ElButton @click="currentLocation" :loading="getLocationLoading">
+        定位
+      </ElButton>
       {{ data.location }}
     </div>
     <div class="lnglat-input">
@@ -204,6 +211,7 @@ const setMarker = () => {
   position: relative;
   border-radius: var(--border-radius);
   padding: var(--padding);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 8px;

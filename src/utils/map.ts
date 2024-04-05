@@ -32,12 +32,13 @@ export async function getLocation(): Promise<AMap.LngLat> {
 
 /**
  * 自定义高德地图hook
+ * 建议用的时候用reactive包裹，不要用Map当变量名！！！推荐用aMap
  * @param domRef Dom的Ref对象
  * @param opts 地图初始化的配置
  * @param config 配置项，默认开启浏览器定位，getCenter就是精确点
  * @param callback 初始化后的回调，传入地图对象
  */
-export function useMap(
+export function useAMap(
   domRef: globalThis.Ref<HTMLDivElement | undefined>,
   opts: any = {},
   config: {
@@ -47,21 +48,21 @@ export function useMap(
     disableGeolocation?: boolean
   } = {}
 ) {
+  // 17602156171
   const global = useGlobalStore()
 
-  const map = ref<AMap.Map>()
+  const map = shallowRef<AMap.Map>()
 
-  const curLocation = config.disableGeolocation ? citySearch() : geolocation()
-  
+  // 不管有没有权限都要定位，如果没有权限，即使开启了浏览器定位，也会走IP定位
+  const curLocation = config.disableGeolocation ? citySearch() : getLocation()
+
   const init = new Promise<AMap.Map>((resolve, reject) => {
     onMounted(async () => {
-      if (!opts.center) opts.center = await curLocation
-
       // 会有 Canvas2D 警告
       const rawMap = new AMap.Map(domRef.value!, {
         zoom: 15, // 地图级别
-        // center: curLocation,
-        // mapStyle: 'amap://styles/whitesmoke', // 设置地图的显示样式
+        center: await curLocation,
+        mapStyle: global.isDark ? 'amap://styles/dark' : 'amap://styles/normal', // 设置地图的显示样式
         ...opts,
       })
 
@@ -77,9 +78,11 @@ export function useMap(
           )
         }
       )
-
-      onUnmounted(rawMap.destroy)
     })
+  })
+
+  onUnmounted(() => {
+    map.value!.destroy()
   })
 
   return { map, init, curLocation }
@@ -169,7 +172,7 @@ export function citySearch(): Promise<any> {
       citySearch.getLocalCity((status: string, result: any) => {
         if (status === 'complete' && result.info === 'OK')
           resolve(result.bounds.getCenter())
-        else reject([status, result])
+        else reject({ status, result })
       })
     })
   })
@@ -192,7 +195,7 @@ export function geolocation(): Promise<any> {
 
       geolocation.getCurrentPosition((status: string, result: any) => {
         if (status == 'complete') resolve(result.position)
-        else reject([status, result])
+        else reject({ status, result })
       })
     })
   })

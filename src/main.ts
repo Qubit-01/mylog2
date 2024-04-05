@@ -11,6 +11,7 @@ import router from './views/router'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn' // 导入本地化语言
 import customParseFormat from 'dayjs/plugin/customParseFormat' // 拓展 dayjs 支持自定义时间格式。
+import { vM } from './utils/directives' // 自定义指令
 
 import './assets/css/base.less' // 全局样式
 
@@ -19,33 +20,15 @@ import './assets/css/base.less' // 全局样式
 dayjs.locale('zh-cn') // 使用本地化语言
 dayjs.extend(customParseFormat)
 
-
 const app = createApp(App)
 
 app.use(createPinia())
 app.use(ElementPlus, { locale: zhCn })
 app.use(router)
 
-
 // 注册所有element图标组件
 for (const [k, c] of Object.entries(Icons)) app.component(k, c)
 // 注册指令：给元素加-m的class
-app.directive('m', (dom) => dom.classList.add('-m'))
-// 注册指令：超出省略号，传入行数，默认一行，0就啥都不干
-app.directive('overflowEllipsis', (el, { value = 1 }) => {
-  if (value === 0) {
-    // 删除样式
-    el.classList.remove('-overflow-ellipsis-s', '-overflow-ellipsis-m')
-    el.style.webkitLineClamp = 'revert'
-  } else if (value === 1) {
-    el.classList.add('-overflow-ellipsis-s')
-    el.classList.remove('-overflow-ellipsis-m')
-    el.style.webkitLineClamp = 'revert'
-  } else {
-    el.classList.remove('-overflow-ellipsis-s')
-    el.classList.add('-overflow-ellipsis-m')
-    el.style.webkitLineClamp = value
-  }
-})
+app.directive('m', vM)
 
 app.mount('#app')

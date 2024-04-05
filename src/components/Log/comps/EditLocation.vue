@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import AMap, { useMap, l2v, getAddress } from '@/utils/map'
+import { vOverflowEllipsis } from '@/utils/directives'
+import AMap, { useAMap, l2v, getAddress } from '@/utils/map'
 
 // 坐标
 const location = defineModel<[[number, number], string] | []>({
@@ -15,14 +16,13 @@ const marker = new AMap.Marker({
   // content: '📍',
 })
 
-const { map, init, curLocation } = useMap(
-  mapDom,
-  location.value[0] ? { center: location.value[0] } : {}
+const aMap = reactive(
+  useAMap(mapDom, location.value[0] ? { center: location.value[0] } : {})
 )
 
-init.then(async map => {
+aMap.init.then(async map => {
   // 如果没有坐标，就使用定位
-  if (!location.value[0]) location.value = [l2v(await curLocation), '']
+  if (!location.value[0]) location.value = [l2v(await aMap.curLocation), '']
   marker.setPosition(location.value[0]!)
 
   map.add(marker)
@@ -48,7 +48,10 @@ init.then(async map => {
 </script>
 
 <template>
-  <div class="edit-location" v-loading="!map">
+  <div
+    class="edit-location"
+    v-loading="!aMap.map"
+  >
     <div class="map" ref="mapDom"></div>
     <div class="search-input">
       <ElInput v-model="search" placeholder="搜索地址" clearable />
