@@ -48,10 +48,7 @@ aMap.init.then(async map => {
 </script>
 
 <template>
-  <div
-    class="edit-location"
-    v-loading="!aMap.map"
-  >
+  <div class="edit-location" v-loading="!aMap.map">
     <div class="map" ref="mapDom"></div>
     <div class="search-input">
       <ElInput v-model="search" placeholder="搜索地址" clearable />
