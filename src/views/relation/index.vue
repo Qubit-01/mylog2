@@ -7,11 +7,15 @@
 <script setup lang="ts">
 import vis from 'vis-network/dist/vis-network.min.js'
 import { FullScreen, Refresh, Plus, Minus } from '@element-plus/icons-vue'
+import useUserStore from '@/stores/user'
+import { getRelations } from '@/api/relation'
 
-let network
-let nodes = [{ id: 0, label: User.name, color: '#daa', font: { size: 30 } }],
-  edges = []
-// const groups = reactive(['亲戚', '其他人'])
+const User = useUserStore()
+
+let network: any
+const networkDom = ref<HTMLDivElement>()
+const nodes: any[] = []
+const edges: any[] = []
 const groups = reactive(['亲戚'])
 
 const options = {
@@ -32,8 +36,59 @@ const options = {
   },
 }
 
-onMounted(() => {})
-console.log('🐤', vis)
+const getData = getRelations({})
+
+onMounted(() => {
+  getData.then(raws => {
+    console.log(raws)
+
+    nodes.push({ id: '0', label: User.name, color: '#daa', font: { size: 30 } })
+
+    for (const raw of raws) {
+      console.log(1, raw.name)
+      // 解析人员节点
+      nodes.push({
+        id: raw.id,
+        label: raw.name,
+        from: raw.from,
+        // group: raw.rGroup,
+        raw,
+      })
+      console.log(raw.name, raw.from, raw.id)
+      edges.push({
+        from: raw.from,
+        to: raw.id,
+        label: raw.info.label,
+      })
+      // 归纳组节点
+      if (!Number(raw.from) && groups.indexOf(raw.from) == -1)
+        groups.push(raw.from)
+    }
+
+    for (const v of groups) {
+      console.log(v)
+      nodes.push({
+        id: v,
+        label: v,
+        from: 0,
+        color: '#ddd',
+        shape: 'ellipse',
+        font: { size: 20 },
+      })
+      edges.push({ from: 0, to: v })
+    }
+
+    network = new vis.Network(networkDom.value, { nodes, edges }, options)
+  })
+})
+// console.log('🐤', vis)
+
+// 缩放按钮
+const setScale = (num: number) => {
+  if (num == 0) network.fit()
+  if (num < 0 && network.getScale() < 0.12) return
+  network.moveTo({ scale: network.getScale() + num })
+}
 </script>
 
 <template>
@@ -41,7 +96,7 @@ console.log('🐤', vis)
     <!-- 外层div 用于fixed占位 -->
     <!-- <div class="out-network model"> -->
     <div class="relation-network" v-m>
-      <div id="network"></div>
+      <div class="network" ref="networkDom"></div>
       <div class="buttons">
         <ElButton type="primary" :icon="FullScreen" @click="MaxNetwork()" />
         <ElButton type="primary" :icon="Refresh" @click="setScale(0)" />
@@ -66,6 +121,10 @@ console.log('🐤', vis)
   .relation-network {
     padding: var(--padding);
     border-radius: var(--border-radius);
+
+    .network {
+      height: 60vh;
+    }
   }
 }
 </style>

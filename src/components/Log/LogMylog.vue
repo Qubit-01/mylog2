@@ -5,6 +5,7 @@
 import type { Log } from '@/types'
 import { delLog, editLog } from '@/stores/log'
 import { Delete, Edit, Share, Promotion } from '@element-plus/icons-vue'
+import { vOverflowEllipsis } from '@/utils/directives'
 
 const { log } = defineProps<{ log: Log }>()
 provide('log', log)

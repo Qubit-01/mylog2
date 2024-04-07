@@ -10,6 +10,7 @@
 <script setup lang="ts">
 import type { Log } from '@/types'
 import { Star, Share } from '@element-plus/icons-vue'
+import { vOverflowEllipsis } from '@/utils/directives'
 
 const router = useRouter()
 

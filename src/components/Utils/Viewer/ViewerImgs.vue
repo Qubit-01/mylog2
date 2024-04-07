@@ -86,7 +86,7 @@ defineExpose({ vErrorRetry })
     <template v-for="img in imgUrls" :key="img">
       <!-- QQ图片要单独去除 referrer -->
       <img
-        v-if="img.indexOf('photo.store.qq.com') === 15"
+        v-if="img.includes('.qq.com/') || img.includes('.qpic.cn/')"
         referrerPolicy="no-referrer"
         :src="img"
         alt="qqimg"

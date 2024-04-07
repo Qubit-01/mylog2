@@ -18,12 +18,12 @@ const router = useRouter()
         </div>
         <nav>
           <!-- 我的主页（别人看见的） -->
-          <RouterLink to="/logger" v-overflowEllipsis>主页</RouterLink>
+          <RouterLink to="/logger" v-overflow-ellipsis>主页</RouterLink>
           <!-- 我的记录（自己看见的） -->
-          <RouterLink to="/mylog" v-overflowEllipsis>记录</RouterLink>
-          <RouterLink to="/album" v-overflowEllipsis>相册</RouterLink>
-          <RouterLink to="/map" v-overflowEllipsis>地图</RouterLink>
-          <RouterLink to="/relation" v-overflowEllipsis>人脉</RouterLink>
+          <RouterLink to="/mylog" v-overflow-ellipsis>记录</RouterLink>
+          <RouterLink to="/album" v-overflow-ellipsis>相册</RouterLink>
+          <RouterLink to="/map" v-overflow-ellipsis>地图</RouterLink>
+          <RouterLink to="/relation" v-overflow-ellipsis>人脉</RouterLink>
         </nav>
         <div class="right">
           <div

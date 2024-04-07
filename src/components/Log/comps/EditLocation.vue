@@ -53,7 +53,7 @@ aMap.init.then(async map => {
     <div class="search-input">
       <ElInput v-model="search" placeholder="搜索地址" clearable />
     </div>
-    <div class="formatted-address" v-overflowEllipsis>{{ location[1] }}</div>
+    <div class="formatted-address" v-overflow-ellipsis>{{ location[1] }}</div>
   </div>
 </template>
 

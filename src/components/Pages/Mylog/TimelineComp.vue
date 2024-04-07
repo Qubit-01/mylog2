@@ -43,7 +43,7 @@ const logReleaseDom = ref()
     </ElTimelineItem> -->
 
       <!-- 时间线开始 -->
-      <template v-for="(log, i) in Mylog.list">
+      <template v-for="(log, i) in Mylog.list" :key="log.id">
         <!-- 年份节点 -->
         <ElTimelineItem
           v-if="i == 0 || !log.logtime!.isSame(Mylog.list[i - 1].logtime!, 'year')"
