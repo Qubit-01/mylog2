@@ -19,12 +19,10 @@ const log = ref<Log>()
  * 分类的marker
  */
 const markers = reactive<{
-  cur: AMap.Marker // 用户当前的
   act: AMap.Marker // 活动的临时坐标
   // log: AMap.Marker[] // log里面的
   diy: AMap.Marker[] // 用户临时添加的
 }>({
-  cur: Markers.red(),
   // act: new AMap.Marker(),
   act: Markers.point(),
   // log: [],
@@ -53,9 +51,6 @@ const aMap = reactive(
 )
 
 aMap.init.then(async map => {
-  data.location = l2v(await aMap.curLocation)
-  
-  // markers.cur.setPosition(data.location)
   // map.add(markers.cur)
   map.add(markers.act)
 
@@ -126,7 +121,7 @@ const getLocationLoading = ref(false)
 const currentLocation = () => {
   getLocationLoading.value = true
   getPosition().then(p => {
-    data.location = l2v(p)
+    data.location = p
     aMap.map!.panTo(p)
     getLocationLoading.value = false
   })

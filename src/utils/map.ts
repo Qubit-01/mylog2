@@ -62,32 +62,33 @@ export async function getCityByIp(ip?: string): Promise<any> {
  * 默认情况下，PC端先精确IP定位，失败后浏览器定位；手机端先浏览器定位，失败后IP定位
  *
  * 还可以通过事件监听获取定位结果
- * @see https://lbs.amap.com/api/javascript-api/reference/location#m_AMap.CitySearch
+ * @see https://lbs.amap.com/api/javascript-api-v2/documentation#geolocation 2.0版本
+ * https://lbs.amap.com/api/javascript-api/reference/location#m_AMap.CitySearch 1.4
  */
 export const getGeolocation = addPlugins.then(() => {
   return new AMap.Geolocation({
     enableHighAccuracy: true, // 是否使用高精度定位，默认：true
     timeout: 10000, // 设置定位超时时间，默认：无穷大
-    // 如果要让地图对象使用定位控件，这些属性默认
-    buttonPosition: 'LT',
-    // buttonOffset: new AMap.Pixel(10, 20), // 定位按钮的停靠位置的偏移量，默认：Pixel(10, 20)
-    // showCircle: true, // 定位成功并且有精度信息时，是否用一个圆圈circle表示精度范围, true
-    // panToLocation: true, // 定位成功后，是否把定位得到的坐标设置为地图中心点坐标, true
+    getCityWhenFail: true, // 定位失败之后是否返回基本城市定位信息
+    needAddress: true, // 是否需要将定位结果进行逆地理编码操作
+    extensions: 'all', // 是否需要详细的逆地理编码信息，默认为'base'只返回基本信息，可选'all'
   })
 })
 
 /**
  * 获取当前位置，浏览器定位，会要权限
- * getCurrentPosition方法返回的数据也就position有用，
+ * getCurrentPosition方法返回的数据也就position有用
+ *
+ * @param 可以自己传入
  *
  * 没有权限时，不会有坐标
  * error =>
  *     message: "Get ipLocation failed.Geolocation permission denied."
  *     originMessage: "User denied Geolocation"
- * @returns Promise<{position坐标对象, ...}>
+ * @return Promise<{position坐标对象, ...}>
  */
-export async function getPositionByGeo(): Promise<any> {
-  const geolocation = await getGeolocation
+export async function getPositionByGeo(gl?: any): Promise<any> {
+  const geolocation = gl || (await getGeolocation)
   return new Promise((resolve, reject) => {
     geolocation.getCurrentPosition((status: string, result: any) => {
       console.info('getPositionByGeo', status, result)
@@ -102,8 +103,8 @@ export async function getPositionByGeo(): Promise<any> {
  * 而且在使用代理时，也会通过ip返回结果
  * @returns Promise<{position坐标数组, ...}>
  */
-export async function getCityInfoByGeo(): Promise<any> {
-  const geolocation = await getGeolocation
+export async function getCityInfoByGeo(gl?: any): Promise<any> {
+  const geolocation = gl || (await getGeolocation)
   return new Promise((resolve, reject) => {
     geolocation.getCityInfo((status: string, result: any) => {
       console.info('getCityInfoByGeo', status, result)
@@ -117,9 +118,12 @@ export async function getCityInfoByGeo(): Promise<any> {
  * 不管有没有权限都要给出一个坐标
  * @returns
  */
-export async function getPosition(): Promise<AMap.LngLat> {
-  const res = await Promise.allSettled([getPositionByGeo(), getCityInfoByGeo()])
-  if (res[0].status === 'fulfilled') return res[0].value.position
+export async function getPosition(gl?: any): Promise<AMap.Vector2> {
+  const res = await Promise.allSettled([
+    getPositionByGeo(gl),
+    getCityInfoByGeo(gl),
+  ])
+  if (res[0].status === 'fulfilled') return l2v(res[0].value.position)
   if (res[1].status === 'fulfilled') return res[1].value.position
   else return Promise.reject(res)
 }
@@ -149,6 +153,8 @@ export async function getAddress(p: AMap.Vector2): Promise<any> {
  * 自定义高德地图hook
  * 建议用的时候用reactive包裹，不要用Map当变量名！！！推荐用aMap
  *
+ * 都要定位用户当前位置，如果传入了center，那就按center
+ *
  * 如果考虑用户不给定位权限的话，太麻烦了，用户必须给定位权限
  * @param domRef Dom的Ref对象
  * @param opts 地图初始化的配置
@@ -170,23 +176,27 @@ export function useAMap(
     enableHighAccuracy: true, //是否使用高精度定位，默认:true
     timeout: 10000, //超过10秒后停止定位，默认：无穷大
     maximumAge: 0, //定位结果缓存0毫秒，默认：0
-    convert: true, //自动偏移坐标，偏移后的坐标为高德坐标，默认：true
-    showButton: true, //显示定位按钮，默认：true
-    buttonPosition: 'LB', //定位按钮停靠位置，默认：'LB'，左下角
-    buttonOffset: new AMap.Pixel(10, 20), //定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
-    showMarker: true, //定位成功后在定位到的位置显示点标记，默认：true
-    showCircle: true, //定位成功后用圆圈表示定位精度范围，默认：true
-    panToLocation: true, //定位成功后将定位到的位置作为地图中心点，默认：true
-    zoomToAccuracy: true, //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
+    // convert: true, //自动偏移坐标，偏移后的坐标为高德坐标，默认：true
+    // showButton: true, //显示定位按钮，默认：true
+    // buttonPosition: 'LB', //定位按钮停靠位置，默认：'LB'，左下角
+    // buttonOffset: new AMap.Pixel(10, 20), //定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+    // showMarker: true, //定位成功后在定位到的位置显示点标记，默认：true
+    // showCircle: true, //定位成功后用圆圈表示定位精度范围，默认：true
+    // panToLocation: false, //定位成功后将定位到的位置作为地图中心点，默认：true
+    // zoomToAccuracy: true, //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
+    // getCityWhenFail: true, // 定位失败之后是否返回基本城市定位信息
   })
 
-  geolocation.getCurrentPosition()
+  geolocation.getCurrentPosition(() => {
+    console.log('🐤dw')
+  })
 
   const init = new Promise<AMap.Map>((resolve, reject) => {
     onMounted(async () => {
       const rawMap = new AMap.Map(domRef.value!, {
         zoom: 15, // 地图级别
-        // center: await curLocation,
+        center: [104.065751, 30.657457],
+        // center: l2v((await getPositionByGeo(geolocation)).position),
         mapStyle: global.isDark ? 'amap://styles/dark' : 'amap://styles/normal', // 设置地图的显示样式
         ...opts,
       })
@@ -294,17 +304,6 @@ export const Markers = {
  * @returns Vector2类型坐标，就是 [number, number]
  */
 export function l2v(p: AMap.LngLat): AMap.Vector2 {
-  return [p.lng, p.lat]
-}
-
-/**
- * LngLat类型坐标转换为Vector2类型坐标
- * 如果传入不是LngLat，就原样输出
- * @param p LngLat类型坐标
- * @returns Vector2类型坐标，就是 [number, number]
- */
-export function v2l(p: AMap.Vector2): AMap.LngLat {
-  return {la}
   return [p.lng, p.lat]
 }
 
