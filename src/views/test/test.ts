@@ -17,7 +17,7 @@ export function useMap() {
 //       /**
 //        * 是否禁用浏览器定位，默认开启
 //        */
-//       disableGeolocation?: boolean
+//       disableGeo?: boolean
 //     } = {}
 //   ) {
 

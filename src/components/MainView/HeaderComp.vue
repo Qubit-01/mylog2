@@ -18,7 +18,7 @@ const router = useRouter()
         </div>
         <nav>
           <!-- 我的主页（别人看见的） -->
-          <RouterLink to="/logger" v-overflow-ellipsis>主页</RouterLink>
+          <!-- <RouterLink to="/logger" v-overflow-ellipsis>我的</RouterLink> -->
           <!-- 我的记录（自己看见的） -->
           <RouterLink to="/mylog" v-overflow-ellipsis>记录</RouterLink>
           <RouterLink to="/album" v-overflow-ellipsis>相册</RouterLink>
@@ -26,13 +26,9 @@ const router = useRouter()
           <RouterLink to="/relation" v-overflow-ellipsis>人脉</RouterLink>
         </nav>
         <div class="right">
-          <div
-            v-if="User.isLogined"
-            class="user"
-            @click="router.push('/logger')"
-          >
+          <RouterLink v-if="User.isLogined" class="user" to="/logger">
             {{ User.name }}
-          </div>
+          </RouterLink>
           <RouterLink v-else to="/login">去登录</RouterLink>
           <ThemeSwitch />
         </div>
@@ -121,6 +117,17 @@ const router = useRouter()
           --el-switch-on-color: #2c2c2c;
           --el-switch-off-color: #f2f2f255;
           --color: #333;
+        }
+
+        > .user {
+          text-decoration: none;
+          color: inherit;
+          padding-left: 20px;
+          padding-right: 20px;
+
+          &:hover {
+            background: #ccc5;
+          }
         }
       }
 

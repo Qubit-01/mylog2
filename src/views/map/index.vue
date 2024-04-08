@@ -4,9 +4,10 @@ import useLogStore from '@/stores/log'
 import AMap, {
   useAMap,
   createLayer,
-  getLocation,
+  getPosition,
   l2v,
   Markers,
+  getGeolocation,
 } from '@/utils/map'
 
 const Mylog = useLogStore().mylog
@@ -53,8 +54,9 @@ const aMap = reactive(
 
 aMap.init.then(async map => {
   data.location = l2v(await aMap.curLocation)
-  markers.cur.setPosition(data.location)
-  map.add(markers.cur)
+  
+  // markers.cur.setPosition(data.location)
+  // map.add(markers.cur)
   map.add(markers.act)
 
   // 点击地图时，设置坐标
@@ -123,7 +125,7 @@ for (const k in data.visible) {
 const getLocationLoading = ref(false)
 const currentLocation = () => {
   getLocationLoading.value = true
-  getLocation().then(p => {
+  getPosition().then(p => {
     data.location = l2v(p)
     aMap.map!.panTo(p)
     getLocationLoading.value = false
@@ -149,7 +151,7 @@ const setMarker = () => {
     class="map-page"
     v-m
     v-loading="!aMap.map"
-    element-loading-text="地图加载中..."
+    :element-loading-text="aMap.state"
   >
     <div>
       <ElButton @click="currentLocation" :loading="getLocationLoading">

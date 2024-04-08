@@ -4,6 +4,7 @@ import { getUser } from '@/api/user'
 import { BucketCDN } from '@/stores/constant'
 import useUserStore, { logout } from '@/stores/user'
 import { ArrowDownBold, ArrowUpBold } from '@element-plus/icons-vue'
+import { getPositionByGeo, getCityByIp, getCityInfoByGeo, getPosition } from '@/utils/map'
 
 const user = ref<User>()
 
@@ -29,6 +30,17 @@ const tab = computed<string>({
   get: () => route.name as string,
   set: v => router.replace({ name: v }),
 })
+
+const location = ref<string>('上海市')
+// getCityInfoByGeo().then(p => {
+//   console.log('🐤', p)
+// })
+// getPositionByGeo().then(p=> {
+//   console.log('🐤', p)
+// })
+getPosition().then(p=> {
+  console.log('🐤', p)
+})
 </script>
 
 <template>
@@ -37,6 +49,9 @@ const tab = computed<string>({
       <div class="carousel">
         <img :src="BucketCDN + 'web-files/carousel-0.jpg'" />
         <div class="logout" @click="logout()">退出登录</div>
+        <div class="location">
+          <ElIcon><Location /></ElIcon>{{ location }}
+        </div>
       </div>
       <div class="logger-info">
         <div class="img">
@@ -111,6 +126,17 @@ const tab = computed<string>({
         backdrop-filter: blur(16px);
 
         cursor: pointer;
+      }
+
+      .location {
+        position: absolute;
+        bottom: 12px;
+        left: 12px;
+
+        border-radius: var(--border-radius);
+        padding: 6px 10px;
+        background-color: var(--m-background-color);
+        backdrop-filter: blur(8px);
       }
     }
 
