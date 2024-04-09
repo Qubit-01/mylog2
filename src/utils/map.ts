@@ -14,11 +14,20 @@ interface AMap extends AMapType {
   CitySearch?: any // IP定位
   Geolocation?: any // 浏览器定位
   Geocoder?: any // 地址解析
+  MarkerCluster?: any // 点聚合
 }
 
 // 给AMap添加需要用的所有功能
 const addPlugins = new Promise<void>((resolve, reject) => {
-  AMap.plugin(['AMap.CitySearch', 'AMap.Geolocation', 'AMap.Geocoder'], resolve)
+  AMap.plugin(
+    [
+      'AMap.CitySearch',
+      'AMap.Geolocation',
+      'AMap.Geocoder',
+      'AMap.MarkerCluster',
+    ],
+    resolve
+  )
 })
 
 /****************
@@ -212,8 +221,7 @@ export function useAMap(
       const curLocation = await getGeolocation
       map.value = new AMap.Map(domRef.value!, {
         zoom: 17, // 地图级别
-        // center: [104.065751, 30.657457],
-        // center: l2v((await getPositionByGeo(geolocation)).position),
+        center: [104.065751, 30.657457],
         mapStyle: global.isDark ? 'amap://styles/dark' : 'amap://styles/normal', // 设置地图的显示样式
         ...opts,
       })
@@ -323,6 +331,12 @@ export const Markers = {
       offset: new AMap.Pixel(-6, -6),
       ...opts,
     }),
+  // 预设content，对marker使用 setContent
+  contents: {
+    count(c: string | number) {
+      
+    },
+  },
 }
 
 /**

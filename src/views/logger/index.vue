@@ -4,12 +4,7 @@ import { getUser } from '@/api/user'
 import { BucketCDN } from '@/stores/constant'
 import useUserStore, { logout } from '@/stores/user'
 import { ArrowDownBold, ArrowUpBold } from '@element-plus/icons-vue'
-import {
-  getPositionByGeo,
-  getCityByIp,
-  getCityInfoByGeo,
-  getPosition,
-} from '@/utils/map'
+import { getCityInfoByGeo } from '@/utils/map'
 
 const user = ref<User>()
 

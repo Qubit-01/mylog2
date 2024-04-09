@@ -1,20 +1,25 @@
 <script setup lang="ts">
 import type { Log } from '@/types'
+import { flatten } from 'lodash'
 import useLogStore from '@/stores/log'
 import AMap, {
   useAMap,
   createLayer,
-  getPosition,
   l2v,
   Markers,
-  getGeolocation,
   getPositionByGeo,
 } from '@/utils/map'
 
 const Mylog = useLogStore().mylog
 const mapDom = ref<HTMLDivElement>()
 // 当前显示的log
-const log = ref<Log>()
+const log = reactive<{
+  list: Log[]
+  curIndex: number
+}>({
+  list: [],
+  curIndex: 0,
+})
 
 /**
  * 分类的marker
@@ -61,20 +66,57 @@ aMap.init.then(async map => {
     markers.act.setPosition(ev.lnglat)
   })
 
-  if (!Mylog.listAll.length) await Mylog.getLogs()
+  await Mylog.getLogs()
 
-  Mylog.listFilter
-    .filter(log => log.location.length)
-    // .map(log => log.location[0])
-    .forEach(l => {
-      const marker = Markers.point(
-        { color: 'green' },
-        { position: l.location[0], map }
-      )
-      marker.on('click', e => {
-        log.value = l
+  // 点集，可以携带数据
+  const points: { weight: number; lnglat: AMap.Vector2; log: Log }[] =
+    Mylog.listFilter
+      .filter(log => log.location.length)
+      .map(l => {
+        // console.log('🐤', l.location)
+        return {
+          weight: 1,
+          lnglat: l.location[0]!,
+          log: l,
+        }
       })
-    })
+
+  // 点聚合
+  const cluster = new AMap.MarkerCluster(map, points, {
+    gridSize: 20,
+    clusterByZoomChange: true,
+    // 聚合点
+    renderClusterMarker(context: {
+      clusterData: any[]
+      count: number
+      marker: AMap.Marker
+    }) {
+      // context属性 marker:当前聚合点，count:当前聚合点内的点数量
+      const c = context.count > 50 ? 50 : context.count > 30 ? 30 : 1
+      const s = context.count > 50 ? 36 : context.count > 30 ? 30 : 24
+      context.marker.setContent(
+        `<div class="log-marker gt${c}" style="--size: ${s}px;">${context.count}</div>`
+      )
+      context.marker.setOffset(new AMap.Pixel(-s / 2, -s / 2))
+      context.marker.on('click', e => {
+        log.curIndex = 1
+        log.list = flatten(
+          context.clusterData.map(d => d._amapMarker.originData[0])
+        )
+          .map((d: any) => d.log)
+          .sort((a: Log, b: Log) => b.logtime.diff(a.logtime))
+      })
+    },
+    // 非聚合点 context.marker:当前非聚合点
+    renderMarker(context: { data: any[]; count: number; marker: AMap.Marker }) {
+      context.marker.setContent('<div class="log-marker"></div>')
+      context.marker.setOffset(new AMap.Pixel(-9, -9))
+      context.marker.on('click', () => {
+        log.curIndex = 1
+        log.list = context.data.map(d => d.log)
+      })
+    },
+  })
 })
 
 // 添加标记方法封装
@@ -199,8 +241,23 @@ const setMarker = () => {
 
     <div class="map" ref="mapDom"></div>
 
-    <div v-if="log" class="log">
-      <Log v-if="log" :log />
+    <div v-if="log.list.length" class="logs">
+      <Log
+        :log="log.list[log.curIndex - 1]"
+        :key="log.list[log.curIndex - 1].id"
+      >
+        <template #bottom>
+          <ElPagination
+            small
+            layout="prev, pager, next"
+            :page-size="1"
+            v-model:current-page="log.curIndex"
+            :total="log.list.length"
+            hide-on-single-page
+            style="justify-content: center"
+          />
+        </template>
+      </Log>
     </div>
   </div>
 </template>
@@ -234,12 +291,39 @@ const setMarker = () => {
     // height: calc(100vh - var(--header-top));
   }
 
-  .log {
+  .logs {
     position: absolute;
     bottom: var(--padding);
     left: var(--padding);
     right: var(--padding);
     // width: 100%;
+    // display: flex;
+  }
+
+  // Marker样式定义
+  :deep(.log-marker) {
+    --size: 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: var(--size);
+    width: var(--size);
+    border: 1px solid #0f0c;
+    border-radius: 50%;
+    box-shadow: #000 0px 0px 3px;
+
+    background-color: #0f05;
+    &.gt1 {
+      background-color: #0f0a;
+    }
+    &.gt30 {
+      background-color: #0f0c;
+    }
+    &.gt50 {
+      background-color: #0f0f;
+    }
   }
 }
 </style>

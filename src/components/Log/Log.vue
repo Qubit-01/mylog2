@@ -107,6 +107,8 @@ const expand = () => {
         </ElButton>
       </ElButtonGroup>
     </div>
+
+    <slot name="bottom"></slot>
   </div>
 </template>
 

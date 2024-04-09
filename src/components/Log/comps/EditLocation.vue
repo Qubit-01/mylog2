@@ -24,7 +24,6 @@ aMap.init.then(async map => {
   // 如果没有坐标，就使用定位
   if (!location.value[0]) location.value = [l2v(map.getCenter()), '']
   marker.setPosition(location.value[0]!)
-
   map.add(marker)
 
   // 点击地图时，设置坐标
