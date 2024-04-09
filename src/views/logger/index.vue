@@ -4,7 +4,12 @@ import { getUser } from '@/api/user'
 import { BucketCDN } from '@/stores/constant'
 import useUserStore, { logout } from '@/stores/user'
 import { ArrowDownBold, ArrowUpBold } from '@element-plus/icons-vue'
-import { getPositionByGeo, getCityByIp, getCityInfoByGeo, getPosition } from '@/utils/map'
+import {
+  getPositionByGeo,
+  getCityByIp,
+  getCityInfoByGeo,
+  getPosition,
+} from '@/utils/map'
 
 const user = ref<User>()
 
@@ -31,15 +36,10 @@ const tab = computed<string>({
   set: v => router.replace({ name: v }),
 })
 
-const location = ref<string>('上海市')
-// getCityInfoByGeo().then(p => {
-//   console.log('🐤', p)
-// })
-// getPositionByGeo().then(p=> {
-//   console.log('🐤', p)
-// })
-getPosition().then(p=> {
-  console.log('🐤', p)
+const location = ref<string>('')
+getCityInfoByGeo().then(res => {
+  console.log('🐤', res)
+  location.value = res.city
 })
 </script>
 
@@ -49,7 +49,7 @@ getPosition().then(p=> {
       <div class="carousel">
         <img :src="BucketCDN + 'web-files/carousel-0.jpg'" />
         <div class="logout" @click="logout()">退出登录</div>
-        <div class="location">
+        <div v-if="location" class="location">
           <ElIcon><Location /></ElIcon>{{ location }}
         </div>
       </div>
@@ -132,6 +132,9 @@ getPosition().then(p=> {
         position: absolute;
         bottom: 12px;
         left: 12px;
+
+        display: flex;
+        align-items: center;
 
         border-radius: var(--border-radius);
         padding: 6px 10px;

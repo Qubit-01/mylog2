@@ -8,6 +8,7 @@ import AMap, {
   l2v,
   Markers,
   getGeolocation,
+  getPositionByGeo,
 } from '@/utils/map'
 
 const Mylog = useLogStore().mylog
@@ -120,9 +121,7 @@ for (const k in data.visible) {
 const getLocationLoading = ref(false)
 const currentLocation = () => {
   getLocationLoading.value = true
-  getPosition().then(p => {
-    data.location = p
-    aMap.map!.panTo(p)
+  getPositionByGeo(aMap.locationController).then(() => {
     getLocationLoading.value = false
   })
 }
@@ -145,8 +144,11 @@ const setMarker = () => {
   <div
     class="map-page"
     v-m
-    v-loading="!aMap.map"
-    :element-loading-text="aMap.state"
+    v-loading="
+      aMap.loading && {
+        text: aMap.state,
+      }
+    "
   >
     <div>
       <ElButton @click="currentLocation" :loading="getLocationLoading">

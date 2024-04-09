@@ -22,7 +22,7 @@ const aMap = reactive(
 
 aMap.init.then(async map => {
   // 如果没有坐标，就使用定位
-  if (!location.value[0]) location.value = [l2v(await aMap.curLocation), '']
+  if (!location.value[0]) location.value = [l2v(map.getCenter()), '']
   marker.setPosition(location.value[0]!)
 
   map.add(marker)
@@ -48,7 +48,14 @@ aMap.init.then(async map => {
 </script>
 
 <template>
-  <div class="edit-location" v-loading="!aMap.map">
+  <div
+    class="edit-location"
+    v-loading="
+      aMap.loading && {
+        text: aMap.state,
+      }
+    "
+  >
     <div class="map" ref="mapDom"></div>
     <div class="search-input">
       <ElInput v-model="search" placeholder="搜索地址" clearable />

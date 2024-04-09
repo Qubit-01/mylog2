@@ -56,22 +56,33 @@ export async function getCityByIp(ip?: string): Promise<any> {
 }
 
 /**
- * 公共的定位对象
+ * 公共的定位对象(全局唯一)，即是公共定位工具，也是地图当前坐标Marker
  * 浏览器定位对象，用的比较多，这里直接抽出来，构造时浏览器不会发起询问，调用方法时会
  * 融合了浏览器定位、高精度IP定位、安卓定位sdk辅助定位等多种手段，提供了获取当前准确位置、获取当前城市信息、持续定位(浏览器定位)等功能。
  * 默认情况下，PC端先精确IP定位，失败后浏览器定位；手机端先浏览器定位，失败后IP定位
+ *
+ * 只管在地图上显示Marker，不会自动定位，不会跳转
  *
  * 还可以通过事件监听获取定位结果
  * @see https://lbs.amap.com/api/javascript-api-v2/documentation#geolocation 2.0版本
  * https://lbs.amap.com/api/javascript-api/reference/location#m_AMap.CitySearch 1.4
  */
 export const getGeolocation = addPlugins.then(() => {
+  console.log('🐤创建定位对象')
   return new AMap.Geolocation({
     enableHighAccuracy: true, // 是否使用高精度定位，默认：true
     timeout: 10000, // 设置定位超时时间，默认：无穷大
-    getCityWhenFail: true, // 定位失败之后是否返回基本城市定位信息
+    // convert: true, //自动偏移坐标，偏移后的坐标为高德坐标，默认：true
+    // getCityWhenFail: true, // 定位失败之后是否返回基本城市定位信息
     needAddress: true, // 是否需要将定位结果进行逆地理编码操作
-    extensions: 'all', // 是否需要详细的逆地理编码信息，默认为'base'只返回基本信息，可选'all'
+    // extensions: 'all', // 是否需要详细的逆地理编码信息,是否需要周边POI、道路交叉口等信息，默认为'base'只返回基本信息，可选'all',将返回周边POI、道路交叉口等信息
+    showButton: false, // 是否显示定位按钮，true
+    // buttonPosition: 'LB', // 定位按钮可停靠的位置 LT左上角 LB左下角 RT右上角 RB右下角 默认LB
+    // buttonOffset: Pixel(10,20) // 按钮距离停靠位置的偏移量 默认Pixel(10,20)
+    // showMarker: false, // 定位成功时是否在定位位置显示一个Marker true
+    // showCircle: true, //定位成功后用圆圈表示定位精度范围，默认：true
+    panToLocation: false, // 定位成功后，是否把定位得到的坐标设置为地图中心点坐标 true
+    // zoomToAccuracy: false,  // 定位成功且显示精度范围时，是否把地图视野调整到正好显示精度范围 false
   })
 })
 
@@ -154,6 +165,8 @@ export async function getAddress(p: AMap.Vector2): Promise<any> {
  * 建议用的时候用reactive包裹，不要用Map当变量名！！！推荐用aMap
  *
  * 都要定位用户当前位置，如果传入了center，那就按center
+ * 用户当前Marker时刻要有
+ * 点击定位按钮跳到当前位置
  *
  * 如果考虑用户不给定位权限的话，太麻烦了，用户必须给定位权限
  * @param domRef Dom的Ref对象
@@ -165,64 +178,79 @@ export function useAMap(
   domRef: globalThis.Ref<HTMLDivElement | undefined>,
   opts: any = {}
 ) {
-  // 17602156171
   const global = useGlobalStore()
 
   const map = shallowRef<AMap.Map>()
-  const state = ref<string>('地图加载中...')
+  const loading = ref(true)
+  /**
+   * 地图状态
+   */
+  const state = ref<string>('正在加载地图...')
+  const curPosition = ref<[number, number]>()
 
-  // 新建定位控件，不要用公共的
-  const geolocation = new AMap.Geolocation({
+  // 定位控件，没有Marker，纯定位，会移动
+  const locationController = new AMap.Geolocation({
     enableHighAccuracy: true, //是否使用高精度定位，默认:true
     timeout: 10000, //超过10秒后停止定位，默认：无穷大
     maximumAge: 0, //定位结果缓存0毫秒，默认：0
     // convert: true, //自动偏移坐标，偏移后的坐标为高德坐标，默认：true
-    // showButton: true, //显示定位按钮，默认：true
+    // showButton: false, //显示定位按钮，默认：true
     // buttonPosition: 'LB', //定位按钮停靠位置，默认：'LB'，左下角
     // buttonOffset: new AMap.Pixel(10, 20), //定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
-    // showMarker: true, //定位成功后在定位到的位置显示点标记，默认：true
-    // showCircle: true, //定位成功后用圆圈表示定位精度范围，默认：true
+    showMarker: false,
+    showCircle: false,
     // panToLocation: false, //定位成功后将定位到的位置作为地图中心点，默认：true
     // zoomToAccuracy: true, //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
     // getCityWhenFail: true, // 定位失败之后是否返回基本城市定位信息
   })
 
-  geolocation.getCurrentPosition(() => {
-    console.log('🐤dw')
-  })
-
+  /**
+   * init后，map对象应该被创建好，curPosition应该有值
+   */
   const init = new Promise<AMap.Map>((resolve, reject) => {
     onMounted(async () => {
-      const rawMap = new AMap.Map(domRef.value!, {
-        zoom: 15, // 地图级别
-        center: [104.065751, 30.657457],
+      const curLocation = await getGeolocation
+      map.value = new AMap.Map(domRef.value!, {
+        zoom: 17, // 地图级别
+        // center: [104.065751, 30.657457],
         // center: l2v((await getPositionByGeo(geolocation)).position),
         mapStyle: global.isDark ? 'amap://styles/dark' : 'amap://styles/normal', // 设置地图的显示样式
         ...opts,
       })
+      map.value.addControl(curLocation) // 添加当前Marker
+      map.value.addControl(locationController) // 添加定位按钮
 
-      rawMap.addControl(geolocation)
-      // geolocation.getCurrentPosition() // 进入页面就定位
-      map.value = rawMap
-      resolve(rawMap)
+      state.value = '正在定位当前...'
+      let firPosition
+      try {
+        // 触发当前Marker定位，不会移动地图，但是如果没传入center，就会跳转到
+        const result = await getPositionByGeo(curLocation)
+        firPosition = result.position
+        if (!opts.center) map.value.panTo(result.position, 0)
+      } catch (e) {
+        console.log('🐤定位出错，应该是没给权限', e)
+      }
+      loading.value = false
 
-      // 监听全局主题变化，自动切换地图样式
-      watch(
-        () => global.isDark,
-        () => {
-          rawMap.setMapStyle(
-            global.isDark ? 'amap://styles/dark' : 'amap://styles/normal'
-          )
-        }
-      )
+      resolve(map.value)
     })
   })
+
+  // 监听全局主题变化，自动切换地图样式
+  watch(
+    () => global.isDark,
+    () => {
+      map.value!.setMapStyle(
+        global.isDark ? 'amap://styles/dark' : 'amap://styles/normal'
+      )
+    }
+  )
 
   onUnmounted(() => {
     map.value!.destroy()
   })
 
-  return { map, init, state, geolocation }
+  return { map, init, loading, state, curPosition, locationController }
 }
 
 type LayerName = 'default' | 'tile' | 'satellite' | 'roadNet' | 'traffic'
