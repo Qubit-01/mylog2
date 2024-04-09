@@ -4,7 +4,7 @@ import { getUser } from '@/api/user'
 import { BucketCDN } from '@/stores/constant'
 import useUserStore, { logout } from '@/stores/user'
 import { ArrowDownBold, ArrowUpBold } from '@element-plus/icons-vue'
-import { getCityInfoByGeo } from '@/utils/map'
+import { getCityByIp, getCityInfoByGeo } from '@/utils/map'
 
 const user = ref<User>()
 
@@ -34,7 +34,16 @@ const tab = computed<string>({
 const location = ref<string>('')
 getCityInfoByGeo().then(res => {
   console.log('🐤', res)
+  // location.value = res.city
+}).catch(e=> {
+  console.log(e)
+})
+
+getCityByIp().then(res => {
+  console.log('🐤1', res)
   location.value = res.city
+}).catch(e=> {
+  console.log(e)
 })
 </script>
 

@@ -66,7 +66,7 @@ aMap.init.then(async map => {
     markers.act.setPosition(ev.lnglat)
   })
 
-  await Mylog.getLogs()
+  if (!Mylog.listAll.length) await Mylog.getLogs()
 
   // 点集，可以携带数据
   const points: { weight: number; lnglat: AMap.Vector2; log: Log }[] =
@@ -249,6 +249,7 @@ const setMarker = () => {
         <template #bottom>
           <ElPagination
             small
+            background
             layout="prev, pager, next"
             :page-size="1"
             v-model:current-page="log.curIndex"

@@ -121,6 +121,7 @@ export async function getPositionByGeo(gl?: any): Promise<any> {
 /**
  * 获取当前城市信息，浏览器定位，不会要权限
  * 而且在使用代理时，也会通过ip返回结果
+ * 有时会失败
  * @returns Promise<{position坐标数组, ...}>
  */
 export async function getCityInfoByGeo(gl?: any): Promise<any> {
@@ -213,6 +214,10 @@ export function useAMap(
     // getCityWhenFail: true, // 定位失败之后是否返回基本城市定位信息
   })
 
+  const firstPosition = getGeolocation.then(curLocation => {
+    return getPositionByGeo(curLocation)
+  })
+
   /**
    * init后，map对象应该被创建好，curPosition应该有值
    */
@@ -221,7 +226,7 @@ export function useAMap(
       const curLocation = await getGeolocation
       map.value = new AMap.Map(domRef.value!, {
         zoom: 17, // 地图级别
-        center: [104.065751, 30.657457],
+        // center: [104.065751, 30.657457],
         mapStyle: global.isDark ? 'amap://styles/dark' : 'amap://styles/normal', // 设置地图的显示样式
         ...opts,
       })
@@ -229,12 +234,9 @@ export function useAMap(
       map.value.addControl(locationController) // 添加定位按钮
 
       state.value = '正在定位当前...'
-      let firPosition
       try {
         // 触发当前Marker定位，不会移动地图，但是如果没传入center，就会跳转到
-        const result = await getPositionByGeo(curLocation)
-        firPosition = result.position
-        if (!opts.center) map.value.panTo(result.position, 0)
+        if (!opts.center) map.value.panTo((await firstPosition).position, 0)
       } catch (e) {
         console.log('🐤定位出错，应该是没给权限', e)
       }
@@ -258,7 +260,15 @@ export function useAMap(
     map.value!.destroy()
   })
 
-  return { map, init, loading, state, curPosition, locationController }
+  return {
+    map,
+    init,
+    loading,
+    state,
+    curPosition,
+    locationController,
+    firstPosition,
+  }
 }
 
 type LayerName = 'default' | 'tile' | 'satellite' | 'roadNet' | 'traffic'
@@ -333,9 +343,7 @@ export const Markers = {
     }),
   // 预设content，对marker使用 setContent
   contents: {
-    count(c: string | number) {
-      
-    },
+    count(c: string | number) {},
   },
 }
 
