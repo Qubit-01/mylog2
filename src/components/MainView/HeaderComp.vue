@@ -29,7 +29,9 @@ const router = useRouter()
           <RouterLink v-if="User.isLogined" class="user" to="/logger">
             {{ User.name }}
           </RouterLink>
-          <RouterLink v-else to="/login">去登录</RouterLink>
+          <ElLink v-else type="primary" @click="$router.push('login')">
+            去登录
+          </ElLink>
           <ThemeSwitch />
         </div>
       </div>

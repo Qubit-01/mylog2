@@ -84,7 +84,9 @@ const doSignin = async () => {
         <ElButton @click="doSignin" size="large">注册</ElButton>
         <div class="toSignin">
           有账号？
-          <RouterLink to="/login" replace>去登录</RouterLink>
+          <ElLink type="primary" @click="$router.replace('/login')">
+            去登录
+          </ElLink>
         </div>
       </form>
 
@@ -168,7 +170,8 @@ const doSignin = async () => {
     }
 
     .toSignin {
-      text-align: right;
+      display: flex;
+      justify-content: flex-end;
     }
   }
 

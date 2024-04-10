@@ -93,7 +93,7 @@ const expand = () => {
       ·
       <div>{{ log.id }}</div>
       <template v-if="log.info.link">
-        · <a :href="log.info.link" target="_blank">查看原文</a>
+        · <ElLink :href="log.info.link" target="_blank">查看原文</ElLink>
       </template>
     </div>
 

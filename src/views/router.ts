@@ -83,7 +83,7 @@ const router = createRouter({
           path: 'map',
           name: 'map', // 地图
           component: () => import('./map/index.vue'),
-          meta: { title: '地图 - 多元记' },
+          meta: { title: '地图 - 多元记', requiresAuth: true },
         },
         {
           path: 'relation',
