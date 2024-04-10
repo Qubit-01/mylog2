@@ -142,6 +142,10 @@ export const useLogStore = defineStore('log', () => {
     loading: true,
     noMore: false,
     addLogs: async () => {
+      if (mylog.params.skip > mylog.listFilter.length) {
+        mylog.noMore = true
+        return
+      }
       mylog.params.skip += mylog.params.limit
     },
     getLogs: async () => {

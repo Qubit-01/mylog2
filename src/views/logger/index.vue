@@ -32,19 +32,23 @@ const tab = computed<string>({
 })
 
 const location = ref<string>('')
-getCityInfoByGeo().then(res => {
-  console.log('🐤', res)
-  // location.value = res.city
-}).catch(e=> {
-  console.log(e)
-})
+getCityInfoByGeo()
+  .then(res => {
+    console.log('🐤', res)
+    // location.value = res.city
+  })
+  .catch(e => {
+    console.log(e)
+  })
 
-getCityByIp().then(res => {
-  console.log('🐤1', res)
-  location.value = res.city
-}).catch(e=> {
-  console.log(e)
-})
+getCityByIp()
+  .then(res => {
+    console.log('🐤1', res)
+    location.value = res.city
+  })
+  .catch(e => {
+    console.log(e)
+  })
 </script>
 
 <template>
@@ -59,7 +63,12 @@ getCityByIp().then(res => {
       </div>
       <div class="logger-info">
         <div class="img">
-          <img :src="user.img" />
+          <img
+            :src="
+              user.img ||
+              'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+            "
+          />
         </div>
         <div class="text">
           <div class="name">

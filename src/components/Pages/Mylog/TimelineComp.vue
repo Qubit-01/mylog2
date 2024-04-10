@@ -78,6 +78,20 @@ const logReleaseDom = ref()
         </ElTimelineItem>
       </template>
 
+      <!-- 没有数据 -->
+      <ElTimelineItem
+        v-if="!Mylog.list.length && !Mylog.loading"
+        timestamp="没有数据哦~"
+        placement="top"
+      >
+        <div
+          v-m
+          style="padding: var(--padding); border-radius: var(--border-radius)"
+        >
+          没有数据哦~
+        </div>
+      </ElTimelineItem>
+
       <ElTimelineItem
         v-if="Mylog.loading"
         timestamp="loading..."

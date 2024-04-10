@@ -49,6 +49,14 @@ watch(
   >
     <Log v-for="log in logger.list" :log="log" />
 
+    <div
+      v-if="!logger.list.length && !logger.loading"
+      v-m
+      style="padding: var(--padding); border-radius: var(--border-radius)"
+    >
+      没有公开的数据哦，快去发一个吧~
+    </div>
+
     <LogLoading v-if="logger.loading" />
   </div>
 </template>
