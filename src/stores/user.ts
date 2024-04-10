@@ -2,7 +2,7 @@ import { updateSetting } from '@/api/user'
 import type { User } from '@/types'
 import { getUser } from './global'
 import { cloneDeep } from 'lodash'
-import QC from '@/utils/QQConnect'
+import QC from '@/utils/qq-connect'
 
 /**
  * 哪些信息需要存入本地？

@@ -24,6 +24,7 @@
     "lodash": "^4.17.21",
     "pinia": "^2.1.7",
     "viewerjs": "^1.11.6",
+    "vis-data": "^7.1.9",
     "vis-network": "^9.1.9",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"

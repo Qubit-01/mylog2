@@ -14,7 +14,7 @@
   &state=login
  -->
 <script setup lang="ts">
-import QC from '@/utils/QQConnect'
+import QC from '@/utils/qq-connect'
 import { haveUser, login, signin, updateUser } from '@/api/user'
 import { ArrowLeftBold } from '@element-plus/icons-vue'
 import { baseURL } from '@/stores/constant'

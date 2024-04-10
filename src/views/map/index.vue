@@ -272,7 +272,7 @@ const setMarker = () => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  height: calc(100vh - var(--header-top) - var(--padding) - 60px);
+  height: calc(100vh - var(--header-top) - var(--gap));
 
   .lnglat-input {
     display: flex;

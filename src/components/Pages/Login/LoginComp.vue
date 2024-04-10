@@ -2,7 +2,7 @@
 import type { User } from '@/types'
 import { login } from '@/api/user'
 import useGlobalStore from '@/stores/global'
-import { appId, redirectURI } from '@/utils/QQConnect'
+import { appId, redirectURI } from '@/utils/qq-connect'
 
 const Global = useGlobalStore()
 const route = useRoute()

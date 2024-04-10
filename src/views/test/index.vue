@@ -1,24 +1,35 @@
 <script setup lang="ts">
-import { useMap, useTest } from './test'
+import { useVisNetwork } from '@/utils/vis-network'
 
-const mapDom = ref<HTMLDivElement>()
+const networkDom = ref<HTMLDivElement>()
 
-const Test = reactive(useTest())
+const VN = reactive(
+  useVisNetwork(networkDom, {
+    nodes: [
+      { id: 1, label: 'Node 1' },
+      { id: 2, label: 'Node 2' },
+      { id: 3, label: 'Node 3' },
+    ],
+    edges: [
+      { from: 1, to: 3 },
+      { from: 1, to: 2 },
+    ],
+  })
+)
 
-const Map = reactive(useMap())
+const addNode = () => {
+  VN.nodes.add({
+    label: 'wc',
+  })
+}
 </script>
 
 <template>
   <div class="test-page" v-m>
     <div>
-      <div>{{ Test.count }}</div>
-      <button @click="Test.count++">add</button>
+      <ElButton @click="addNode">添加</ElButton>
     </div>
-
-    <div>{{ Map.count }}</div>
-    <button @click="Map.count++">add</button>
-
-    <div class="map" ref="mapDom"></div>
+    <div class="network" ref="networkDom"></div>
   </div>
 </template>
 
@@ -26,5 +37,15 @@ const Map = reactive(useMap())
 .test-page {
   border-radius: var(--border-radius);
   padding: var(--padding);
+
+  height: calc(100vh - var(--header-top) - var(--gap));
+
+  display: flex;
+  flex-direction: column;
+
+  .network {
+    height: 0;
+    flex: 1;
+  }
 }
 </style>

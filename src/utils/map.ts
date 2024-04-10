@@ -182,7 +182,6 @@ export async function getAddress(p: AMap.Vector2): Promise<any> {
  * @param domRef Dom的Ref对象
  * @param opts 地图初始化的配置
  * @param config 配置项，默认开启浏览器定位，getCenter就是精确点
- * @param callback 初始化后的回调，传入地图对象
  */
 export function useAMap(
   domRef: globalThis.Ref<HTMLDivElement | undefined>,
