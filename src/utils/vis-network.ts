@@ -10,6 +10,7 @@ import type {
 } from 'vis-network'
 /**
  * https://visjs.github.io/vis-network/
+ * 中文文档 https://ame.cool/core/frontend-tools/
  */
 
 /**

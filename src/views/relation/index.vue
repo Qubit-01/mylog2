@@ -10,11 +10,20 @@ import useUserStore from '@/stores/user'
 import { useVisNetwork } from '@/utils/vis-network'
 import { ElButton } from 'element-plus'
 import { useRelationStore } from '@/stores/relation'
+import type { Relation } from '@/types'
 
 const User = useUserStore()
 const Relation = useRelationStore()
 
 const networkDom = ref<HTMLDivElement>()
+// 当前显示的log
+const relations = reactive<{
+  list: Relation[]
+  curIndex: number
+}>({
+  list: [],
+  curIndex: 1,
+})
 
 const VN = reactive(
   useVisNetwork(networkDom, {
@@ -24,6 +33,18 @@ const VN = reactive(
     edges: Relation.getEdges(),
   })
 )
+
+VN.init.then(network => {
+  network.on('click', e => {
+    // console.log(e.nodes)
+    const rs: Relation[] = []
+    for (const id of e.nodes) {
+      rs.push(Relation.listAll.find(i => i.id == id)!)
+    }
+    // console.log(rs)
+    relations.list = rs
+  })
+})
 
 // 缩放按钮
 const setScale = (num: number) => {
@@ -35,26 +56,39 @@ const setScale = (num: number) => {
 
 <template>
   <div class="relation-page" v-m>
+    <div class="network" ref="networkDom"></div>
+
     <div class="buttons">
       <!-- <ElButton type="primary" :icon="FullScreen" @click="MaxNetwork()" /> -->
       <ElButton :icon="Refresh" @click="setScale(0)" />
       <ElButton :icon="Plus" @click="setScale(0.1)" />
       <ElButton :icon="Minus" @click="setScale(-0.1)" />
     </div>
-    <div class="network" ref="networkDom"></div>
 
-    <!-- 查看人员表单 -->
-    <!-- <PeopleComp
-        :selectedPeople="selectedPeople"
-        :groups="groups"
-        :handleRaws="handleRaws"
-        :raws="raws"
-      /> -->
+    <!-- {{ relations }} -->
+    <div v-if="relations.list.length" class="relations">
+      <RelationComp
+        :relation="relations.list[relations.curIndex - 1]"
+        :key="relations.list[relations.curIndex - 1].id"
+      >
+        <ElPagination
+          small
+          background
+          layout="prev, pager, next"
+          :page-size="1"
+          v-model:current-page="relations.curIndex"
+          :total="relations.list.length"
+          hide-on-single-page
+          style="justify-content: center"
+        />
+      </RelationComp>
+    </div>
   </div>
 </template>
 
 <style scoped lang="less">
 .relation-page {
+  position: relative;
   border-radius: var(--border-radius);
   padding: var(--padding);
   height: calc(100vh - var(--header-top) - var(--gap));
@@ -65,6 +99,21 @@ const setScale = (num: number) => {
   .network {
     height: 0;
     flex: 1;
+  }
+
+  .buttons {
+    position: absolute;
+    top: var(--padding);
+    left: var(--padding);
+  }
+
+  .relations {
+    position: absolute;
+    bottom: var(--padding);
+    left: var(--padding);
+    right: var(--padding);
+    // width: 100%;
+    // display: flex;
   }
 }
 </style>

@@ -90,6 +90,9 @@ export interface Relation {
     label: string // 线条标签
     img: string // 头像
     phone: string // 手机号码
+    _other: {
+      [key in string]: any // 自定义项
+    }
   }
 }
 
