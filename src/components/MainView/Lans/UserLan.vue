@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import useUserStore, { logout } from '@/stores/user'
+import { vImgSrc } from '@/utils/directives'
 const User = useUserStore()
 </script>
 <!-- 可以加点数量统计 -->
@@ -7,7 +8,7 @@ const User = useUserStore()
   <div class="user-lan" v-m>
     <div class="img">
       <img
-        :src="
+        v-img-src="
           User.img ||
           'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
         "
@@ -15,9 +16,9 @@ const User = useUserStore()
       />
     </div>
     <template v-if="User.isLogined">
-      <div class="title">
+      <ElLink class="title" @click="$router.push('/logger')">
         {{ User.name }}
-      </div>
+      </ElLink>
       <div class="items">
         <ElButton type="primary" text @click="$router.push('/mylog')">
           发个Log

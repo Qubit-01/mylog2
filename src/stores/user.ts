@@ -99,6 +99,6 @@ export const logout = (to: string = '/') => {
   localStorage.removeItem('token')
   localStorage.removeItem('pageSetting')
   QC.Login.signOut()
-  if (to !== '') location.href = to
+  if (to !== '') location.href = '/#' + to
   location.reload()
 }

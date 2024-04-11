@@ -27,3 +27,19 @@ export const vOverflowEllipsis: Directive = (el, { value = 1 }) => {
     el.style.webkitLineClamp = value
   }
 }
+
+/**
+ * 通过图片地址，给img设置不同的属性
+ * QQ图片需要设置referrerPolicy
+ * @param value 图片地址
+ */
+export const vImgSrc: Directive = (el, { value }) => {
+  el.setAttribute('src', value)
+  // 判断QQ图片
+  if (value.includes('.qq.com/') || value.includes('.qpic.cn/')) {
+    el.setAttribute('referrerPolicy', 'no-referrer')
+    if (!el.getAttribute('alt')) el.setAttribute('alt', 'QQ空间图片')
+  } else {
+    if (!el.getAttribute('alt')) el.setAttribute('alt', value.split('/').at(-1))
+  }
+}

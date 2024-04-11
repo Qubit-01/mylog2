@@ -5,6 +5,7 @@ import { BucketCDN } from '@/stores/constant'
 import useUserStore, { logout } from '@/stores/user'
 import { ArrowDownBold, ArrowUpBold } from '@element-plus/icons-vue'
 import { getCityByIp, getCityInfoByGeo } from '@/utils/map'
+import { vImgSrc } from '@/utils/directives'
 
 const user = ref<User>()
 
@@ -64,7 +65,7 @@ getCityByIp()
       <div class="logger-info">
         <div class="img">
           <img
-            :src="
+            v-img-src="
               user.img ||
               'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
             "
