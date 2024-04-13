@@ -160,7 +160,7 @@ export const useLogStore = defineStore('log', () => {
 
   /**
    * 从all中获取真实的log对象
-   * @param id log的id
+   * @param log 取出id属性去比较
    * @return 返回log对象，没找到就undefined
    */
   const getLog = (log: LogEdit) => mylog.listAll.find(l => l.id === log.id)
@@ -276,7 +276,7 @@ export const logInit: LogEdit = {
  * @param log log对象，部分
  * @param file 要上传的文件
  */
-export const rlsLog = (
+export const rlsLog = async (
   logEdit: LogEdit,
   params: COS.UploadFilesParams = { files: [] }
 ): Promise<Log | undefined> => {
@@ -298,16 +298,14 @@ export const rlsLog = (
     logEdit
   ) as Log
 
-  return myUploadFiles(params).then(data => {
-    return releaseLog({ logJson: JSON.stringify(log) }).then(id => {
-      if (id !== '0') {
-        log.id = id
-        logStore.addLog(log)
-        ElMessage({ message: '发布成功：' + log.id, type: 'success' })
-        return log
-      }
-    })
-  })
+  const data = await myUploadFiles(params)
+  const id = await releaseLog({ logJson: JSON.stringify(log) })
+  if (id !== '0') {
+    log.id = id
+    logStore.addLog(log)
+    ElMessage({ message: '发布成功：' + log.id, type: 'success' })
+    return log
+  }
 }
 
 /**
@@ -317,7 +315,7 @@ export const rlsLog = (
  * @param params 可以不传，文件上传参数，{files[]文件列表，SliceSize? 触发分块的大小，onProgress? 进度条方法}
  * @returns 受影响log的条数
  */
-export const editLog = (
+export const editLog = async (
   logEdit: LogEdit & { id: string },
   params: COS.UploadFilesParams = { files: [] }
 ): Promise<number> => {
@@ -347,17 +345,13 @@ export const editLog = (
   console.log(logEdit, params, delObjs)
   // return Promise.resolve(1)
 
-  return Promise.all([myDeleteFiles(delObjs), myUploadFiles(params)]).then(
-    data => {
-      return updateLog({ logJson: JSON.stringify(logEdit) }).then(count => {
-        if (count === 1) {
-          ElMessage({ message: '编辑成功', type: 'success' })
-          logStore.editLog(logEdit)
-        }
-        return count
-      })
-    }
-  )
+  const data = await Promise.all([myDeleteFiles(delObjs), myUploadFiles(params)])
+  const count = await updateLog({ logJson: JSON.stringify(logEdit) })
+  if (count === 1) {
+    ElMessage({ message: '编辑成功', type: 'success' })
+    logStore.editLog(logEdit)
+  }
+  return count
 }
 
 /**

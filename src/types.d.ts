@@ -87,9 +87,9 @@ export interface Relation {
   from: string // 前节点，这里用字符串转换判断是不是组节点
   name: string // 人的名字
   info: {
-    label: string // 线条标签
-    img: string // 头像
-    phone: string // 手机号码
+    label?: string // 线条标签
+    img?: string // 头像
+    phone?: string // 手机号码
     _other: {
       [key in string]: any // 自定义项
     }
@@ -135,6 +135,11 @@ export type LogFiles = {
  * 编辑中的log类型，只能填入log属性
  */
 export type LogEdit = Partial<Log>
+
+/**
+ * 编辑中的log类型，只能填入log属性
+ */
+export type RelationEdit = Partial<Relation>
 
 /**
  * 普通文件，加入上传要用的key，

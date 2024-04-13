@@ -20,9 +20,11 @@ const networkDom = ref<HTMLDivElement>()
 const relations = reactive<{
   list: Relation[]
   curIndex: number
+  group: string
 }>({
   list: [],
   curIndex: 1,
+  group: '',
 })
 
 const VN = reactive(
@@ -36,13 +38,12 @@ const VN = reactive(
 
 VN.init.then(network => {
   network.on('click', e => {
-    // console.log(e.nodes)
-    const rs: Relation[] = []
-    for (const id of e.nodes) {
-      rs.push(Relation.listAll.find(i => i.id == id)!)
-    }
-    // console.log(rs)
-    relations.list = rs
+    // console.log(e)
+    // 组节点
+    if (!Number(e.nodes[0])) relations.group = e.nodes[0]
+    else relations.group = ''
+
+    relations.list = Relation.listAll.filter(i => e.nodes.includes(i.id))
   })
 })
 
@@ -63,6 +64,10 @@ const setScale = (num: number) => {
       <ElButton :icon="Refresh" @click="setScale(0)" />
       <ElButton :icon="Plus" @click="setScale(0.1)" />
       <ElButton :icon="Minus" @click="setScale(-0.1)" />
+    </div>
+
+    <div v-if="relations.group">
+      <GroupComp :group="relations.group" />
     </div>
 
     <!-- {{ relations }} -->

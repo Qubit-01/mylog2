@@ -1,6 +1,12 @@
-import { getRelations } from '@/api/relation'
-import type { Relation } from '@/types'
+import { deleteRelation, getRelations, updateRelation } from '@/api/relation'
+import type { Relation, RelationEdit } from '@/types'
+import type COS from 'cos-js-sdk-v5'
 import type { Node, Edge } from 'vis-network/declarations/network/Network'
+import useUserStore from './user'
+import { myUploadFiles } from '@/utils/cos'
+import { newRelation as newRelationApi } from '@/api/relation'
+
+const User = useUserStore()
 
 /**
  * 应该只获取一次数据，然后只计算一次nodes和edges，然后让network渲染
@@ -18,6 +24,9 @@ export const useRelationStore = defineStore('relation', () => {
     loading.value = true
     getRelations({}).then(data => {
       // data.forEach() // 预处理
+      data.forEach(r => {
+        r.info._other ??= {}
+      })
       listAll.value = data
       loading.value = false
       resolve(data)
@@ -25,7 +34,7 @@ export const useRelationStore = defineStore('relation', () => {
   })
 
   const getNetworkData = getListAll.then(relations => {
-    const groups = ['亲戚']
+    const groups = []
     const nodes: Node[] = []
     const edges: Edge[] = []
     for (const r of relations) {
@@ -63,3 +72,104 @@ export const useRelationStore = defineStore('relation', () => {
 
   return { loading, listAll, getListAll, getNetworkData, getNodes, getEdges }
 })
+
+export default useRelationStore
+
+const relationStore = useRelationStore()
+
+/**
+ * 发布Relation时的，默认数据，兜底
+ */
+export const relationInit: Readonly<RelationEdit> = {
+  info: {
+    _other: {},
+  },
+}
+
+/**
+ * 新建Relation
+ * @param relationEdit relation对象
+ * @param params 文件上传
+ */
+export const newRelation = async (
+  relationEdit: RelationEdit,
+  params: COS.UploadFilesParams = { files: [] }
+): Promise<Relation | undefined> => {
+  if (!relationEdit.name) {
+    ElMessage.error('必须填入内容哦')
+    return Promise.reject(undefined)
+  }
+
+  const relation: Relation = Object.assign(
+    {},
+    relationInit,
+    {
+      userid: User.id,
+      username: User.name,
+    },
+    relationEdit
+  ) as Relation
+
+  const data = await myUploadFiles(params)
+  const id = await newRelationApi({ relationJson: JSON.stringify(relation) })
+  if (id !== '0') {
+    relation.id = id
+    relationStore.listAll.push(relation)
+    ElMessage({ message: '新增成功：' + relation.id, type: 'success' })
+    return relation
+  }
+}
+
+/**
+ * 编辑Relation
+ * @param relationEdit 编辑对象
+ * @param params 文件对象
+ * @returns 影响的条数
+ */
+export const editRelation = async (
+  relationEdit: RelationEdit & { id: string },
+  params: COS.UploadFilesParams = { files: [] }
+): Promise<number> => {
+  const relationOld = relationStore.listAll.find(r => r.id === relationEdit.id)!
+
+  // todo: 要删除里面的文件内容
+  const count = await updateRelation({
+    relationJson: JSON.stringify(relationEdit),
+  })
+
+  if (count === 1) {
+    ElMessage({ message: '编辑成功', type: 'success' })
+    Object.assign(relationOld, relationEdit)
+  }
+  return count
+}
+
+/**
+ * 删除Relation
+ * @param relation 删除的对象，会取id
+ * @returns 删除的条数
+ */
+export const delRelation = async (relation: Relation): Promise<Relation> => {
+  try {
+    await ElMessageBox.confirm('确定删除吗？', '删除Log', {
+      confirmButtonText: '删除',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+  } catch {
+    return relation
+  }
+
+  // todo: 删除文件
+
+  return deleteRelation({ id: relation.id })
+    .then(count => {
+      ElMessage({ message: '删除成功', type: 'success' })
+      relationStore.listAll.splice(
+        relationStore.listAll.findIndex(r => r.id === relation.id),
+        1
+      )
+      return relation
+    })
+    .catch(err => err)
+}
