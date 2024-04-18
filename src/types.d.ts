@@ -87,6 +87,7 @@ export interface Relation {
   from: string // 前节点，这里用字符串转换判断是不是组节点
   name: string // 人的名字
   info: {
+    // 一级放入系统要用的数据，键的名字由开发者设置，_other里面的由用户定义
     label?: string // 线条标签
     img?: string // 头像
     phone?: string // 手机号码

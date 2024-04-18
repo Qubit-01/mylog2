@@ -112,6 +112,11 @@ onBeforeUnmount(() => clearInterval(timer))
           >
             教务网
           </ElLink>
+        </div>
+        <div class="item">
+          喜欢本站的话，不妨分享给你身边的同学们，万分感谢！
+        </div>
+        <div class="item">
           <ElLink
             type="primary"
             href="https://beian.miit.gov.cn/"
@@ -119,9 +124,15 @@ onBeforeUnmount(() => clearInterval(timer))
           >
             蜀ICP备2020030786号
           </ElLink>
-        </div>
-        <div class="item">
-          喜欢本站的话，不妨分享给你身边的同学们，万分感谢！
+          <ElLink
+            type="primary"
+            href="https://beian.mps.gov.cn/#/query/webSearch?code=51018102000743"
+            target="_black"
+            class="beian"
+          >
+            <img src="@/assets/img/备案图标.png" alt="备案图标" />
+            川公网安备51018102000743
+          </ElLink>
         </div>
       </div>
     </div>
@@ -173,12 +184,23 @@ footer {
     }
 
     .texts {
-      margin: 10px 0;
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 16px 0;
 
       .item {
         display: flex;
+        justify-content: space-evenly;
         gap: 10px;
+
+        .beian {
+          img {
+            width: 16px;
+            height: 16px;
+            margin-right: 4px;
+          }
+        }
       }
     }
   }

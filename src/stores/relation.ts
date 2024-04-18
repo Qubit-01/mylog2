@@ -23,7 +23,6 @@ export const useRelationStore = defineStore('relation', () => {
     console.info('🐤getRelations 全局只执行一次')
     loading.value = true
     getRelations({}).then(data => {
-      // data.forEach() // 预处理
       data.forEach(r => {
         r.info._other ??= {}
       })

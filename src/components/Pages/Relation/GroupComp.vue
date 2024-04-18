@@ -1,6 +1,33 @@
 <script setup lang="ts">
+import type { Relation } from '@/types'
+import { Check, Delete } from '@element-plus/icons-vue'
+
 const { group } = defineProps<{ group: string }>()
 const curTab = ref('new')
+
+const relation = reactive<Relation>({
+  id: '',
+  userid: '1',
+  username: 'Sybit',
+  from: group,
+  name: '',
+  info: {
+    _other: {},
+  },
+})
+
+const infoOther = reactive({
+  key: '',
+  value: '',
+})
+
+const addInfoOther = () => {
+  if (infoOther.key && infoOther.value) {
+    relation.info._other[infoOther.key] = infoOther.value
+    infoOther.key = ''
+    infoOther.value = ''
+  }
+}
 </script>
 
 <template>
@@ -25,41 +52,62 @@ const curTab = ref('new')
     <div class="info">
       <ElTabs v-model="curTab">
         <ElTabPane label="添加人员" name="new">
-          添加人员
-          <!-- <NewPeople :groups="groups" :handleRaws="handleRaws" /> -->
-        </ElTabPane>
+          {{ relation }}
+          <ElForm label-width="auto" @submit.native.prevent>
+            <ElFormItem label="姓名">
+              <ElInput v-model="relation.name" />
+            </ElFormItem>
+            <ElFormItem label="所属节点">
+              <ElInput v-model="relation.from" />
+            </ElFormItem>
+            <ElFormItem label="和所属关系">
+              <ElInput v-model="relation.info.label" />
+            </ElFormItem>
+            <ElFormItem label="电话号码">
+              <ElInput v-model="relation.info.phone" />
+            </ElFormItem>
 
-        <ElTabPane label="添加组员" name="group">
-          添加组员
-          <!-- <el-form @submit.prevent :model="newPeopleForm" label-width="70px">
-              <el-form-item label="添加到">
-                {{ selectedPeople.label }}
-              </el-form-item>
-              <el-form-item label="姓名">
-                <ElInput v-model="newPeopleForm.rName" />
-              </el-form-item>
-              <el-form-item label="电话">
-                <ElInput v-model="newPeopleForm.rNumber" />
-              </el-form-item>
-              <el-form-item label="线条标签">
-                <ElInput v-model="newPeopleForm.rEdgeLabel" />
-              </el-form-item>
-              <el-form-item
-                label="解释"
-                v-show="newPeopleForm.rName"
-                style="color: #999"
-              >
-                <span>
-                  我的 {{ selectedPeople.label }} 是 {{ newPeopleForm.rName }}
-                </span>
-                <span v-show="newPeopleForm.rEdgeLabel"
-                  >，他是我的 {{ newPeopleForm.rEdgeLabel }}</span
-                >
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" @click="newPeople">提交</el-button>
-              </el-form-item>
-            </el-form> -->
+            <ElFormItem label="更多信息项" />
+            <ElFormItem
+              v-for="(value, key) in relation.info._other"
+              :label="key"
+              :key="key"
+              class="column"
+            >
+              <InputSwitch v-model="relation.info._other[key]" />
+              <ElButton
+                type="danger"
+                :icon="Delete"
+                text
+                circle
+                @click="delete relation.info._other[key]"
+              />
+            </ElFormItem>
+            <ElFormItem class="column">
+              <template #label>
+                <ElInput
+                  v-model="infoOther.key"
+                  placeholder="项名称"
+                  style="width: 80px"
+                />
+              </template>
+              <ElInput
+                v-model="infoOther.value"
+                placeholder="内容"
+                @keyup.enter="addInfoOther"
+              />
+              <ElButton
+                type="success"
+                :icon="Check"
+                text
+                circle
+                @click="addInfoOther"
+              />
+            </ElFormItem>
+            <ElFormItem>
+              <ElButton type="primary">保存</ElButton>
+            </ElFormItem>
+          </ElForm>
         </ElTabPane>
       </ElTabs>
     </div>
@@ -74,5 +122,28 @@ const curTab = ref('new')
   display: flex;
   flex-direction: column;
   gap: 4px;
+
+  .info {
+    // border: 1px solid red;
+    flex: 1;
+    width: 100%;
+
+    :deep(.el-tabs__content) {
+      height: 200px;
+      overflow: auto;
+      .el-form-item {
+        margin-bottom: 8px;
+      }
+    }
+
+    .column {
+      :deep(.el-form-item__content) {
+        // display: flex;
+        gap: 8px;
+        // align-items: center;
+        flex-wrap: nowrap;
+      }
+    }
+  }
 }
 </style>

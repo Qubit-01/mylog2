@@ -15,6 +15,20 @@ export const getRelations = (data: { token?: string }): Promise<Relation[]> => {
     method: 'post',
     data: { token: Global.token, ...data },
   })
+  // return Promise.resolve([
+  //   {
+  //     id: '100',
+  //     userid: '1',
+  //     username: 'Sybit',
+  //     from: '朋友',
+  //     name: '张三',
+  //     info: {
+  //       _other: {
+  //         爱好: '打球',
+  //       },
+  //     },
+  //   },
+  // ])
 }
 
 /**

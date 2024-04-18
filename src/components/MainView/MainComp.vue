@@ -63,7 +63,7 @@
       }
     }
 
-    @media (max-width: 700px) {
+    @media (max-width: 890px) {
       .left,
       .right {
         display: none;
