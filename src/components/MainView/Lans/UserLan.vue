@@ -16,9 +16,9 @@ const User = useUserStore()
       />
     </div>
     <template v-if="User.isLogined">
-      <ElLink class="title" @click="$router.push('/logger')">
+      <div class="title" @click="$router.push('/logger')">
         {{ User.name }}
-      </ElLink>
+      </div>
       <div class="items">
         <ElButton type="primary" text @click="$router.push('/mylog')">
           发个Log
@@ -66,6 +66,11 @@ const User = useUserStore()
 
   .title {
     font-size: 1.5rem;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--color-2);
+    }
   }
 
   .items {
