@@ -9,11 +9,11 @@ const Global = useGlobalStore()
  * 不传page参数就返回全部
  * get_logs_all_by_userid
  */
-export const getRelations = (data: { token?: string }): Promise<Relation[]> => {
+export const getRelations = (params: { token?: string }): Promise<Relation[]> => {
   return request({
     url: 'relation/get_relations',
-    method: 'post',
-    data: { token: Global.token, ...data },
+    method: 'get',
+    params: { token: Global.token, ...params },
   })
   // return Promise.resolve([
   //   {

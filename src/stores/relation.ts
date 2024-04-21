@@ -18,6 +18,23 @@ export const useRelationStore = defineStore('relation', () => {
 
   /** 获取的原始全部relations */
   const listAll = ref<Relation[]>([])
+  // 原始节点信息
+  const networkData = reactive<{
+    nodes: Node[]
+    edges: Edge[]
+    groups: string[]
+  }>({
+    nodes: [],
+    edges: [],
+    groups: [],
+  })
+
+  watch(listAll, async () => {
+    const nd = await getNetworkData()
+    networkData.nodes = nd.nodes
+    networkData.edges = nd.edges
+    networkData.groups = nd.groups
+  })
 
   const getListAll = new Promise<Relation[]>((resolve, reject) => {
     console.info('🐤getRelations 全局只执行一次')
@@ -32,44 +49,44 @@ export const useRelationStore = defineStore('relation', () => {
     })
   })
 
-  const getNetworkData = getListAll.then(relations => {
-    const groups = []
-    const nodes: Node[] = []
-    const edges: Edge[] = []
-    for (const r of relations) {
-      // 归纳组节点
-      if (!Number(r.from) && groups.indexOf(r.from) == -1) {
-        groups.push(r.from)
+  // 从listAll里面获取网络数据，不是直接从后端返回
+  const getNetworkData = () =>
+    getListAll.then(r => {
+      console.log('获取网络数据')
+      const nodes: Node[] = [
+        { id: '0', label: User.name, color: '#daa', font: { size: 30 } },
+      ]
+      const edges: Edge[] = []
+      const groups: string[] = []
+      for (const r of listAll.value) {
+        // 归纳组节点
+        if (!Number(r.from) && groups.indexOf(r.from) == -1) {
+          groups.push(r.from)
+          nodes.push({
+            id: r.from,
+            label: r.from,
+            color: '#ddd',
+            shape: 'ellipse',
+            font: { size: 20 },
+          })
+          edges.push({ from: 0, to: r.from })
+        }
+        // 解析人员节点
         nodes.push({
-          id: r.from,
-          label: r.from,
-          color: '#ddd',
-          shape: 'ellipse',
-          font: { size: 20 },
+          id: r.id,
+          label: r.name,
+          group: r.from,
         })
-        edges.push({ from: 0, to: r.from })
+        edges.push({
+          from: r.from,
+          to: r.id,
+          label: r.info.label,
+        })
       }
-      // 解析人员节点
-      nodes.push({
-        id: r.id,
-        label: r.name,
-        group: r.from,
-      })
-      edges.push({
-        from: r.from,
-        to: r.id,
-        label: r.info.label,
-      })
-    }
-    return { nodes, edges, groups }
-  })
+      return { nodes, edges, groups }
+    })
 
-  const getNodes = (nodes: Node[] = []) =>
-    getNetworkData.then(({ nodes: ns }) => [...nodes, ...ns])
-  const getEdges = (edges: Edge[] = []) =>
-    getNetworkData.then(({ edges: es }) => [...edges, ...es])
-
-  return { loading, listAll, getListAll, getNetworkData, getNodes, getEdges }
+  return { loading, listAll, getListAll, getNetworkData, networkData }
 })
 
 export default useRelationStore
@@ -81,20 +98,25 @@ const relationStore = useRelationStore()
  */
 export const relationInit: Readonly<RelationEdit> = {
   info: {
+    label: '',
+    img: '',
+    phone: '',
     _other: {},
   },
 }
 
 /**
  * 新建Relation
+ * 预留了文件上传
  * @param relationEdit relation对象
  * @param params 文件上传
+ * @returns 新建的relation，有id
  */
 export const newRelation = async (
   relationEdit: RelationEdit,
   params: COS.UploadFilesParams = { files: [] }
 ): Promise<Relation | undefined> => {
-  if (!relationEdit.name) {
+  if (!relationEdit.name || !relationEdit.from) {
     ElMessage.error('必须填入内容哦')
     return Promise.reject(undefined)
   }

@@ -6,13 +6,11 @@
  -->
 <script setup lang="ts">
 import { FullScreen, Refresh, Plus, Minus } from '@element-plus/icons-vue'
-import useUserStore from '@/stores/user'
 import { useVisNetwork } from '@/utils/vis-network'
 import { ElButton } from 'element-plus'
-import { useRelationStore } from '@/stores/relation'
+import { delRelation, newRelation, useRelationStore } from '@/stores/relation'
 import type { Relation } from '@/types'
 
-const User = useUserStore()
 const Relation = useRelationStore()
 
 const networkDom = ref<HTMLDivElement>()
@@ -27,31 +25,18 @@ const relations = reactive<{
   node: '',
 })
 
-const VN = reactive(
+const vn = reactive(
   useVisNetwork(networkDom, {
-    nodes: Relation.getNodes([
-      { id: '0', label: User.name, color: '#daa', font: { size: 30 } },
-    ]),
-    edges: Relation.getEdges(),
+    nodes: Relation.getNetworkData().then(d => d.nodes),
+    edges: Relation.getNetworkData().then(d => d.edges),
   })
 )
 
-VN.init.then(network => {
+vn.init.then(network => {
   // 目前只支持单选
   network.on('click', e => {
-    // console.log(e)
     const n = e.nodes[0]
-    console.log(n)
-
     relations.node = n
-
-    // 组节点
-    // if (Number(n)) {
-    //   if (n==='0')
-    // }
-    // if (!Number(n)) relations.group = n
-    // else if (n==='0')
-    // else relations.group = ''
 
     relations.list = Relation.listAll.filter(i => e.nodes.includes(i.id))
   })
@@ -59,14 +44,63 @@ VN.init.then(network => {
 
 // 缩放按钮
 const setScale = (num: number) => {
-  if (num == 0) VN.network?.fit()
-  if (num < 0 && VN.network!.getScale() < 0.12) return
-  VN.network?.moveTo({ scale: VN.network?.getScale() + num })
+  if (num == 0) vn.network?.fit()
+  if (num < 0 && vn.network!.getScale() < 0.12) return
+  vn.network?.moveTo({ scale: vn.network?.getScale() + num })
+}
+
+/**
+ * 添加人员节点和线
+ * @param relation 人员对象
+ */
+const add = (r: Relation) => {
+  newRelation(r).then(relation => {
+    console.log('添加节点')
+    // 添加组节点
+    try {
+      vn.nodes.add({
+        id: r.from,
+        label: r.from,
+        color: '#ddd',
+        shape: 'ellipse',
+        font: { size: 20 },
+      })
+      vn.edges.add({ from: 0, to: r.from })
+    } catch (error) {
+      console.log('组节点已存在')
+    }
+
+    // 添加人员节点
+    vn.edges.add({
+      from: r.from,
+      to: r.id,
+      label: r.info.label,
+    })
+    vn.nodes.add({
+      id: r.id,
+      label: r.name,
+      group: r.from,
+    })
+  })
+}
+
+// 删除ralation，网络、数据、后端
+const remove = (r: Relation) => {
+  // 先删后端，会同步删除数据
+  delRelation(r).then(count => {
+    console.log(count)
+    // 更新网络
+    vn.refresh({
+      nodes: Relation.getNetworkData().then(d => d.nodes),
+      edges: Relation.getNetworkData().then(d => d.edges),
+    })
+  })
 }
 </script>
 
 <template>
   <div class="relation-page" v-m>
+    <!-- {{ Relation.networkData }} -->
     <div class="network" ref="networkDom"></div>
 
     <div class="buttons">
@@ -77,17 +111,20 @@ const setScale = (num: number) => {
     </div>
 
     <div class="bottom">
+      <!-- 组节点：点击自己和组节点时 -->
       <div v-if="relations.node && !Number(relations.node)">
-        <GroupComp :group="relations.node" />
+        <GroupComp :group="relations.node" :add :key="relations.node" />
       </div>
 
-      <!-- {{ relations }} -->
+      <!-- 人员节点 -->
       <div v-if="relations.list.length">
         <RelationComp
           :relation="relations.list[relations.curPage - 1]"
           :key="relations.list[relations.curPage - 1].id"
+          :add
+          :remove
         >
-          <ElPagination
+          <!-- <ElPagination
             small
             background
             layout="prev, pager, next"
@@ -96,7 +133,7 @@ const setScale = (num: number) => {
             :total="relations.list.length"
             hide-on-single-page
             style="justify-content: center"
-          />
+          /> -->
         </RelationComp>
       </div>
     </div>

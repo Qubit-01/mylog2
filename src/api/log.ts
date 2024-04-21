@@ -26,17 +26,21 @@ export const getPublics = (params: {
  * 不传page参数就返回全部
  * get_logs_all_by_userid
  */
-export const getMylogs = (data: {
-  token?: string
-  skip?: number
-  limit?: number
-} | {
-  share: string
-}): Promise<Log[]> => {
+export const getMylogs = (
+  params:
+    | {
+        token?: string
+        skip?: number
+        limit?: number
+      }
+    | {
+        share: string
+      }
+): Promise<Log[]> => {
   return request({
     url: 'log/get_mylogs',
-    method: 'post',
-    data: { token: Global.token, ...data },
+    method: 'get',
+    params: { token: Global.token, ...params },
   })
 }
 
@@ -45,13 +49,11 @@ export const getMylogs = (data: {
  * 不传page参数就返回全部
  * get_logs_all_by_userid
  */
-export const getTags = (data: {
-  token?: string
-}): Promise<Log[]> => {
+export const getTags = (data: { token?: string }): Promise<Log[]> => {
   return request({
     url: 'log/get_tags',
-    method: 'post',
-    data: { token: Global.token, ...data },
+    method: 'get',
+    params: { token: Global.token, ...data },
   })
 }
 
@@ -117,7 +119,7 @@ export const deleteLog = (data: {
 
 /**
  * 获取link密文
- * 
+ *
  */
 export const getShare = (data: {
   token?: string
@@ -125,7 +127,7 @@ export const getShare = (data: {
 }): Promise<string> => {
   return request({
     url: 'log/get_share',
-    method: 'post',
-    data: { token: Global.token, ...data },
+    method: 'get',
+    params: { token: Global.token, ...data },
   })
 }

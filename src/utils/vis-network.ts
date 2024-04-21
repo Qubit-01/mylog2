@@ -67,5 +67,16 @@ export function useVisNetwork(
     })
   })
 
-  return { network, init, nodes, edges }
+  const refresh = async (data: {
+    nodes?: Node[] | Promise<Node[]>
+    edges?: Edge[] | Promise<Edge[]>
+  }) => {
+    nodes.clear()
+    edges.clear()
+    nodes.add((await data.nodes) || [])
+    edges.add((await data.edges) || [])
+    // network.value?.fit()
+  }
+
+  return { network, init, nodes, edges, refresh }
 }

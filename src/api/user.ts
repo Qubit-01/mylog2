@@ -29,12 +29,12 @@ export const login = (
  * @augments data { name: string, pswd: string }
  */
 export const getUser = (
-  data: { token: string } | { openidQ: string } | { id: string }
+  params: { token: string } | { openidQ: string } | { id: string }
 ): Promise<User> => {
   return request({
     url: 'user/get_user',
-    method: 'post',
-    data,
+    method: 'get',
+    params,
   })
 }
 
@@ -49,7 +49,7 @@ export const haveUser = (
 ): Promise<number> => {
   return request({
     url: 'user/have_user',
-    method: 'post',
+    method: 'get',
     params: data,
   })
 }

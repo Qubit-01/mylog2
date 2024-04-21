@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { delRelation, editRelation } from '@/stores/relation'
+import { editRelation } from '@/stores/relation'
 import type { Relation } from '@/types'
 import { vImgSrc } from '@/utils/directives'
 import { Check, Delete } from '@element-plus/icons-vue'
 
-const { relation } = defineProps<{ relation: Relation }>()
+const { relation, remove, add } = defineProps<{
+  relation: Relation
+  remove: (r: Relation) => void
+  add: (r: Relation) => void
+}>()
 const curTab = ref('info')
 
 const infoOther = reactive({
@@ -26,15 +30,16 @@ watch(relation, () => {
   })
 })
 
-/**
- * 删除节点
- */
-const del = () => {
-  console.log('删除节点')
-  delRelation(relation).then(count => {
-    console.log(count)
-  })
-}
+const newRelation = reactive<Relation>({
+  id: '',
+  userid: '1',
+  username: 'Sybit',
+  from: relation.id,
+  name: '',
+  info: {
+    _other: {},
+  },
+})
 </script>
 
 <template>
@@ -54,7 +59,9 @@ const del = () => {
         <div>{{ relation.name }}</div>
         <div>{{ relation.from }}</div>
       </div>
-      <ElButton type="primary" size="small" @click="del">删除节点</ElButton>
+      <ElButton type="primary" size="small" @click="remove(relation)"
+        >删除节点</ElButton
+      >
     </div>
     <div class="info">
       <ElTabs v-model="curTab">
@@ -115,37 +122,7 @@ const del = () => {
         </ElTabPane>
 
         <el-tab-pane label="其后添加" name="add">
-          <!-- <el-form @submit.prevent :model="newPeopleForm" label-width="70px">
-              <el-form-item label="添加到">
-                {{ selectedPeople.label }}
-              </el-form-item>
-              <el-form-item label="姓名">
-                <el-input v-model="newPeopleForm.rName" />
-              </el-form-item>
-              <el-form-item label="电话">
-                <el-input v-model="newPeopleForm.rNumber" />
-              </el-form-item>
-              <el-form-item label="线条标签">
-                <el-input v-model="newPeopleForm.rEdgeLabel" />
-              </el-form-item>
-              <el-form-item
-                label="解释"
-                v-show="newPeopleForm.rName"
-                style="color: #999"
-              >
-                <span v-show="!newPeopleForm.rEdgeLabel"
-                  >{{ newPeopleForm.rName }} 和
-                  {{ selectedPeople.label }} 有关</span
-                >
-                <span v-show="newPeopleForm.rEdgeLabel">
-                  {{ selectedPeople.label }} 的
-                  {{ newPeopleForm.rEdgeLabel }} 是 {{ newPeopleForm.rName }}
-                </span>
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" @click="newPeople">提交</el-button>
-              </el-form-item>
-            </el-form> -->
+          <RelationEdit v-model="newRelation" :add />
         </el-tab-pane>
       </ElTabs>
     </div>
