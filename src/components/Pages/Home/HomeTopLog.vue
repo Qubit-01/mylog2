@@ -3,15 +3,7 @@
  -->
 <script setup lang="ts">
 import { BucketCDN } from '@/stores/constant'
-
-const loginTest = (e: Event) => {
-  console.log('登录测试账号')
-  localStorage.setItem(
-    'token',
-    'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJVc2VyVG9rZW4iLCJpZCI6NDEsIm5hbWUiOiLmtYvor5XotKblj7ciLCJpYXQiOjE3MTM0NDMwOTksImV4cCI6MTcxODYyNzA5OX0.xufWbFxh9VY2LS9Tx8e3iYGG348wlPDBn9ynAj6tc9E'
-  )
-  // e.preventDefault()
-}
+import { loginTest } from '@/stores/user'
 </script>
 
 <template>

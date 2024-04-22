@@ -8,7 +8,9 @@ import { vOverflowEllipsis } from '@/utils/directives'
 
 const GAP = 20
 
+// 列表dom
 const listDom = ref<HTMLDivElement>()
+// 元素dom列表
 const itemDoms = ref<HTMLDivElement[]>([])
 
 getUser.then(user => {
@@ -32,7 +34,6 @@ const imglog: MylogStore = reactive({
   loading: true,
   noMore: false,
   addLogs: async () => {
-    console.log(123)
     if (imglog.params.skip > imglog.listFilter.length) {
       imglog.noMore = true
       return
@@ -94,15 +95,17 @@ const listHeight = computed(() => Math.max(...env.colHeight))
 const updateEnv = () => {
   env.windowWidth = window.innerWidth
   env.listWidth = listDom.value!.offsetWidth
-  if (env.windowWidth < 890) env.colNum = 2
-  else if (env.windowWidth < 1424) env.colNum = 3
+  // if (env.windowWidth < 890) env.colNum = 2
+  // else if (env.windowWidth < 1424) env.colNum = 3
+  // else env.colNum = 4
+  if (env.listWidth < 700) env.colNum = 2
+  else if (env.listWidth < 1000) env.colNum = 3
   else env.colNum = 4
   env.itemWidth = (env.listWidth - GAP * (env.colNum - 1)) / env.colNum
   env.colHeight = Array(env.colNum).fill(0)
 }
 
 window.addEventListener('resize', () => {
-  updateEnv()
   positionItem()
 })
 
@@ -110,7 +113,6 @@ window.addEventListener('resize', () => {
  * 监听list宽度
  */
 onMounted(() => {
-  updateEnv()
   watch(
     () => imglog.list,
     () => {
@@ -123,18 +125,14 @@ onMounted(() => {
  * 计算log的位置
  */
 const positionItem = () => {
+  updateEnv()
   nextTick(() => {
     env.colHeight = Array(env.colNum).fill(0)
     itemDoms.value.forEach((itemDom, index) => {
-      const col = env.colHeight.findIndex(v => v == Math.min(...env.colHeight))
-      // console.log(
-      //   `高度：${itemDom.offsetHeight}；列：${col}；当前列高：${env.colHeight}`
-      // )
-
+      const col = env.colHeight.findIndex(v => v === Math.min(...env.colHeight))
       const x = (env.itemWidth + GAP) * col
       const y = env.colHeight[col]
       env.colHeight[col] += itemDom.offsetHeight + GAP
-
       itemDom.style.transform = `translate(${x}px, ${y}px)`
     })
     imglog.loading = false
@@ -166,7 +164,12 @@ onUnmounted(() => {
       <div class="img">
         <img :src="toFileUrl(log.imgs[0], 'compress-imgs/', log.userid)" />
       </div>
-      <div class="text" v-overflow-ellipsis="2">{{ log.content }}</div>
+      <div class="text">
+        <div class="content" v-overflow-ellipsis="2">{{ log.content }}</div>
+        <div class="bottom">
+          <div>{{ log.logtime.format('YY-MM-DD HH:mm') }}</div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -175,45 +178,42 @@ onUnmounted(() => {
 // list
 .album-page {
   position: relative;
-  // border: 1px solid red;
   height: v-bind("listHeight - GAP + 'px'");
 
   // item
   .log {
     position: absolute;
-    top: 0;
-    left: 0;
     width: v-bind("env.itemWidth + 'px'");
-
     transition: transform 0.5s;
 
-    // transform: translate(154px, 1000px);
-    padding: var(--padding);
-
     border-radius: var(--border-radius);
+    overflow: hidden;
 
     display: flex;
     flex-direction: column;
-    gap: 10px;
 
     .img {
       width: 100%;
       height: 200px;
       border-radius: var(--border-radius);
-      overflow: hidden;
+
       img {
         width: 100%;
         height: 100%;
-        border-radius: var(--border-radius);
-        // height: 100%;
-        // border-radius: 10px;
         object-fit: cover;
       }
     }
 
     .text {
-      // border: 1px solid red;
-      line-height: 2rem;
+      padding: var(--padding);
+      line-height: 1.5rem;
+
+      .bottom {
+        display: flex;
+        gap: 4px;
+        font-size: 0.9rem;
+        color: var(--color-2);
+      }
     }
   }
 }

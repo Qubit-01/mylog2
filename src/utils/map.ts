@@ -77,7 +77,7 @@ export async function getCityByIp(ip?: string): Promise<any> {
  * https://lbs.amap.com/api/javascript-api/reference/location#m_AMap.CitySearch 1.4
  */
 export const getGeolocation = addPlugins.then(() => {
-  console.log('🐤创建定位对象')
+  console.debug('🐤创建定位对象（单例）')
   return new AMap.Geolocation({
     enableHighAccuracy: true, // 是否使用高精度定位，默认：true
     timeout: 10000, // 设置定位超时时间，默认：无穷大

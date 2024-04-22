@@ -3,7 +3,12 @@ import useUserStore from '@/stores/user'
 
 const User = useUserStore()
 const Setting = User.setting
-const curTab = ref('user')
+const curTab = ref('mylog')
+
+const delFilter = (i: number) => {
+  Setting.mylog.filters.splice(i, 1)
+  if (i === Setting.mylog.filterIndex) Setting.mylog.filterIndex = -1
+}
 </script>
 
 <template>
@@ -54,17 +59,30 @@ const curTab = ref('user')
             <EditTags v-model="Setting.mylog.tags" size="large" />
           </ElFormItem>
           <ElFormItem label="过滤器预设">
-            {{ Setting.mylog.filters.map(f => f.name) }}
-          </ElFormItem>
-          <ElFormItem label="默认过滤器">
-            <ElRadioGroup v-model="Setting.mylog.filterIndex">
-              <ElRadioButton label="全部" :value="-1" />
-              <ElRadioButton
-                v-for="(f, i) of Setting.mylog.filters"
-                :label="f.name"
-                :value="i"
-              />
-            </ElRadioGroup>
+            <!-- {{ Setting.mylog.filters.map(f => f.name) }} -->
+            <!-- <EditTags v-model="Setting.mylog.calendarTags" size="large" /> -->
+            <div class="tags">
+              <ElTag
+                label="全部"
+                :value="-1"
+                @click="Setting.mylog.filterIndex = -1"
+                size="large"
+                :effect="Setting.mylog.filterIndex === -1 ? 'dark' : undefined"
+              >
+                全部
+              </ElTag>
+              <ElTag
+                v-for="(tag, i) of Setting.mylog.filters.map(f => f.name)"
+                :key="tag"
+                closable
+                @close="delFilter(i)"
+                @click="Setting.mylog.filterIndex = i"
+                size="large"
+                :effect="Setting.mylog.filterIndex === i ? 'dark' : undefined"
+              >
+                {{ tag }}
+              </ElTag>
+            </div>
           </ElFormItem>
           <ElFormItem label="日历标签">
             <EditTags v-model="Setting.mylog.calendarTags" size="large" />
@@ -95,5 +113,14 @@ const curTab = ref('user')
   padding: var(--padding);
   padding-top: 0;
   border-radius: var(--border-radius);
+
+  .tags {
+    display: flex;
+    gap: 8px;
+
+    .el-tag {
+      cursor: pointer;
+    }
+  }
 }
 </style>

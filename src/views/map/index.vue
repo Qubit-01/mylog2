@@ -206,14 +206,14 @@ const setMarker = () => {
       </ElButton>
       <ElButton @click="setMarker">打标</ElButton>
     </div>
-    <div class="diy-lnglat">
+    <!-- <div class="diy-lnglat">
       <ElInput v-model="data.input[0]" placeholder="lng经度" />
       <ElInput v-model="data.input[1]" placeholder="lat纬度" />
       <ElButton @click="panTo" :disabled="!data.input[0] || !data.input[1]">
         转到
       </ElButton>
       <ElButton @click="setMarker">打标</ElButton>
-    </div>
+    </div> -->
 
     <div class="control-layer">
       <ElSwitch

@@ -32,3 +32,9 @@ for (const [k, c] of Object.entries(Icons)) app.component(k, c)
 app.directive('m', vM)
 
 app.mount('#app')
+
+// 去除浏览器输出
+// -url:https://connect.qq.com/qc_jssdk.js 
+// -Canvas2D
+//
+//

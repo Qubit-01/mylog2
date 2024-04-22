@@ -3,6 +3,7 @@ import type { User } from '@/types'
 import { login } from '@/api/user'
 import useGlobalStore from '@/stores/global'
 import { appId, redirectURI } from '@/utils/qq-connect'
+import { loginTest } from '@/stores/user'
 
 const Global = useGlobalStore()
 const route = useRoute()
@@ -60,8 +61,9 @@ const qqLogin = () => {
         <div class="toSignin">
           没有账号？
           <ElLink type="primary" @click="$router.replace('/login/signin')">
-            去注册
-          </ElLink>
+            去注册 </ElLink
+          >&nbsp;
+          <ElLink @click="loginTest">登录测试账号</ElLink>
         </div>
       </form>
 

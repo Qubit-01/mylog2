@@ -102,3 +102,15 @@ export const logout = (to: string = '/') => {
   if (to !== '') location.href = '/#' + to
   location.reload()
 }
+
+/**
+ * 登录测试账号
+ */
+export const loginTest = () => {
+  console.log('登录测试账号')
+  localStorage.setItem(
+    'token',
+    'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJVc2VyVG9rZW4iLCJpZCI6NDEsIm5hbWUiOiLmtYvor5XotKblj7ciLCJpYXQiOjE3MTM0NDMwOTksImV4cCI6MTcxODYyNzA5OX0.xufWbFxh9VY2LS9Tx8e3iYGG348wlPDBn9ynAj6tc9E'
+  )
+  location.href = '/'
+}
