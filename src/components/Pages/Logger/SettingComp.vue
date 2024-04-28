@@ -5,9 +5,15 @@ const User = useUserStore()
 const Setting = User.setting
 const curTab = ref('mylog')
 
+// 删除过滤预设
 const delFilter = (i: number) => {
   Setting.mylog.filters.splice(i, 1)
   if (i === Setting.mylog.filterIndex) Setting.mylog.filterIndex = -1
+}
+
+// 删除自定义点
+const delDiyPoint = (i: number) => {
+  Setting.map.diyPoints.splice(i, 1)
 }
 </script>
 
@@ -59,8 +65,6 @@ const delFilter = (i: number) => {
             <EditTags v-model="Setting.mylog.tags" size="large" />
           </ElFormItem>
           <ElFormItem label="过滤器预设">
-            <!-- {{ Setting.mylog.filters.map(f => f.name) }} -->
-            <!-- <EditTags v-model="Setting.mylog.calendarTags" size="large" /> -->
             <div class="tags">
               <ElTag
                 label="全部"
@@ -86,6 +90,28 @@ const delFilter = (i: number) => {
           </ElFormItem>
           <ElFormItem label="日历标签">
             <EditTags v-model="Setting.mylog.calendarTags" size="large" />
+          </ElFormItem>
+        </ElForm>
+      </ElTabPane>
+      <ElTabPane label="地图" name="map">
+        <ElForm
+          class="relation-setting"
+          label-width="auto"
+          @submit.native.prevent
+        >
+          <ElFormItem label="自定义点">
+            <!-- <EditTags v-model="Setting.map.diyPoints" size="large" /> -->
+            <div class="tags">
+              <ElTag
+                v-for="(p, i) of Setting.map.diyPoints"
+                :key="p.lnglat.join(',')"
+                closable
+                @close="delDiyPoint(i)"
+                size="large"
+              >
+                {{ p.lnglat.join(',') }}
+              </ElTag>
+            </div>
           </ElFormItem>
         </ElForm>
       </ElTabPane>

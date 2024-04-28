@@ -127,7 +127,7 @@ export const getShare = (data: {
 }): Promise<string> => {
   return request({
     url: 'log/get_share',
-    method: 'get',
-    params: { token: Global.token, ...data },
+    method: 'post',
+    data: { token: Global.token, ...data },
   })
 }

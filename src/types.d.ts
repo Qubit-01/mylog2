@@ -42,7 +42,11 @@ export interface User {
        */
       calendarTags: string[]
     }
-    map?: {}
+    map: {
+      diyPoints: {
+        lnglat: [number, number]
+      }[]
+    }
   }
   createtime?: Date
   openidQ?: string

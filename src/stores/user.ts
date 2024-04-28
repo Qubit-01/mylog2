@@ -40,6 +40,22 @@ export const useUserStore = defineStore('user', () => {
         filterIndex: -1,
         calendarTags: [],
       },
+      map: {
+        diyPoints: [
+          // {
+          //   lnglat: [103.00042, 29.983349],
+          // },
+          // {
+          //   lnglat: [103.00042, 29.984349],
+          // },
+          // {
+          //   lnglat: [103.00042, 29.982349],
+          // },
+          // {
+          //   lnglat: [103.00042, 29.981349],
+          // },
+        ],
+      },
     },
     createtime: undefined,
     openidQ: undefined,
@@ -63,6 +79,7 @@ export const useUserStore = defineStore('user', () => {
       Object.assign(user, userdata)
       Object.assign(user.setting.page, setting.page)
       Object.assign(user.setting.mylog, setting.mylog)
+      Object.assign(user.setting.map, setting.map)
       isLogined.value = true
       // 获取到远端用户setting在注册监视，同步双端
       watch(user.setting, () => {

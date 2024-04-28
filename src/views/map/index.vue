@@ -9,6 +9,9 @@ import AMap, {
   Markers,
   getPositionByGeo,
 } from '@/utils/map'
+import useUserStore from '@/stores/user'
+
+const User = useUserStore()
 
 const Mylog = useLogStore().mylog
 const mapDom = ref<HTMLDivElement>()
@@ -68,21 +71,15 @@ aMap.init.then(async map => {
 
   if (!Mylog.listAll.length) await Mylog.getLogs()
 
-  // 点集，可以携带数据
-  const points: { weight: number; lnglat: AMap.Vector2; log: Log }[] =
-    Mylog.listFilter
-      .filter(log => log.location.length)
-      .map(l => {
-        // console.log('🐤', l.location)
-        return {
-          weight: 1,
-          lnglat: l.location[0]!,
-          log: l,
-        }
-      })
+  type Point = { weight: number; lnglat: AMap.Vector2; data: any }
 
-  // 点聚合
-  const cluster = new AMap.MarkerCluster(map, points, {
+  // Log点集，可以携带数据
+  const logPoints: Point[] = Mylog.listFilter
+    .filter(log => log.location.length)
+    .map(l => ({ weight: 1, lnglat: l.location[0]!, data: l }))
+
+  // Log点聚合
+  new AMap.MarkerCluster(map, logPoints, {
     gridSize: 20,
     clusterByZoomChange: true,
     // 聚合点
@@ -103,7 +100,7 @@ aMap.init.then(async map => {
         log.list = flatten(
           context.clusterData.map(d => d._amapMarker.originData[0])
         )
-          .map((d: any) => d.log)
+          .map((d: any) => d.data)
           .sort((a: Log, b: Log) => b.logtime.diff(a.logtime))
       })
     },
@@ -113,8 +110,52 @@ aMap.init.then(async map => {
       context.marker.setOffset(new AMap.Pixel(-9, -9))
       context.marker.on('click', () => {
         log.curIndex = 1
-        log.list = context.data.map(d => d.log)
+        log.list = context.data.map(d => d.data)
       })
+    },
+  })
+
+  // 用户点集，可以携带数据
+  const diyPoints: Point[] = User.setting.map.diyPoints.map(l => ({
+    weight: 1,
+    lnglat: l.lnglat,
+    data: l,
+  }))
+
+  // Log点聚合
+  new AMap.MarkerCluster(map, diyPoints, {
+    gridSize: 20,
+    clusterByZoomChange: true,
+    // 聚合点
+    renderClusterMarker(context: {
+      clusterData: any[]
+      count: number
+      marker: AMap.Marker
+    }) {
+      // context属性 marker:当前聚合点，count:当前聚合点内的点数量
+      const c = context.count > 50 ? 50 : context.count > 30 ? 30 : 1
+      const s = context.count > 50 ? 36 : context.count > 30 ? 30 : 24
+      context.marker.setContent(
+        `<div class="log-marker gt${c}" style="--size: ${s}px;">${context.count}</div>`
+      )
+      context.marker.setOffset(new AMap.Pixel(-s / 2, -s / 2))
+      // context.marker.on('click', e => {
+      //   log.curIndex = 1
+      //   log.list = flatten(
+      //     context.clusterData.map(d => d._amapMarker.originData[0])
+      //   )
+      //     .map((d: any) => d.data)
+      //     .sort((a: Log, b: Log) => b.logtime.diff(a.logtime))
+      // })
+    },
+    // 非聚合点 context.marker:当前非聚合点
+    renderMarker(context: { data: any[]; count: number; marker: AMap.Marker }) {
+      context.marker.setContent('<div class="log-marker"></div>')
+      context.marker.setOffset(new AMap.Pixel(-9, -9))
+      // context.marker.on('click', () => {
+      //   log.curIndex = 1
+      //   log.list = context.data.map(d => d.data)
+      // })
     },
   })
 })
@@ -148,14 +189,15 @@ const data = reactive<{
   },
 })
 
+// 启用地图图层
+const curLayers = ref<string[]>(['default'])
+watch(curLayers, () => {
+  for (const l in data.visible) data.visible[l] = curLayers.value.includes(l)
+})
+
 // 监听图层显示隐藏
-for (const k in data.visible) {
-  watchEffect(() => {
-    // @ts-ignore
-    data.visible[k] ? layers[k].show() : layers[k].hide()
-  })
-}
-// "103.9017713,30.53006918;104.2544496,30.79041003"
+for (const k in data.visible) // @ts-ignore
+  watchEffect(() => layers[k][data.visible[k] ? 'show' : 'hide']())
 
 /**
  * 定位到当前
@@ -183,15 +225,8 @@ const setMarker = () => {
 </script>
 
 <template>
-  <div
-    class="map-page"
-    v-m
-    v-loading="
-      aMap.loading && {
-        text: aMap.state,
-      }
-    "
-  >
+  <!-- {{ User.setting.map }} -->
+  <div class="map-page" v-m v-loading="aMap.loading && { text: aMap.state }">
     <div>
       <ElButton @click="currentLocation" :loading="getLocationLoading">
         定位
@@ -216,27 +251,13 @@ const setMarker = () => {
     </div> -->
 
     <div class="control-layer">
-      <ElSwitch
-        v-model="data.visible.default"
-        type="primary"
-        active-text="default"
-      />
-      <ElSwitch v-model="data.visible.tile" type="primary" active-text="tile" />
-      <ElSwitch
-        v-model="data.visible.satellite"
-        type="primary"
-        active-text="satellite"
-      />
-      <ElSwitch
-        v-model="data.visible.traffic"
-        type="primary"
-        active-text="traffic"
-      />
-      <ElSwitch
-        v-model="data.visible.roadNet"
-        type="primary"
-        active-text="roadNet"
-      />
+      <ElCheckboxGroup v-model="curLayers">
+        <ElCheckboxButton value="default" label="基础地图和文字" />
+        <ElCheckboxButton value="tile" label="旅游地图" />
+        <ElCheckboxButton value="satellite" label="卫星地图" />
+        <ElCheckboxButton value="traffic" label="交通" />
+        <ElCheckboxButton value="roadNet" label="路网" />
+      </ElCheckboxGroup>
     </div>
 
     <div class="map" ref="mapDom"></div>
@@ -301,8 +322,9 @@ const setMarker = () => {
     // display: flex;
   }
 
-  // Marker样式定义
+  // Log Marker样式定义
   :deep(.log-marker) {
+    --color: var(--el-color-primary-light-3);
     --size: 18px;
 
     display: flex;
@@ -311,20 +333,58 @@ const setMarker = () => {
 
     height: var(--size);
     width: var(--size);
-    border: 1px solid #0f0c;
+    border: 1px solid var(--el-color-primary);
     border-radius: 50%;
     box-shadow: #000 0px 0px 3px;
 
     background-color: #0f05;
     &.gt1 {
-      background-color: #0f0a;
+      background-color: radial-gradient(
+        circle at center,
+        transparent 50%,
+        var(--color) 50%
+      );
     }
     &.gt30 {
-      background-color: #0f0c;
+      background-color: radial-gradient(
+        circle at center,
+        transparent 50%,
+        var(--color) 50%
+      );
     }
     &.gt50 {
-      background-color: #0f0f;
+      background-color: radial-gradient(
+        circle at center,
+        transparent 50%,
+        var(--color) 50%
+      );
     }
   }
+
+  // User Marker样式定义
+  // :deep(.log-marker) {
+  //   --size: 18px;
+
+  //   display: flex;
+  //   align-items: center;
+  //   justify-content: center;
+
+  //   height: var(--size);
+  //   width: var(--size);
+  //   border: 1px solid #0f0c;
+  //   border-radius: 50%;
+  //   box-shadow: #000 0px 0px 3px;
+
+  //   background-color: #0f05;
+  //   &.gt1 {
+  //     background-color: #0f0a;
+  //   }
+  //   &.gt30 {
+  //     background-color: #0f0c;
+  //   }
+  //   &.gt50 {
+  //     background-color: #0f0f;
+  //   }
+  // }
 }
 </style>
