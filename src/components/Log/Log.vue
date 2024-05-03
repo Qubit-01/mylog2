@@ -10,9 +10,7 @@
 <script setup lang="ts">
 import type { Log } from '@/types'
 import { Star, Share } from '@element-plus/icons-vue'
-import { vOverflowEllipsis } from '@/utils/directives'
-
-const router = useRouter()
+import { vOverflowEllipsis, vDblclick } from '@/utils/directives'
 
 const { log } = defineProps<{ log: Log }>()
 provide('log', log) // 暴露给子组件
@@ -25,7 +23,7 @@ const expand = () => {
 </script>
 
 <template>
-  <div class="log" v-m @click="expand">
+  <div class="log" v-m :id="'log' + log.id" v-dblclick="expand">
     <!-- 标题 -->
     <div
       class="title"
@@ -71,42 +69,16 @@ const expand = () => {
       </template>
     </div>
 
-    <div class="bottom">
-      <div
-        @click="router.push({ name: 'logger', query: { id: log.userid } })"
-        style="cursor: pointer"
-      >
-        {{ log.username }}
-      </div>
-      ·
-      <ElTooltip effect="light" placement="top">
-        <div>{{ log.logtime.format('YYYY-MM-DD HH:mm') }}</div>
-        <template #content>
-          发送时间：{{ log.sendtime!.format('YYYY-MM-DD HH:mm') }}<br />
-          记录时间：{{ log.logtime.format('YYYY-MM-DD HH:mm') }}
-        </template>
-      </ElTooltip>
-      <template v-if="log.location.length">
-        ·
-        <div>{{ log.location[1] }}</div>
-      </template>
-      ·
-      <div>{{ log.id }}</div>
-      <template v-if="log.info.link">
-        · <ElLink :href="log.info.link" target="_blank">查看原文</ElLink>
-      </template>
-    </div>
+    <LogBottom />
 
-    <div v-if="isExpand" class="buttons">
-      <ElButtonGroup>
-        <ElButton :icon="Share" />
-        <ElButton :icon="Star" />
-        <!-- StarFilled -->
-        <ElButton>
-          <ElIcon><CaretTop /></ElIcon>0
-        </ElButton>
-      </ElButtonGroup>
-    </div>
+    <ElButtonGroup class="buttons">
+      <ElButton :icon="Share" />
+      <ElButton :icon="Star" />
+      <!-- StarFilled -->
+      <ElButton>
+        <ElIcon><CaretTop /></ElIcon>0
+      </ElButton>
+    </ElButtonGroup>
 
     <slot name="bottom"></slot>
   </div>
@@ -159,17 +131,15 @@ const expand = () => {
     flex-wrap: wrap;
   }
 
-  .bottom {
-    display: flex;
-    gap: 4px;
-    font-size: 0.9rem;
-    color: var(--color-2);
-  }
-
   .buttons {
+    display: none;
     position: absolute;
     top: -26px;
     right: var(--padding);
+  }
+
+  &:hover .buttons {
+    display: block;
   }
 }
 </style>

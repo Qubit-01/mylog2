@@ -5,7 +5,7 @@
 import type { Log } from '@/types'
 import { delLog, editLog } from '@/stores/log'
 import { Delete, Edit, Share, Promotion } from '@element-plus/icons-vue'
-import { vOverflowEllipsis } from '@/utils/directives'
+import { vOverflowEllipsis, vDblclick } from '@/utils/directives'
 
 const { log } = defineProps<{ log: Log }>()
 provide('log', log)
@@ -31,7 +31,7 @@ const toggleType = (log: Log) => {
 </script>
 
 <template>
-  <div class="log" v-m @click="expand" :id="'log' + log.id">
+  <div class="log-mylog" v-m :id="'log' + log.id" v-dblclick="expand">
     <!-- 标题 -->
     <div
       class="title"
@@ -80,42 +80,24 @@ const toggleType = (log: Log) => {
       </template>
     </div>
 
-    <div v-if="isExpand" class="bottom">
-      <div>{{ log.username }}</div>
-      ·
-      <ElTooltip effect="light" placement="top">
-        <div>{{ log.logtime!.format('YYYY-MM-DD HH:mm') }}</div>
-        <template #content>
-          发送时间：{{ log.sendtime!.format('YYYY-MM-DD HH:mm') }}<br />
-          记录时间：{{ log.logtime!.format('YYYY-MM-DD HH:mm') }}
-        </template>
-      </ElTooltip>
-      <template v-if="log?.location[1]">
-        ·
-        <div>{{ log.location[1] }}</div>
-      </template>
-      ·
-      <div>{{ log.id }}</div>
-    </div>
+    <LogBottom v-if="isExpand" noUsername />
 
     <!-- 编辑模块 -->
     <LogEdit v-if="isEdit" @onSuccess="isEdit = false" />
 
-    <div v-if="isExpand" class="buttons">
-      <ElButtonGroup>
-        <ElButton :icon="Promotion" @click.stop="toggleType(log)" />
-        <ElButton :icon="Edit" @click.stop="isEdit = !isEdit" />
-        <ElButton :icon="Share" />
-        <ElButton :icon="Delete" @click.stop="delLog(log)" />
-      </ElButtonGroup>
-    </div>
+    <ElButtonGroup class="buttons">
+      <ElButton :icon="Promotion" @click.stop="toggleType(log)" />
+      <ElButton :icon="Edit" @click.stop="isEdit = !isEdit" />
+      <ElButton :icon="Share" />
+      <ElButton :icon="Delete" @click.stop="delLog(log)" />
+    </ElButtonGroup>
 
     <!-- <div>log: {{ log }}</div> -->
   </div>
 </template>
 
 <style scoped lang="less">
-.log {
+.log-mylog {
   border-radius: var(--border-radius);
   padding: var(--padding);
 
@@ -164,17 +146,15 @@ const toggleType = (log: Log) => {
     flex-wrap: wrap;
   }
 
-  .bottom {
-    display: flex;
-    gap: 4px;
-    font-size: 0.9rem;
-    color: var(--color-2);
-  }
-
   .buttons {
+    display: none;
     position: absolute;
     top: -26px;
     right: var(--padding);
+  }
+
+  &:hover .buttons {
+    display: block;
   }
 }
 </style>

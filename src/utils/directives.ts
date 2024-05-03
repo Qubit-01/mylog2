@@ -43,3 +43,17 @@ export const vImgSrc: Directive = (el, { value }) => {
     if (!el.getAttribute('alt')) el.setAttribute('alt', value.split('/').at(-1))
   }
 }
+
+/**
+ * 取消双击后选中文本的默认事件，正常执行回调
+ * @param value 双击的事件
+ */
+export const vDblclick: Directive = (el: HTMLDivElement, { value }) => {
+  // 去除双击选中文本
+  el.addEventListener('mousedown', e => {
+    // detail 是短时间连击次数
+    if (e.detail > 1) e.preventDefault()
+  })
+
+  el.addEventListener('dblclick', value)
+}

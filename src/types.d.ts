@@ -61,7 +61,7 @@ export interface Log {
   id?: string
   userid: string
   username: string
-  type: 'public' | 'log' | 'tag'
+  type: 'public' | 'log' | 'tag' | 'todo'
   sendtime?: dayjs.Dayjs // 发送时间
   logtime: dayjs.Dayjs // 记录时间
   content: string
@@ -76,8 +76,11 @@ export interface Log {
     title?: string // log的标题
     link?: string // 爬虫数据的原始链接
     markdown?: boolean // 是否是MD类型
-    level?: number // 待办优先级（这个功能待定）
     source?: string // 爬虫数据的来源
+    todo?: {
+      complete: boolean // 是否完成
+      level: number // 优先级
+    }
   }
 }
 
