@@ -12,13 +12,11 @@ const router = useRouter()
       <div class="center">
         <div class="left">
           <div class="logo" @click="router.push('/')">
-            <img :src="BucketCDN + 'web-files/favicon.svg'" />
+            <img src="@/assets/img/favicon.svg" />
             多元记
           </div>
         </div>
-        <nav>
-          <!-- 我的主页（别人看见的） -->
-          <!-- <RouterLink to="/logger" v-overflow-ellipsis>我的</RouterLink> -->
+        <nav> 
           <!-- 我的记录（自己看见的） -->
           <RouterLink to="/mylog" v-overflow-ellipsis>记录</RouterLink>
           <RouterLink to="/album" v-overflow-ellipsis>相册</RouterLink>
@@ -94,6 +92,8 @@ const router = useRouter()
 
           display: flex;
           justify-content: center;
+
+          cursor: pointer;
 
           &:hover {
             background: #aaa5;
