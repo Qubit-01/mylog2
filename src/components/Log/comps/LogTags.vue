@@ -5,6 +5,7 @@ const log = inject<Log>('log')!
 const isExpand = inject<Ref<boolean>>('isExpand')!
 const { noPublic } = defineProps<{
   noPublic?: boolean
+  noTodo?: boolean
 }>()
 </script>
 
@@ -16,6 +17,10 @@ const { noPublic } = defineProps<{
       type="warning"
     >
       公开
+    </ElTag>
+    <ElTag v-if="noPublic && log.type === 'todo'" size="small" type="warning">
+      待办
+      <span v-show="log.info.todo?.complete">√</span>
     </ElTag>
     <ElTag v-for="p in log.people" :key="p" size="small">{{ p }}</ElTag>
     <ElTag v-for="t in log.tags" :key="t" size="small" type="success">

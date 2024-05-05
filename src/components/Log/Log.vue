@@ -18,9 +18,7 @@ provide('log', log) // 暴露给子组件
 // 双击log，展开和收起
 const isExpand = ref(false)
 provide('isExpand', isExpand)
-const expand = () => {
-  isExpand.value = !isExpand.value
-}
+const expand = () => (isExpand.value = !isExpand.value)
 </script>
 
 <template>

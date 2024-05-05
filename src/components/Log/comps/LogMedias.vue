@@ -29,4 +29,9 @@ const isExpand = inject<boolean>('isExpand')!
   flex-wrap: wrap;
   gap: var(--block-gap);
 }
+
+// 空div应该不占用gap
+.block-media:empty {
+  display: none;
+}
 </style>

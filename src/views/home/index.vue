@@ -14,7 +14,7 @@ home.addLogs!()
   >
     <HomeTopLog />
 
-    <Log v-for="log in home.list" :log="log" />
+    <Log v-for="log in home.list" :key="log.id" :log="log" />
 
     <LogLoading v-if="home.loading" />
   </div>

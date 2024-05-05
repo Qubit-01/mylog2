@@ -1,9 +1,14 @@
+<!-- 
+  集成了log和todo，以后看看有没有必要分开
+ -->
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import type { KeyFile, LogEdit, LogFileItem, LogFiles, LogItem } from '@/types'
 import { logInit, rlsLog } from '@/stores/log'
 import { getCosFiles } from '@/utils/cos'
 import { cloneDeep } from 'lodash'
+
+const { isTodo } = defineProps<{ isTodo?: boolean }>()
 
 // 换一种方式，父组件管理files，不再用组件暴露的files了，主要是为了一个组件上传其他类型文件可以兼容
 const files = reactive<LogFiles>({
@@ -13,7 +18,17 @@ const files = reactive<LogFiles>({
   files: [],
 })
 
-const logEdit = reactive<LogEdit>({ content: '' })
+const logEdit = reactive<LogEdit>({
+  type: 'log',
+  content: '',
+})
+// todo 要修改
+if (isTodo)
+  Object.assign(logEdit, {
+    type: 'todo',
+    info: { todo: { complete: false, level: 1 } },
+  })
+
 const upload = reactive({
   percent: -1, // 上传进度
   speed: 0, // 上传速度 MB/s
@@ -72,6 +87,7 @@ const release = () => {
   upload.percent = 0
   const cosFiles = getCosFiles(files)
 
+  console.log('🐤', JSON.stringify(logEdit))
   rlsLog(cloneDeep(logEdit), {
     files: cosFiles,
     onProgress: info => {
@@ -124,6 +140,11 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
     <div v-else class="control">
       <ControlIcons v-model="visible" :setItem :closeItem />
       <div class="rls-btn">
+        <ElRadioGroup v-model="logEdit.type" size="small">
+          <ElRadioButton label="记录" value="log" />
+          <ElRadioButton label="公开" value="public" />
+          <ElRadioButton label="待办" value="todo" />
+        </ElRadioGroup>
         <ElButton size="small" type="primary" @click="release">发布</ElButton>
       </div>
     </div>
@@ -182,6 +203,11 @@ defineExpose({ logEdit }) // 暴露数据给父组件用
   .control {
     display: flex;
     justify-content: space-between;
+
+    .rls-btn {
+      display: flex;
+      gap: 8px;
+    }
   }
 }
 

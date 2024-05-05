@@ -45,6 +45,17 @@ export const getMylogs = (
 }
 
 /**
+ * 通过token获取todo列表，全部
+ */
+export const getTodos = (data: { token?: string }): Promise<Log[]> => {
+  return request({
+    url: 'log/get_todos',
+    method: 'get',
+    params: { token: Global.token, ...data },
+  })
+}
+
+/**
  * 通过token获取log列表，全部
  * 不传page参数就返回全部
  * get_logs_all_by_userid

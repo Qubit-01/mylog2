@@ -5,8 +5,7 @@
 
 <script setup lang="ts">
 import type { Log } from '@/types'
-import { CaretTop, StarFilled } from '@element-plus/icons-vue'
-import type { CheckboxValueType } from 'element-plus'
+import { ArrowUpBold, ArrowDownBold } from '@element-plus/icons-vue'
 import { vOverflowEllipsis, vDblclick } from '@/utils/directives'
 
 const { log } = defineProps<{ log: Log }>()
@@ -14,6 +13,7 @@ provide('log', log) // 暴露给子组件
 
 // 双击log，展开和收起
 const isExpand = ref(false)
+provide('isExpand', isExpand)
 const expand = () => {
   isExpand.value = !isExpand.value
 }
@@ -21,27 +21,26 @@ const expand = () => {
 
 <template>
   <div class="log-todo" v-m v-dblclick="expand">
-    <div class="left">
-      <ElCheckbox
-        v-model="log.info.todo!.complete"
-        size="large"
-        style="height: 14px"
-      />
-    </div>
-    <div v-if="log.info.todo?.complete" class="completed">
+    <ElCheckbox v-model="log.info.todo!.complete" style="height: 15px" />
+
+    <!-- 两种状态
+      1. 已完成: 默认只展示content，双击展示全部
+      2. 未完成: 默认普通展示（mylog），双击展示全部
+    -->
+    <div v-if="log.info.todo?.complete && !isExpand" class="completed">
       {{ log.content }}
     </div>
-    <div v-else>
-      {{ log.content }}
+    <!-- 未完成 -->
+    <div v-else class="log">
+      <LogContent />
+      <LogMedias />
+      <LogTags noTodo />
+      <LogBottom v-if="isExpand" noUsername />
     </div>
 
     <ElButtonGroup class="buttons">
-      <!-- 增加优先级 -->
-      <ElButton :icon="CaretTop" />
-      <!-- 降低优先级 -->
-      <ElButton :icon="CaretTop" />
-      <!-- 完成 -->
-      <ElButton :icon="StarFilled" />
+      <ElButton :icon="ArrowUpBold" /><!-- 增加优先级 -->
+      <ElButton :icon="ArrowDownBold" /><!-- 降低优先级 -->
     </ElButtonGroup>
   </div>
 </template>
@@ -53,12 +52,22 @@ const expand = () => {
 
   display: flex;
   align-items: center;
-  gap: 4px;
-  // flex-direction: column;
+  gap: 10px;
 
   // 已完成
   .completed {
     text-decoration: line-through;
+  }
+
+  .log {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    // 空div应该不占用gap
+    > div:empty {
+      display: none;
+    }
   }
 
   .buttons {

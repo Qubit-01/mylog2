@@ -9,6 +9,7 @@ import {
   deleteLog,
   updateLog,
   getTags,
+  getTodos,
 } from '@/api/log'
 import useUserStore from './user'
 import { logFileItem } from './constant'
@@ -107,6 +108,21 @@ export const useLogStore = defineStore('log', () => {
     },
   })
 
+  // todos，不分页直接获取全部
+  const todos = reactive<AllStore>({
+    listAll: [],
+    loading: true,
+    getLogs: async () => {
+      console.log('🐤')
+      todos.loading = true
+      const data = await getTodos({})
+      data.forEach(handleLog)
+      console.log('🐤', data)
+      todos.listAll = data
+      todos.loading = false
+    },
+  })
+
   // 日历Tags，不分页直接获取全部
   const tags = reactive<AllStore>({
     listAll: [],
@@ -172,6 +188,13 @@ export const useLogStore = defineStore('log', () => {
    * @param log log对象
    */
   const addLog = (log: Log) => {
+    // 如果是todo
+    if (log.type === 'todo') {
+      const i = todos.listAll.findIndex(l => l.logtime <= log.logtime)
+      if (i === -1) todos.listAll.push(log) // 没有找到，插入末尾
+      else todos.listAll.splice(i, 0, log) // 插入
+      return
+    }
     // 如果是tag
     if (log.type === 'tag') {
       const i = tags.listAll.findIndex(l => l.logtime <= log.logtime)
@@ -231,7 +254,8 @@ export const useLogStore = defineStore('log', () => {
   return {
     home, // 首页
     mylog, // 记录页
-    tags, // 日历页-
+    todos, // todo页
+    tags, // 日历页
     getLog,
     addLog,
     delLog,
@@ -345,7 +369,10 @@ export const editLog = async (
   console.log(logEdit, params, delObjs)
   // return Promise.resolve(1)
 
-  const data = await Promise.all([myDeleteFiles(delObjs), myUploadFiles(params)])
+  const data = await Promise.all([
+    myDeleteFiles(delObjs),
+    myUploadFiles(params),
+  ])
   const count = await updateLog({ logJson: JSON.stringify(logEdit) })
   if (count === 1) {
     ElMessage({ message: '编辑成功', type: 'success' })
