@@ -54,13 +54,6 @@ interface Global {
 
 export const useGlobalStore: () => Global = defineStore('global', () => {
   const user = useUserStore()
-  /**
-   * 通过设置 token 的 get 和 set 方法，实现 token 的存储和删除
-   */
-  // const token = computed({
-  //   get: () => Cookies.get('token') || '',
-  //   set: v => (v ? setToken(v) : Cookies.remove('token')),
-  // })
   const token = computed(() => Cookies.get('token') || '')
 
   // 主题相关 ===============================
