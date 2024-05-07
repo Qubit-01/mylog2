@@ -1,6 +1,7 @@
 import { getUser as getUserApi } from '@/api/user'
 import type { User } from '@/types'
-import useUserStore from './user'
+import useUserStore, { setToken } from './user'
+import Cookies from 'js-cookie'
 
 /**
  * # 获取用户接口全局只调用一次，所以用Promise
@@ -14,14 +15,14 @@ import useUserStore from './user'
  * 保证进入页面后，要么没有token，要么是正确的token
  */
 export const getUser: Promise<User> = new Promise((resolve, reject) => {
-  const token = localStorage.getItem('token')
+  const token = Cookies.get('token')
   if (token)
-    getUserApi({ token: token }).then(res => {
+    getUserApi({ token }).then(res => {
       if (res) resolve(res) // 2.1 正常token
       else {
         // 2.2 错误token，回归到没有token
         ElMessage.error('用户登录信息已过期或错误，请重新登录')
-        localStorage.removeItem('token')
+        Cookies.remove('token')
         location.reload()
       }
     })
@@ -41,6 +42,7 @@ export const getUser: Promise<User> = new Promise((resolve, reject) => {
  * Global 全局数据的类型
  */
 interface Global {
+  /** 用户Token */
   token: string
   /**
    * # 是否是暗黑模式（计算属性）
@@ -52,15 +54,14 @@ interface Global {
 
 export const useGlobalStore: () => Global = defineStore('global', () => {
   const user = useUserStore()
-  // const token = ref(localStorage.getItem('token') || '')
   /**
    * 通过设置 token 的 get 和 set 方法，实现 token 的存储和删除
    */
-  const token = computed({
-    get: () => localStorage.getItem('token') || '',
-    set: v =>
-      v ? localStorage.setItem('token', v) : localStorage.removeItem('token'),
-  })
+  // const token = computed({
+  //   get: () => Cookies.get('token') || '',
+  //   set: v => (v ? setToken(v) : Cookies.remove('token')),
+  // })
+  const token = computed(() => Cookies.get('token') || '')
 
   // 主题相关 ===============================
 

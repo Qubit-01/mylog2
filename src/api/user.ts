@@ -1,5 +1,6 @@
 import type { User } from '@/types'
 import request from '@/utils/request'
+import Cookie from 'js-cookie'
 
 /**
  * 通过用户名密码获取带token的用户信息
@@ -72,7 +73,6 @@ export const signin = (data: {
   })
 }
 
-
 /**
  * 更新用户设置 user/update_setting
  *
@@ -86,7 +86,7 @@ export const updateSetting = (data: {
   return request({
     url: 'user/update_setting',
     method: 'post',
-    data: { token: localStorage.getItem('token'), ...data },
+    data: { token: Cookie.get('token'), ...data },
   })
 }
 
@@ -103,6 +103,6 @@ export const updateUser = (data: {
   return request({
     url: 'user/update_user',
     method: 'post',
-    data: { token: localStorage.getItem('token'), ...data },
+    data: { token: Cookie.get('token'), ...data },
   })
 }

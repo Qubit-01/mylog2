@@ -3,7 +3,7 @@ import type { User } from '@/types'
 import { login } from '@/api/user'
 import useGlobalStore from '@/stores/global'
 import { appId, redirectURI } from '@/utils/qq-connect'
-import { loginTest } from '@/stores/user'
+import { loginByToken, loginTest } from '@/stores/user'
 
 const Global = useGlobalStore()
 const route = useRoute()
@@ -18,10 +18,7 @@ const doLogin = async () => {
   user = await login(loginData)
   if (user) {
     ElMessage.success(`欢迎你，${user.name} ！`)
-    Global.token = user.token!
-    // 跳转并刷新
-    location.replace('/#' + (route.query.redirect || ''))
-    location.reload()
+    loginByToken(user.token!, route.query.redirect as string)
   } else {
     ElMessage.error('用户名或密码错误')
   }

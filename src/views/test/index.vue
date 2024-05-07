@@ -1,11 +1,19 @@
 <script setup lang="ts">
+import { loginTest } from '@/stores/user';
 import { useVisNetwork } from '@/utils/vis-network'
+import Cookie from 'js-cookie'
 
 // const networkDom = ref<HTMLDivElement>()
+
+console.log('🐤', Cookie.get('token'))
+
 </script>
 
 <template>
-  <div class="test-page" v-m></div>
+  <div class="test-page" v-m>
+    <ElButton @click="loginTest">登录测试账号</ElButton>
+
+  </div>
 </template>
 
 <style scoped lang="less">

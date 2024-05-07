@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import MainView from '../views/MainView.vue'
 import LoginView from '../views/login/index.vue'
+import Cookies from 'js-cookie'
 // import HomeView from '../views/home/index.vue'
 
 declare module 'vue-router' {
@@ -142,7 +143,7 @@ router.beforeEach((to, from) => {
   document.title = to.meta.title || '多元记 - 把你写成书'
 
   // 这里是处理没有token的情况，token是否错误或过期这里不处理
-  if (to.meta.requiresAuth && !localStorage.getItem('token')) {
+  if (to.meta.requiresAuth && !Cookies.get('token')) {
     ElMessage({ message: '请先登录', type: 'warning' })
     return {
       name: 'login',

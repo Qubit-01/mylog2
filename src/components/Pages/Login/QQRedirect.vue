@@ -18,6 +18,7 @@ import QC from '@/utils/qq-connect'
 import { haveUser, login, signin, updateUser } from '@/api/user'
 import { ArrowLeftBold } from '@element-plus/icons-vue'
 import { baseURL } from '@/stores/constant'
+import { loginByToken } from '@/stores/user';
 
 const route = useRoute()
 const state = ref(0) // 0加载 1选择（没找到用户） 2登录 3注册
@@ -51,9 +52,7 @@ if (QC.Login.check()) {
     else {
       console.log('🐤找到账号直接登录')
       login({ openidQ }).then(user => {
-        localStorage.setItem('token', user.token!)
-        // location.replace('/#' + (route.query.redirect || ''))
-        location.href = '/'
+        loginByToken(user.token!)
       })
     }
   })
@@ -80,8 +79,7 @@ const bd = () => {
       }).then(count => {
         if (count === 1) {
           ElMessage({ message: '绑定成功', type: 'success' })
-          localStorage.setItem('token', resUser.token!)
-          location.replace('/')
+          loginByToken(resUser.token!)
         } else {
           return ElMessage({ message: '绑定失败', type: 'error' })
         }
@@ -130,8 +128,7 @@ const zc = async () => {
       }).then(count => {
         if (count === 1) {
           ElMessage({ message: '绑定成功', type: 'success' })
-          localStorage.setItem('token', resUser.token!)
-          location.replace('/')
+          loginByToken(resUser.token!)
         } else {
           ElMessage({ message: '绑定失败', type: 'error' })
         }
