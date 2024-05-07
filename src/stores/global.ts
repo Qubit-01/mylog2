@@ -50,7 +50,23 @@ interface Global {
    * 改变 html class属性
    */
   isDark: boolean
+  /**
+   * 目录数据
+   */
+  content: {
+    list: ContentList
+  }
 }
+
+/** 目录的数据类型 */
+type ContentList = {
+  /** 显示文字 */
+  label: string
+  /** 对应锚点，其实就是dom的id */
+  anchor: string
+  /** 文字样式 */
+  type: number
+}[]
 
 export const useGlobalStore: () => Global = defineStore('global', () => {
   const user = useUserStore()
@@ -71,9 +87,31 @@ export const useGlobalStore: () => Global = defineStore('global', () => {
     html.className = user.setting.page.theme!
   })
 
+  // 目录模块
+  const content = reactive<Global['content']>({
+    list: [
+      {
+        label: '简介',
+        anchor: '简介',
+        type: 1,
+      },
+      {
+        label: '目录',
+        anchor: '目录',
+        type: 2,
+      },
+      {
+        label: '更新日志',
+        anchor: '更新日志',
+        type: 3,
+      },
+    ],
+  })
+
   return {
     token,
     isDark,
+    content,
   }
 })
 

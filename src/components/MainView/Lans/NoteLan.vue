@@ -1,3 +1,4 @@
+<!-- 公告栏 -->
 <script setup lang="ts">
 import useGlobalStore from '@/stores/global'
 
@@ -5,7 +6,6 @@ const Global = useGlobalStore()
 const showBeg = ref(false)
 </script>
 <template>
-  <!-- 公告栏 -->
   <div class="note-lan" v-m>
     <div class="title">公告</div>
     <div class="items">

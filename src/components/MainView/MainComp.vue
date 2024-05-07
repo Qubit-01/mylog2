@@ -14,6 +14,7 @@
         <NoteLan />
       </div>
       <div class="right">
+        <ContentLan />
         <OneSentence />
       </div>
     </div>

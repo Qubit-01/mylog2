@@ -55,15 +55,15 @@ export function clone<T>(obj: T): T {
 // }
 
 // 给一个元素id，滚动条跳转
-// export function goAnchor(e: string) {
-//   const el = document.querySelector('#' + e)
-//   if (el)
-//     el.scrollIntoView({
-//       behavior: 'smooth',
-//       block: 'center',
-//       inline: 'nearest',
-//     })
-// }
+export function goAnchor(e: string) {
+  const el = document.querySelector('#' + e)
+  if (el)
+    el.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+      inline: 'nearest',
+    })
+}
 
 // 获取URL参数
 // export function getQueryAttr(variable: string) {
