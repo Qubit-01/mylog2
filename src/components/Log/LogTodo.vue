@@ -7,6 +7,7 @@
 import type { Log } from '@/types'
 import { ArrowUpBold, ArrowDownBold } from '@element-plus/icons-vue'
 import { vOverflowEllipsis, vDblclick } from '@/utils/directives'
+import { editLog } from '@/stores/log'
 
 const { log } = defineProps<{ log: Log }>()
 provide('log', log) // 暴露给子组件
@@ -17,6 +18,25 @@ provide('isExpand', isExpand)
 const expand = () => {
   isExpand.value = !isExpand.value
 }
+
+const complete = (log: Log) => {
+  console.log('完成了', log)
+}
+
+watch(
+  () => log.info.todo!.complete,
+  () => {
+    editLog({
+      id: log.id!,
+      info: log.info,
+    }).then(count => {
+      console.log('修改了', count, '条记录')
+    })
+  }
+)
+
+// 点击公开按钮
+const toggleType = (log: boolean) => {}
 </script>
 
 <template>
