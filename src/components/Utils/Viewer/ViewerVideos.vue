@@ -2,30 +2,32 @@
   props 优先级比 log 高
   如果传入了props，那么就用props，否则用log
   传入的imgs一个数组对象，所有不能对log.imgs的地址进行修改
+
+  腾讯云推荐的播放器：https://cloud.tencent.com/act/pro/cos-video?player=tcplayer&mode=mp4
+  详细API文档：https://cloud.tencent.com/document/product/436/104530
+  
  -->
 <script setup lang="ts">
 import { toFileUrl } from '@/utils/cos'
 import type { Log } from '@/types'
+import DPlayer from 'dplayer'
 
 // 从父组件拿到log，主要是获取userId
 const log: Log = inject('log')!
 
-/**
- * files是视频列表，不传就用父组件注入的log.videos
- */
+/** files是视频列表，不传就用父组件注入的log.videos */
 const props = defineProps<{ videos?: string[] }>()
-// 计算从哪里取属性
+/** 视频名称列表，计算从哪里取属性 */
 const videos = computed(() => props.videos || log.videos)
 
-// 传入的文件要处理，如果不是http开头，那么就加上OOS地址，否则直接用，而且要改为https
-const videoUrls = ref<string[]>(toFileUrl(videos.value, 'videos/', log.userid))
+/**
+ * 真正的视频URL列表
+ * 传入的文件要处理，如果不是http开头，那么就加上OOS地址，否则直接用，而且要改为https
+ */
+const videoUrls = computed(() => toFileUrl(videos.value, 'videos/', log.userid))
 
-// 当前播放的是视频地址
+/** 当前播放的是视频地址，控制播放器的显示与否 */
 const videoSrc = ref('')
-
-watch(videos, () => {
-  videoUrls.value = toFileUrl(videos.value, 'videos/', log.userid)
-})
 </script>
 
 <template>
@@ -53,9 +55,7 @@ watch(videos, () => {
       auto:根据实际情况动态决定
     -->
   <TeleportBody v-if="videoSrc" @close="videoSrc = ''">
-    <video class="video-play" controls autoplay ref="videoDom">
-      <source :src="videoSrc" type="video/mp4" />
-    </video>
+    <VideoDplayer :videoSrc class="video-play" autoplay />
   </TeleportBody>
 </template>
 
