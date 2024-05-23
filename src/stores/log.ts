@@ -245,6 +245,7 @@ export const useLogStore = defineStore('log', () => {
    */
   const editLog = (logEdit: LogEdit) => {
     const log = logStore.getLog(logEdit)!
+    if (!log) return
     Object.assign(log, logEdit)
     // 如果修改的是logtime，就先删再加
     if (logEdit.logtime) addLog(delLog(log)!)
@@ -352,7 +353,7 @@ export const editLog = async (
   const delObjs: { Key: string }[] = []
   logFileItem.forEach(type => {
     if (logEdit[type]) {
-      logOld[type]
+      ;(logOld[type] as string[])
         .filter(i => !logEdit[type]?.includes(i)) // 找old里面没有的
         .forEach(i => {
           const Key = `${cosPath()}${type}/${i}`
