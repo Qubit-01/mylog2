@@ -139,7 +139,7 @@ export const loginByToken = (token: string, to: string = '/') => {
  * @param to 跳转的页面， 不传跳主页，传空串刷新当前页，传路径跳指定
  */
 export const logout = (to: string = '/') => {
-  Cookies.remove('token')
+  Cookies.remove('token', { domain: 'mylog.cool' })
   localStorage.removeItem('pageSetting')
   QC.Login.signOut()
   if (to !== '') location.href = '/#' + to
