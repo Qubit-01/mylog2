@@ -22,7 +22,7 @@ export const getUser: Promise<User> = new Promise((resolve, reject) => {
       else {
         // 2.2 错误token，回归到没有token
         ElMessage.error('用户登录信息已过期或错误，请重新登录')
-        Cookies.remove('token')
+        Cookies.remove('token', { domain: 'mylog.cool' })
         location.reload()
       }
     })
