@@ -96,7 +96,7 @@ const router = createRouter({
           path: 'share',
           name: 'share', // 分享
           component: () => import('./share/index.vue'),
-          meta: { title: '分享 - 多元记', requiresAuth: true },
+          meta: { title: '分享 - 多元记' },
         },
         {
           path: '/test',

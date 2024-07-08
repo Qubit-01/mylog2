@@ -144,7 +144,8 @@ export const saveAs = (blob: Blob, filename: string) => {
 }
 
 /**
- * 通过url下载文件并重命名
+ * 通过url下载文件并重命名（不推荐使用此方法）
+ * 这里的实现是先在内存下载，然后再保存到本地
  * @param url 文件Url
  * @param filename 文件重命名
  */

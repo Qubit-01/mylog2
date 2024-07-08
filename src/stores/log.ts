@@ -154,7 +154,7 @@ export const useLogStore = defineStore('log', () => {
       mylog.filter = filter
       mylog.addLogs()
     },
-    params: { skip: 0, limit: 15 },
+    params: { skip: 0, limit: 10 },
     loading: true,
     noMore: false,
     addLogs: async () => {
