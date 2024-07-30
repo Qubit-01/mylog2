@@ -29,7 +29,7 @@ import type {
   LogImgFile,
   LogItem,
 } from '@/types'
-import { fileType, logFileItem } from '@/stores/log'
+import { fileType, logFileItem } from '@/stores/constant'
 import { compressImg, getExif, getLnglatByExif } from '@/utils/img'
 import AMap, { l2v } from '@/utils/map'
 import { getKey, toFileUrl } from '@/utils/cos'
@@ -233,8 +233,7 @@ const useExif = () => {
 
 <style scoped lang="less">
 .edit-imgs {
-  --block-height: 100px;
-  --block-width: 100px;
+  --block-height: 6rem;
   --block-gap: 2px;
 
   display: flex;
@@ -254,7 +253,7 @@ const useExif = () => {
         gap: var(--block-gap);
 
         > * {
-          width: var(--block-width);
+          width: var(--block-height);
           height: var(--block-height);
           margin: 0;
 

@@ -5,12 +5,14 @@
 import type { Log } from '@/types'
 import { delLog, editLog } from '@/stores/log'
 import { Delete, Edit, Share, Promotion } from '@element-plus/icons-vue'
+import { vDblclick } from '@/utils/directives'
 
 const { log } = defineProps<{ log: Log }>()
 provide('log', log)
 
 // 双击log，展开和收起
 const isExpand = ref(false)
+provide('isExpand', isExpand)
 const expand = () => {
   isExpand.value = !isExpand.value
 }
@@ -30,149 +32,52 @@ const toggleType = (log: Log) => {
 </script>
 
 <template>
-  <div class="log" v-m @click="expand" :id="'log' + log.id">
-    <!-- 标题 -->
-    <div
-      class="title"
-      v-if="log.info?.title"
-      v-overflow-ellipsis="isExpand ? 0 : 1"
-    >
-      {{ log.info?.title }}
-    </div>
+  <div class="log-mylog" v-m :id="'log' + log.id" v-dblclick="expand">
+    <LogContent />
 
-    <!-- 内容 -->
-    <div class="text">
-      <pre
-        class="content"
-        v-overflow-ellipsis="isExpand ? 0 : 3"
-        v-text="log.content"
-      ></pre>
-    </div>
+    <LogMedias />
 
-    <!-- 图片和视频放在一起 -->
-    <div class="block-media">
-      <ViewerImgs v-if="log.imgs.length" />
-      <ViewerVideos v-if="log.videos.length && isExpand" />
-    </div>
+    <LogTags />
 
-    <!-- 音频 和 文件 -->
-    <template v-if="isExpand">
-      <div v-if="log.audios.length">音频：{{ log.audios }}</div>
-      <ViewerFiles v-if="log.files.length">文件：{{ log.files }}</ViewerFiles>
-    </template>
-
-    <div class="tags">
-      <ElTag v-if="log.type === 'public'" size="small" type="warning"
-        >公开</ElTag
-      >
-      <ElTag v-for="p in log.people" :key="p" size="small">{{ p }}</ElTag>
-      <ElTag v-for="t in log.tags" :key="t" size="small" type="success">
-        {{ t }}
-      </ElTag>
-      <ElTag v-if="log.info.markdown" size="small">MarkDown</ElTag>
-
-      <template v-if="!isExpand">
-        <span v-if="log.videos.length">🎬{{ log.videos.length }}</span>
-        <span v-if="log.audios.length">🎙️{{ log.audios.length }}</span>
-        <span v-if="log.files.length">📁{{ log.files.length }}</span>
-        <span v-if="log.location.length">📍</span>
-      </template>
-    </div>
-
-    <div v-if="isExpand" class="bottom">
-      <div>{{ log.username }}</div>
-      ·
-      <ElTooltip effect="light" placement="top">
-        <div>{{ log.logtime!.format('YYYY-MM-DD HH:mm') }}</div>
-        <template #content>
-          发送时间：{{ log.sendtime!.format('YYYY-MM-DD HH:mm') }}<br />
-          记录时间：{{ log.logtime!.format('YYYY-MM-DD HH:mm') }}
-        </template>
-      </ElTooltip>
-      <template v-if="log?.location[1]">
-        ·
-        <div>{{ log.location[1] }}</div>
-      </template>
-      ·
-      <div>{{ log.id }}</div>
-    </div>
+    <LogBottom v-if="isExpand" noUsername />
 
     <!-- 编辑模块 -->
     <LogEdit v-if="isEdit" @onSuccess="isEdit = false" />
 
-    <div v-if="isExpand" class="buttons">
-      <ElButtonGroup>
-        <ElButton :icon="Promotion" @click.stop="toggleType(log)" />
-        <ElButton :icon="Edit" @click.stop="isEdit = !isEdit" />
-        <ElButton :icon="Share" />
-        <ElButton :icon="Delete" @click.stop="delLog(log)" />
-      </ElButtonGroup>
-    </div>
+    <ElButtonGroup class="buttons">
+      <ElButton :icon="Promotion" @click.stop="toggleType(log)" />
+      <ElButton :icon="Edit" @click.stop="isEdit = !isEdit" />
+      <ElButton :icon="Share" />
+      <ElButton :icon="Delete" @click.stop="delLog(log)" />
+    </ElButtonGroup>
 
     <!-- <div>log: {{ log }}</div> -->
   </div>
 </template>
 
 <style scoped lang="less">
-.log {
+.log-mylog {
   border-radius: var(--border-radius);
   padding: var(--padding);
 
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 
   // 空div应该不占用gap
   > div:empty {
     display: none;
   }
 
-  .title {
-    font-size: 1.2rem;
-    font-weight: bolder;
-  }
-
-  .text {
-    display: flex;
-    flex-wrap: wrap;
-
-    .content {
-      width: fit-content;
-      white-space: pre-wrap;
-      // 继承父元素的字体
-      font-family: unset;
-      // 长英语要换行
-      word-break: break-all;
-    }
-  }
-
-  .block-media {
-    --block-height: 100px;
-    --block-border-radius: 6px;
-    --block-gap: 2px;
-
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--block-gap);
-  }
-
-  .tags {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-  }
-
-  .bottom {
-    display: flex;
-    gap: 4px;
-    font-size: 0.9rem;
-    color: var(--color-2);
-  }
-
   .buttons {
+    display: none;
     position: absolute;
     top: -26px;
     right: var(--padding);
+  }
+
+  &:hover .buttons {
+    display: block;
   }
 }
 </style>

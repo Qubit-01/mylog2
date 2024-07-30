@@ -30,11 +30,11 @@ const map = {
   tags: PriceTag,
   imgs: Picture,
   videos: VideoCamera,
-  audios: Microphone,
+  // audios: Microphone,
   files: FolderOpened,
   location: Location,
   people: User,
-  info: More,
+  // info: More,
 }
 </script>
 

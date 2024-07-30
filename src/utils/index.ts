@@ -55,15 +55,15 @@ export function clone<T>(obj: T): T {
 // }
 
 // 给一个元素id，滚动条跳转
-// export function goAnchor(e: string) {
-//   const el = document.querySelector('#' + e)
-//   if (el)
-//     el.scrollIntoView({
-//       behavior: 'smooth',
-//       block: 'center',
-//       inline: 'nearest',
-//     })
-// }
+export function goAnchor(e: string) {
+  const el = document.querySelector('#' + e)
+  if (el)
+    el.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+      inline: 'nearest',
+    })
+}
 
 // 获取URL参数
 // export function getQueryAttr(variable: string) {
@@ -75,7 +75,7 @@ export function clone<T>(obj: T): T {
 // }
 
 // 将字符串传入剪贴板
-export function writeClipboard(str: string) {
+export function writeClipboard(str: string): Promise<void> {
   const clipboardObj = navigator.clipboard
   if (!clipboardObj) return Promise.reject('浏览器不支持 navigator.clipboard')
   return clipboardObj.writeText(str)
@@ -144,7 +144,8 @@ export const saveAs = (blob: Blob, filename: string) => {
 }
 
 /**
- * 通过url下载文件并重命名
+ * 通过url下载文件并重命名（不推荐使用此方法）
+ * 这里的实现是先在内存下载，然后再保存到本地
  * @param url 文件Url
  * @param filename 文件重命名
  */

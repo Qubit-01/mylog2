@@ -26,15 +26,32 @@ export const getPublics = (params: {
  * 不传page参数就返回全部
  * get_logs_all_by_userid
  */
-export const getMylogs = (data: {
-  token?: string
-  skip?: number
-  limit?: number
-}): Promise<Log[]> => {
+export const getMylogs = (
+  params:
+    | {
+        token?: string
+        skip?: number
+        limit?: number
+      }
+    | {
+        share: string
+      }
+): Promise<Log[]> => {
   return request({
     url: 'log/get_mylogs',
-    method: 'post',
-    data: { token: Global.token, ...data },
+    method: 'get',
+    params: { token: Global.token, ...params },
+  })
+}
+
+/**
+ * 通过token获取todo列表，全部
+ */
+export const getTodos = (data: { token?: string }): Promise<Log[]> => {
+  return request({
+    url: 'log/get_todos',
+    method: 'get',
+    params: { token: Global.token, ...data },
   })
 }
 
@@ -43,13 +60,11 @@ export const getMylogs = (data: {
  * 不传page参数就返回全部
  * get_logs_all_by_userid
  */
-export const getTags = (data: {
-  token?: string
-}): Promise<Log[]> => {
+export const getTags = (data: { token?: string }): Promise<Log[]> => {
   return request({
     url: 'log/get_tags',
-    method: 'post',
-    data: { token: Global.token, ...data },
+    method: 'get',
+    params: { token: Global.token, ...data },
   })
 }
 
@@ -108,6 +123,21 @@ export const deleteLog = (data: {
 }): Promise<number> => {
   return request({
     url: 'log/delete_log',
+    method: 'post',
+    data: { token: Global.token, ...data },
+  })
+}
+
+/**
+ * 获取link密文
+ *
+ */
+export const getShare = (data: {
+  token?: string
+  logIdsJson: string
+}): Promise<string> => {
+  return request({
+    url: 'log/get_share',
     method: 'post',
     data: { token: Global.token, ...data },
   })

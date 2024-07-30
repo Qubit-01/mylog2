@@ -4,6 +4,9 @@ import useUserStore from '@/stores/user'
 import useLogStore from '@/stores/log'
 import { cloneDeep } from 'lodash'
 import dayjs from 'dayjs'
+import { getShare } from '@/api/log'
+import { webURL } from '@/stores/constant'
+import { writeClipboard } from '@/utils'
 
 const mylog = useLogStore().mylog
 const User = useUserStore()
@@ -62,6 +65,29 @@ const delFilter = () => {
   filters.value.splice(curFilter.value, 1)
   curFilter.value = -1
 }
+
+/**
+ * 分享
+ */
+const shareLogs = async () => {
+  const logIds = mylog.listFilter.map(log => log.id)
+  try {
+    await ElMessageBox.confirm(`确定要分享${logIds.length}条Log吗？`, '分享', {
+      confirmButtonText: '分享',
+      cancelButtonText: '取消',
+      type: 'info',
+    })
+  } catch {
+    return
+  }
+  getShare({ logIdsJson: JSON.stringify(logIds) }).then(link => {
+    // 要进行url转义
+    const url = `${webURL}/#/share?share=${encodeURIComponent(link)}`
+    writeClipboard(url).then(() => {
+      ElMessage({ message: '分享链接已经写入剪贴板', type: 'success' })
+    })
+  })
+}
 </script>
 
 <template>
@@ -74,9 +100,11 @@ const delFilter = () => {
         <ElRadioButton label="自定义" :value="-2" />
       </ElRadioGroup>
 
-      <ElButton v-if="curFilter >= 0" size="small" @click="delFilter"
+      <ElButton size="small" @click="shareLogs"> 分享 </ElButton>
+      <!-- 删除预设应当移动到设置页面 -->
+      <!-- <ElButton v-if="curFilter >= 0" size="small" @click="delFilter"
         >删除此预设</ElButton
-      >
+      > -->
     </div>
 
     <!-- {{ diyFilter }} -->
@@ -166,8 +194,8 @@ const delFilter = () => {
         <ElInput
           v-if="curFilter === -2"
           v-model="diyFilter.name"
-          style="max-width: 200px"
-          placeholder="输入名称添加到预设"
+          style="max-width: 160px"
+          placeholder="预设名称"
         >
           <template #append>
             <ElButton @click="addFilter">添加</ElButton>
@@ -204,7 +232,8 @@ const delFilter = () => {
     // 添加输入框
     .add-filter {
       position: absolute;
-      top: -32px;
+      // top: -32px;
+      bottom: var(--padding);
       right: var(--padding);
     }
   }

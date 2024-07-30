@@ -106,6 +106,7 @@ const tabNoteClose = (tag: Log) => {
       display: flex;
       flex-direction: column;
       gap: 2px;
+      align-items: flex-start;
     }
 
     :deep(.el-calendar) {

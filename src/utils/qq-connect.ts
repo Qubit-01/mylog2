@@ -1,6 +1,6 @@
 export const appId = '102099147'
 export const appKey = 'RnwueATZXHm23pNh'
-export const redirectURI = 'https://mylog.cool/#/login/qq-redirect'
+export const redirectURI = 'https://mylog.cool/#/login/qq-redirect?q=1' // 可以自己加参数
 
 /**
  * 用户身份的唯一标识。保存在服务器和用户绑定，以便用户下次登录时可对应到其之前的身份信息，不需要重新授权。
@@ -173,3 +173,25 @@ const QC = window.QC as QQConnect
 // }
 
 export default QC
+
+
+/**
+ * 有跨域限制
+ * @see https://wiki.connect.qq.com/unionid介绍
+ * @param params 
+ * @returns 
+ */
+// export const getMe = (params: {
+//   access_token: string
+//   unionid?: number
+//   fmt?: 'jsonpb' | 'json'
+// }): Promise<any> => {
+//   return request({
+//     url: 'https://graph.qq.com/oauth2.0/me',
+//     method: 'post',
+//     params: {
+//       fmt: 'json',
+//       ...params,
+//     },
+//   })
+// }

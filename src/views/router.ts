@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import MainView from '../views/MainView.vue'
 import LoginView from '../views/login/index.vue'
+import Cookies from 'js-cookie'
 // import HomeView from '../views/home/index.vue'
 
 declare module 'vue-router' {
@@ -26,11 +27,12 @@ const router = createRouter({
         {
           path: '',
           name: 'home', // 主页
-          component: () => import('../views/home/index.vue'),
+          component: () => import('./home/index.vue'),
         },
         {
           path: 'logger', // 我的主页（别人看的）
-          component: () => import('../views/logger/index.vue'),
+          component: () => import('./logger/index.vue'),
+          props: ({ query: { id } }) => ({ id }),
           meta: { title: '主页 - 多元记' },
           children: [
             {
@@ -38,6 +40,7 @@ const router = createRouter({
               name: 'logger', // 时间线
               component: () =>
                 import('../components/Pages/Logger/LoggerComp.vue'),
+              props: ({ query: { id } }) => ({ id }),
             },
             {
               path: 'setting',
@@ -49,7 +52,7 @@ const router = createRouter({
         },
         {
           path: 'mylog', // 我的记录（自己看的）
-          component: () => import('../views/mylog/index.vue'),
+          component: () => import('./mylog/index.vue'),
           meta: { title: '记录 - 多元记', requiresAuth: true },
           children: [
             {
@@ -74,20 +77,32 @@ const router = createRouter({
         {
           path: 'album',
           name: 'album', // 相册
-          component: () => import('../views/album/index.vue'),
+          component: () => import('./album/index.vue'),
           meta: { title: '相册 - 多元记', requiresAuth: true },
         },
         {
           path: 'map',
           name: 'map', // 地图
-          component: () => import('../views/map/index.vue'),
-          meta: { title: '地图 - 多元记' },
+          component: () => import('./map/index.vue'),
+          meta: { title: '地图 - 多元记', requiresAuth: true },
         },
         {
           path: 'relation',
           name: 'relation', // 人脉
-          component: () => import('../views/relation/index.vue'),
+          component: () => import('./relation/index.vue'),
           meta: { title: '人脉 - 多元记', requiresAuth: true },
+        },
+        {
+          path: 'share',
+          name: 'share', // 分享
+          component: () => import('./share/index.vue'),
+          meta: { title: '分享 - 多元记' },
+        },
+        {
+          path: '/test',
+          name: 'test',
+          component: () => import('./test/index.vue'),
+          meta: { title: '测试 - 多元记' },
         },
       ],
     },
@@ -118,7 +133,7 @@ const router = createRouter({
     {
       path: '/:pathMatch(.*)*',
       name: '404',
-      component: () => import('../views/404/index.vue'),
+      component: () => import('./404/index.vue'),
       meta: { title: '404 - 多元记' },
     },
   ],
@@ -128,7 +143,7 @@ router.beforeEach((to, from) => {
   document.title = to.meta.title || '多元记 - 把你写成书'
 
   // 这里是处理没有token的情况，token是否错误或过期这里不处理
-  if (to.meta.requiresAuth && !localStorage.getItem('token')) {
+  if (to.meta.requiresAuth && !Cookies.get('token')) {
     ElMessage({ message: '请先登录', type: 'warning' })
     return {
       name: 'login',

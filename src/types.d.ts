@@ -42,6 +42,11 @@ export interface User {
        */
       calendarTags: string[]
     }
+    map: {
+      diyPoints: {
+        lnglat: [number, number]
+      }[]
+    }
   }
   createtime?: Date
   openidQ?: string
@@ -56,7 +61,7 @@ export interface Log {
   id?: string
   userid: string
   username: string
-  type: 'public' | 'log' | 'tag'
+  type: 'public' | 'log' | 'tag' | 'todo'
   sendtime?: dayjs.Dayjs // 发送时间
   logtime: dayjs.Dayjs // 记录时间
   content: string
@@ -71,8 +76,31 @@ export interface Log {
     title?: string // log的标题
     link?: string // 爬虫数据的原始链接
     markdown?: boolean // 是否是MD类型
-    level?: number // 待办优先级（这个功能待定）
     source?: string // 爬虫数据的来源
+    todo?: {
+      complete: boolean // 是否完成
+      level: number // 优先级
+    }
+  }
+}
+
+/**
+ * 人脉的数据结构
+ */
+export interface Relation {
+  id: string
+  userid: string // 创建者
+  username: string
+  from: string // 前节点，这里用字符串转换判断是不是组节点
+  name: string // 人的名字
+  info: {
+    // 一级放入系统要用的数据，键的名字由开发者设置，_other里面的由用户定义
+    label?: string // 线条标签
+    img?: string // 头像
+    phone?: string // 手机号码
+    _other: {
+      [key in string]: any // 自定义项
+    }
   }
 }
 
@@ -117,6 +145,11 @@ export type LogFiles = {
 export type LogEdit = Partial<Log>
 
 /**
+ * 编辑中的log类型，只能填入log属性
+ */
+export type RelationEdit = Partial<Relation>
+
+/**
  * 普通文件，加入上传要用的key，
  * key为：文件名，上传时间-序号-文件名，
  * 避免上传到COS时，文件名重复覆盖
@@ -139,7 +172,6 @@ export interface LogImgFile extends KeyFile {
  * 就是有EXIF信息的El Raw文件
  */
 export interface ExifUploadRawFile extends UploadRawFile, ExifImgFile {}
-
 
 /**
  * 过滤器对象

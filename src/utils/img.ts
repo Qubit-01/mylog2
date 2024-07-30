@@ -10,7 +10,7 @@ import * as ExifReader from 'exifreader'
  * @param rate 压缩率，默认0.2
  * @returns
  */
-export function compressImg(file: File, rate = 0.3): Promise<File> {
+export function compressImg(file: File, rate = 0.2): Promise<File> {
   function dataURLtoFile(dataurl: string, fileName: string) {
     let arr = dataurl.split(','),
       mime = arr[0].match(/:(.*?);/)![1],

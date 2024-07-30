@@ -9,8 +9,10 @@ import {
   deleteLog,
   updateLog,
   getTags,
+  getTodos,
 } from '@/api/log'
 import useUserStore from './user'
+import { logFileItem } from './constant'
 
 const User = useUserStore()
 
@@ -59,7 +61,7 @@ export interface PageStore {
 }
 
 // mylog的类型
-interface MylogStore extends AllStore, PageStore {
+export interface MylogStore extends AllStore, PageStore {
   /**
    * 通过参数显示的数据
    */
@@ -106,21 +108,18 @@ export const useLogStore = defineStore('log', () => {
     },
   })
 
-  // 主页
-  const logger = reactive<PageStore>({
-    list: [],
-    params: { skip: 0, limit: 20 },
+  // todos，不分页直接获取全部
+  const todos = reactive<AllStore>({
+    listAll: [],
     loading: true,
-    noMore: false,
-    addLogs: async () => {
-      if (logger.noMore) return
-      logger.loading = true
-      const data = await getPublics({ userid: User.id, ...logger.params })
-      if (data.length < logger.params.limit) logger.noMore = true
+    getLogs: async () => {
+      console.log('🐤')
+      todos.loading = true
+      const data = await getTodos({})
       data.forEach(handleLog)
-      logger.list.push(...data)
-      logger.params.skip += logger.params.limit
-      logger.loading = false
+      console.log('🐤', data)
+      todos.listAll = data
+      todos.loading = false
     },
   })
 
@@ -155,10 +154,14 @@ export const useLogStore = defineStore('log', () => {
       mylog.filter = filter
       mylog.addLogs()
     },
-    params: { skip: 0, limit: 15 },
+    params: { skip: 0, limit: 10 },
     loading: true,
     noMore: false,
     addLogs: async () => {
+      if (mylog.params.skip > mylog.listFilter.length) {
+        mylog.noMore = true
+        return
+      }
       mylog.params.skip += mylog.params.limit
     },
     getLogs: async () => {
@@ -173,7 +176,7 @@ export const useLogStore = defineStore('log', () => {
 
   /**
    * 从all中获取真实的log对象
-   * @param id log的id
+   * @param log 取出id属性去比较
    * @return 返回log对象，没找到就undefined
    */
   const getLog = (log: LogEdit) => mylog.listAll.find(l => l.id === log.id)
@@ -185,6 +188,13 @@ export const useLogStore = defineStore('log', () => {
    * @param log log对象
    */
   const addLog = (log: Log) => {
+    // 如果是todo
+    if (log.type === 'todo') {
+      const i = todos.listAll.findIndex(l => l.logtime <= log.logtime)
+      if (i === -1) todos.listAll.push(log) // 没有找到，插入末尾
+      else todos.listAll.splice(i, 0, log) // 插入
+      return
+    }
     // 如果是tag
     if (log.type === 'tag') {
       const i = tags.listAll.findIndex(l => l.logtime <= log.logtime)
@@ -198,10 +208,6 @@ export const useLogStore = defineStore('log', () => {
       home.params.skip = 0
       home.loading = true
       home.noMore = false
-      logger.list = []
-      logger.params.skip = 0
-      logger.loading = true
-      logger.noMore = false
     }
     // 最后无论如何都要插入mylog的
     const i = mylog.listAll.findIndex(l => l.logtime <= log.logtime)
@@ -226,8 +232,6 @@ export const useLogStore = defineStore('log', () => {
     if (log.type === 'public') {
       i = home.list.findIndex(l => l.id === log.id)
       if (i !== -1) home.list.splice(i, 1)
-      i = logger.list.findIndex(l => l.id === log.id)
-      if (i !== -1) logger.list.splice(i, 1)
     }
     i = mylog.listAll.findIndex(l => l.id === log.id)
     return mylog.listAll.splice(i, 1)[0]
@@ -241,6 +245,7 @@ export const useLogStore = defineStore('log', () => {
    */
   const editLog = (logEdit: LogEdit) => {
     const log = logStore.getLog(logEdit)!
+    if (!log) return
     Object.assign(log, logEdit)
     // 如果修改的是logtime，就先删再加
     if (logEdit.logtime) addLog(delLog(log)!)
@@ -249,9 +254,9 @@ export const useLogStore = defineStore('log', () => {
 
   return {
     home, // 首页
-    logger, // 个人主页
     mylog, // 记录页
-    tags, // 日历页-
+    todos, // todo页
+    tags, // 日历页
     getLog,
     addLog,
     delLog,
@@ -262,32 +267,6 @@ export const useLogStore = defineStore('log', () => {
 export default useLogStore
 
 const logStore = useLogStore()
-
-// 这里files必须放在最后，遍历时兜底
-export const logFileItem: LogFileItem[] = ['imgs', 'videos', 'audios', 'files']
-
-// 创造一个indexOf永远返回0的数组
-const anyArray: string[] = []
-anyArray.indexOf = () => 0
-/**
- * 可以上传的文件类型
- */
-export const fileType: { [K in LogFileItem]: string[] } = {
-  imgs: ['image/png', 'image/gif', 'image/jpeg', 'image/jpg'],
-  videos: ['video/mp4', 'video/quicktime'],
-  audios: ['audios/mp3'], // 这里随便写的
-  files: anyArray,
-}
-
-/**
- * 文件的大小限制
- */
-export const fileSize: { [K in LogFileItem]: number } = {
-  imgs: 10 * 1024 * 1024, // 图片大小限制，字节
-  videos: 500 * 1024 * 1024, // 大小限制，字节
-  audios: 100 * 1024 * 1024,
-  files: 2000 * 1024 * 1024,
-}
 
 /**
  * 处理单个Log，直接操作参数
@@ -322,7 +301,7 @@ export const logInit: LogEdit = {
  * @param log log对象，部分
  * @param file 要上传的文件
  */
-export const rlsLog = (
+export const rlsLog = async (
   logEdit: LogEdit,
   params: COS.UploadFilesParams = { files: [] }
 ): Promise<Log | undefined> => {
@@ -344,16 +323,14 @@ export const rlsLog = (
     logEdit
   ) as Log
 
-  return myUploadFiles(params).then(data => {
-    return releaseLog({ logJson: JSON.stringify(log) }).then(id => {
-      if (id !== '0') {
-        log.id = id
-        logStore.addLog(log)
-        ElMessage({ message: '发布成功：' + log.id, type: 'success' })
-        return log
-      }
-    })
-  })
+  const data = await myUploadFiles(params)
+  const id = await releaseLog({ logJson: JSON.stringify(log) })
+  if (id !== '0') {
+    log.id = id
+    logStore.addLog(log)
+    ElMessage({ message: '发布成功：' + log.id, type: 'success' })
+    return log
+  }
 }
 
 /**
@@ -363,7 +340,7 @@ export const rlsLog = (
  * @param params 可以不传，文件上传参数，{files[]文件列表，SliceSize? 触发分块的大小，onProgress? 进度条方法}
  * @returns 受影响log的条数
  */
-export const editLog = (
+export const editLog = async (
   logEdit: LogEdit & { id: string },
   params: COS.UploadFilesParams = { files: [] }
 ): Promise<number> => {
@@ -376,7 +353,7 @@ export const editLog = (
   const delObjs: { Key: string }[] = []
   logFileItem.forEach(type => {
     if (logEdit[type]) {
-      logOld[type]
+      ;(logOld[type] as string[])
         .filter(i => !logEdit[type]?.includes(i)) // 找old里面没有的
         .forEach(i => {
           const Key = `${cosPath()}${type}/${i}`
@@ -393,17 +370,16 @@ export const editLog = (
   console.log(logEdit, params, delObjs)
   // return Promise.resolve(1)
 
-  return Promise.all([myDeleteFiles(delObjs), myUploadFiles(params)]).then(
-    data => {
-      return updateLog({ logJson: JSON.stringify(logEdit) }).then(count => {
-        if (count === 1) {
-          ElMessage({ message: '编辑成功', type: 'success' })
-          logStore.editLog(logEdit)
-        }
-        return count
-      })
-    }
-  )
+  const data = await Promise.all([
+    myDeleteFiles(delObjs),
+    myUploadFiles(params),
+  ])
+  const count = await updateLog({ logJson: JSON.stringify(logEdit) })
+  if (count === 1) {
+    ElMessage({ message: '编辑成功', type: 'success' })
+    logStore.editLog(logEdit)
+  }
+  return count
 }
 
 /**

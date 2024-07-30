@@ -10,6 +10,7 @@ import Viewer from 'viewerjs'
 import 'viewerjs/dist/viewer.css'
 import { toFileUrl } from '@/utils/cos'
 import type { Log } from '@/types'
+import { vImgSrc } from '@/utils/directives'
 
 // 从父组件拿到log，主要是获取userId
 const log: Log = inject('log')!
@@ -85,13 +86,7 @@ defineExpose({ vErrorRetry })
   <div class="viewer-imgs" ref="viewerDom" @click.stop>
     <template v-for="img in imgUrls" :key="img">
       <!-- QQ图片要单独去除 referrer -->
-      <img
-        v-if="img.indexOf('photo.store.qq.com') === 15"
-        referrerPolicy="no-referrer"
-        :src="img"
-        alt="qqimg"
-      />
-      <img v-else :src="img" :alt="img.split('/').at(-1)" v-error-retry />
+      <img v-img-src="img" v-error-retry />
     </template>
   </div>
 

@@ -1,6 +1,7 @@
 import { getUser as getUserApi } from '@/api/user'
 import type { User } from '@/types'
-import useUserStore from './user'
+import useUserStore, { setToken } from './user'
+import Cookies from 'js-cookie'
 
 /**
  * # 获取用户接口全局只调用一次，所以用Promise
@@ -14,14 +15,14 @@ import useUserStore from './user'
  * 保证进入页面后，要么没有token，要么是正确的token
  */
 export const getUser: Promise<User> = new Promise((resolve, reject) => {
-  const token = localStorage.getItem('token')
+  const token = Cookies.get('token')
   if (token)
-    getUserApi({ token: token }).then(res => {
+    getUserApi({ token }).then(res => {
       if (res) resolve(res) // 2.1 正常token
       else {
         // 2.2 错误token，回归到没有token
         ElMessage.error('用户登录信息已过期或错误，请重新登录')
-        localStorage.removeItem('token')
+        Cookies.remove('token', { domain: 'mylog.cool' })
         location.reload()
       }
     })
@@ -41,6 +42,7 @@ export const getUser: Promise<User> = new Promise((resolve, reject) => {
  * Global 全局数据的类型
  */
 interface Global {
+  /** 用户Token */
   token: string
   /**
    * # 是否是暗黑模式（计算属性）
@@ -48,19 +50,27 @@ interface Global {
    * 改变 html class属性
    */
   isDark: boolean
+  /**
+   * 目录数据
+   */
+  content: {
+    list: ContentList
+  }
 }
+
+/** 目录的数据类型 */
+type ContentList = {
+  /** 显示文字 */
+  label: string
+  /** 对应锚点，其实就是dom的id */
+  anchor: string
+  /** 文字样式 */
+  type: number
+}[]
 
 export const useGlobalStore: () => Global = defineStore('global', () => {
   const user = useUserStore()
-  // const token = ref(localStorage.getItem('token') || '')
-  /**
-   * 通过设置 token 的 get 和 set 方法，实现 token 的存储和删除
-   */
-  const token = computed({
-    get: () => localStorage.getItem('token') || '',
-    set: v =>
-      v ? localStorage.setItem('token', v) : localStorage.removeItem('token'),
-  })
+  const token = computed(() => Cookies.get('token') || '')
 
   // 主题相关 ===============================
 
@@ -77,9 +87,31 @@ export const useGlobalStore: () => Global = defineStore('global', () => {
     html.className = user.setting.page.theme!
   })
 
+  // 目录模块
+  const content = reactive<Global['content']>({
+    list: [
+      {
+        label: '简介',
+        anchor: '简介',
+        type: 1,
+      },
+      {
+        label: '目录',
+        anchor: '目录',
+        type: 2,
+      },
+      {
+        label: '更新日志',
+        anchor: '更新日志',
+        type: 3,
+      },
+    ],
+  })
+
   return {
     token,
     isDark,
+    content,
   }
 })
 

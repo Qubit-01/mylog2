@@ -6,6 +6,7 @@
  */
 
 :root {
+  font-size: 16px;
   /* 无关主题，通用样式========================= */
   /* 各个模块间的间距 */
   --gap: 20px;
@@ -26,7 +27,7 @@
   /* 滚动条粗细 */
   --scrollbar-weight: 6px;
 
-  @media (max-width: 1024px) {
+  @media (max-width: 1424px) {
     /* 页面宽度在小挡位时的宽度 */
     --center-width: 95%;
   }
@@ -39,7 +40,7 @@
   /* light下的样式========================= */
 
   --body-background-color: #ccc;
-  --body-background-image: url(https://cos.mylog.cool/web-files/bg-light.jpg);
+  --body-background-image: url(../img/bg-light.jpg);
 
   /* 二级字体颜色 */
   --color-2: #111a;
@@ -56,13 +57,20 @@
   /* 滚动滑块颜色 */
   --scrollbar-thumb-background: #999a;
 
+  /* 明暗主题通用element样式 */
+  .el-link {
+    --el-font-size-base: unset;
+  }
+
   /* 修改element一些的样式 */
-  --el-fill-color-blank: #fff5;
+  --el-fill-color-blank: #fff5; // 大部分组件背景色
+  --el-mask-color: rgba(255, 255, 255, 0.5); // 加载遮罩层颜色
+  --el-text-color-regular: var(--color-2); // 主要文字颜色
 }
 
 html.dark {
   --body-background-color: #333;
-  --body-background-image: url(https://cos.mylog.cool/web-files/bg-dark.jpg);
+  --body-background-image: url(../img/bg-dark.jpg);
 
   /* 二级字体颜色 */
   --color-2: #eeea;
@@ -80,6 +88,7 @@ html.dark {
 
   /* 修改element一些的样式 */
   --el-fill-color-blank: #6667;
+  --el-mask-color: rgba(0, 0, 0, 0.5);
 }
 
 /* 中间模块通用 */

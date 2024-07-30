@@ -2,6 +2,8 @@ import { updateSetting } from '@/api/user'
 import type { User } from '@/types'
 import { getUser } from './global'
 import { cloneDeep } from 'lodash'
+import QC from '@/utils/qq-connect'
+import Cookies from 'js-cookie'
 
 /**
  * 哪些信息需要存入本地？
@@ -39,6 +41,22 @@ export const useUserStore = defineStore('user', () => {
         filterIndex: -1,
         calendarTags: [],
       },
+      map: {
+        diyPoints: [
+          // {
+          //   lnglat: [103.00042, 29.983349],
+          // },
+          // {
+          //   lnglat: [103.00042, 29.984349],
+          // },
+          // {
+          //   lnglat: [103.00042, 29.982349],
+          // },
+          // {
+          //   lnglat: [103.00042, 29.981349],
+          // },
+        ],
+      },
     },
     createtime: undefined,
     openidQ: undefined,
@@ -62,6 +80,7 @@ export const useUserStore = defineStore('user', () => {
       Object.assign(user, userdata)
       Object.assign(user.setting.page, setting.page)
       Object.assign(user.setting.mylog, setting.mylog)
+      Object.assign(user.setting.map, setting.map)
       isLogined.value = true
       // 获取到远端用户setting在注册监视，同步双端
       watch(user.setting, () => {
@@ -90,13 +109,49 @@ export const useUserStore = defineStore('user', () => {
 export default useUserStore
 
 /**
+ * 设置用户token到cookie
+ * @param token 用户token
+ */
+export const setToken = (token: string) => {
+  Cookies.set('token', token, {
+    expires: 60,
+    path: '/',
+    domain: 'mylog.cool',
+    secure: true, // 仅https
+    sameSite: 'strict', // 防止CSRF攻击和用户追踪
+  })
+}
+
+/**
+ * 登录后跳转，一般在获取到token后使用
+ * @param token 用户token
+ * @param to 跳转的位置，默认/
+ */
+export const loginByToken = (token: string, to: string = '/') => {
+  setToken(token)
+  if (to !== '') location.href = '/#' + to
+  location.reload()
+}
+
+/**
  * 退出登录方法
  * 退出登录，删除 token、pageSetting
  * @param to 跳转的页面， 不传跳主页，传空串刷新当前页，传路径跳指定
  */
 export const logout = (to: string = '/') => {
-  localStorage.removeItem('token')
+  Cookies.remove('token', { domain: 'mylog.cool' })
   localStorage.removeItem('pageSetting')
-  if (to !== '') location.href = to
+  QC.Login.signOut()
+  if (to !== '') location.href = '/#' + to
   location.reload()
+}
+
+/**
+ * 登录测试账号
+ */
+export const loginTest = () => {
+  console.log('登录测试账号')
+  loginByToken(
+    'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJVc2VyVG9rZW4iLCJpZCI6NDEsIm5hbWUiOiLmtYvor5XotKblj7ciLCJpYXQiOjE3MTM0NDMwOTksImV4cCI6MTcxODYyNzA5OX0.xufWbFxh9VY2LS9Tx8e3iYGG348wlPDBn9ynAj6tc9E'
+  )
 }

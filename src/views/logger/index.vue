@@ -1,47 +1,93 @@
 <script setup lang="ts">
+import type { User } from '@/types'
+import { getUser } from '@/api/user'
 import { BucketCDN } from '@/stores/constant'
-import useUserStore from '@/stores/user'
+import useUserStore, { logout } from '@/stores/user'
 import { ArrowDownBold, ArrowUpBold } from '@element-plus/icons-vue'
+import { getCityByIp, getCityInfoByGeo } from '@/utils/map'
+import { vImgSrc } from '@/utils/directives'
 
-const User = useUserStore()
+const user = ref<User>()
 
 const router = useRouter()
 const route = useRoute()
+
+// 有id说明是带id查询（访客页面），没id就是自己（有设置）
+const props = defineProps<{ id?: string }>()
+watch(
+  () => props.id,
+  () => {
+    if (props.id)
+      getUser({ id: props.id }).then(resUser => (user.value = resUser))
+    else user.value = useUserStore()
+  },
+  { immediate: true }
+)
 
 // 展开和收起
 const isExpand = ref(false)
 
 const tab = computed<string>({
   get: () => route.name as string,
-  set: v => router.push({ name: v }),
+  set: v => router.replace({ name: v }),
 })
+
+const location = ref<string>('')
+getCityInfoByGeo()
+  .then(res => {
+    console.log('🐤', res)
+    // location.value = res.city
+  })
+  .catch(e => {
+    console.log(e)
+  })
+
+getCityByIp()
+  .then(res => {
+    console.log('🐤1', res)
+    location.value = res.city
+  })
+  .catch(e => {
+    console.log(e)
+  })
 </script>
 
 <template>
   <div class="logger-page">
-    <div class="logger-model" v-m>
+    <div v-if="user" class="logger-model" v-m>
       <div class="carousel">
         <img :src="BucketCDN + 'web-files/carousel-0.jpg'" />
+        <div class="logout" @click="logout()">退出登录</div>
+        <div v-if="location" class="location">
+          <ElIcon><Location /></ElIcon>{{ location }}
+        </div>
       </div>
       <div class="logger-info">
-        <div class="img"><img :src="User.img" /></div>
+        <div class="img">
+          <img
+            v-img-src="
+              user.img ||
+              'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+            "
+          />
+        </div>
         <div class="text">
           <div class="name">
-            {{ User.name }}
+            {{ user.name }}
             <span class="info">
-              <span>{{ User.id }}</span>
-              <span>{{ User.info.sex }}</span>
-              <span>{{ User.info.birth }}</span>
+              <span>{{ user.id }}</span>
+              <span>{{ user.info.sex }}</span>
+              <span>{{ user.info.birth }}</span>
             </span>
           </div>
           <div class="info">
-            <div>{{ User.info.text }}</div>
+            <div>{{ user.info.text }}</div>
           </div>
           <div v-if="isExpand" class="more">
-            <div>info: {{ User.info }}</div>
-            <div>setting.mylog: {{ User.setting.mylog }}</div>
-            <div>setting.page: {{ User.setting.page }}</div>
-            <div>setting: {{ Object.keys(User.setting) }}</div>
+            <div>info: {{ user.info }}</div>
+            <div>setting.mylog: {{ user.setting.mylog }}</div>
+            <div>setting.page: {{ user.setting.page }}</div>
+            <div>setting: {{ Object.keys(user.setting) }}</div>
           </div>
         </div>
         <ElButton
@@ -54,7 +100,7 @@ const tab = computed<string>({
       </div>
     </div>
 
-    <ElRadioGroup v-model="tab" size="large">
+    <ElRadioGroup v-if="!id" v-model="tab" size="large">
       <!-- size="large" -->
       <ElRadioButton label="多元记" value="logger" />
       <ElRadioButton label="设置" value="setting" />
@@ -77,10 +123,37 @@ const tab = computed<string>({
     // 背景图片
     .carousel {
       height: 270px;
+      position: relative;
       img {
         height: 100%;
         width: 100%;
         object-fit: cover;
+      }
+      .logout {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+
+        border-radius: var(--border-radius);
+        padding: 8px 12px;
+        background-color: var(--m-background-color);
+        backdrop-filter: blur(16px);
+
+        cursor: pointer;
+      }
+
+      .location {
+        position: absolute;
+        bottom: 12px;
+        left: 12px;
+
+        display: flex;
+        align-items: center;
+
+        border-radius: var(--border-radius);
+        padding: 6px 10px;
+        background-color: var(--m-background-color);
+        backdrop-filter: blur(8px);
       }
     }
 

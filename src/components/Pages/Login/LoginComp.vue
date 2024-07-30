@@ -2,7 +2,8 @@
 import type { User } from '@/types'
 import { login } from '@/api/user'
 import useGlobalStore from '@/stores/global'
-import { appId, redirectURI } from '@/utils/QQConnect'
+import { appId, redirectURI } from '@/utils/qq-connect'
+import { loginByToken, loginTest } from '@/stores/user'
 
 const Global = useGlobalStore()
 const route = useRoute()
@@ -17,10 +18,7 @@ const doLogin = async () => {
   user = await login(loginData)
   if (user) {
     ElMessage.success(`欢迎你，${user.name} ！`)
-    Global.token = user.token!
-    // 跳转并刷新
-    location.replace('/#' + (route.query.redirect || ''))
-    location.reload()
+    loginByToken(user.token!, route.query.redirect as string)
   } else {
     ElMessage.error('用户名或密码错误')
   }
@@ -59,7 +57,10 @@ const qqLogin = () => {
         <ElButton @click="doLogin" size="large">登录</ElButton>
         <div class="toSignin">
           没有账号？
-          <RouterLink to="/login/signin" replace>去注册</RouterLink>
+          <ElLink type="primary" @click="$router.replace('/login/signin')">
+            去注册 </ElLink
+          >&nbsp;
+          <ElLink @click="loginTest">登录测试账号</ElLink>
         </div>
       </form>
 
@@ -70,14 +71,18 @@ const qqLogin = () => {
           <div></div>
         </div>
         <div class="icons">
-          <img
-            src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/wechat.png"
-            alt="微信登录"
-          />
-          <img
-            src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/weibo.png"
-            alt="微博登录"
-          />
+          <ElTooltip content="暂未开通">
+            <img
+              src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/wechat.png"
+              alt="微信登录"
+            />
+          </ElTooltip>
+          <ElTooltip content="暂未开通">
+            <img
+              src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/weibo.png"
+              alt="微博登录"
+            />
+          </ElTooltip>
           <img
             @click="qqLogin"
             src="https://s1.hdslb.com/bfs/static/jinkela/passport-pc/assets/qq.png"
@@ -134,7 +139,8 @@ const qqLogin = () => {
     }
 
     .toSignin {
-      text-align: right;
+      display: flex;
+      justify-content: flex-end;
     }
   }
 

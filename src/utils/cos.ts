@@ -18,8 +18,8 @@ const User = useUserStore()
 const getCredential = (data?: { token?: string }): Promise<any> => {
   return request({
     url: 'cos/get_credential',
-    method: 'post',
-    data: { token: Global.token, ...data },
+    method: 'get',
+    params: { token: Global.token, ...data },
   })
 }
 

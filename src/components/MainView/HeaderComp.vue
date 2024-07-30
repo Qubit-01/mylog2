@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import { vOverflowEllipsis } from '@/utils/directives'
 import { BucketCDN } from '@/stores/constant'
 import useUserStore from '@/stores/user'
 const User = useUserStore()
 const router = useRouter()
+
+// 判断是否在dev环境
+const dev: boolean = import.meta.env.DEV
 </script>
 
 <template>
@@ -11,22 +15,25 @@ const router = useRouter()
       <div class="center">
         <div class="left">
           <div class="logo" @click="router.push('/')">
-            <img :src="BucketCDN + 'web-files/favicon.svg'" />
+            <img src="@/assets/img/favicon.svg" />
             多元记
+            <div class="env" v-if="dev">DEV</div>
           </div>
         </div>
-        <nav>
-          <!-- 我的主页（别人看见的） -->
-          <RouterLink to="/logger" v-overflowEllipsis>主页</RouterLink>
+        <nav> 
           <!-- 我的记录（自己看见的） -->
-          <RouterLink to="/mylog" v-overflowEllipsis>记录</RouterLink>
-          <RouterLink to="/album" v-overflowEllipsis>相册</RouterLink>
-          <RouterLink to="/map" v-overflowEllipsis>地图</RouterLink>
-          <RouterLink to="/relation" v-overflowEllipsis>人脉</RouterLink>
+          <RouterLink to="/mylog" v-overflow-ellipsis>记录</RouterLink>
+          <RouterLink to="/album" v-overflow-ellipsis>相册</RouterLink>
+          <RouterLink to="/map" v-overflow-ellipsis>地图</RouterLink>
+          <RouterLink to="/relation" v-overflow-ellipsis>人脉</RouterLink>
         </nav>
         <div class="right">
-          <div v-if="User.isLogined" class="user">{{ User.name }}</div>
-          <RouterLink v-else to="/login">去登录</RouterLink>
+          <RouterLink v-if="User.isLogined" class="user" to="/logger">
+            {{ User.name }}
+          </RouterLink>
+          <ElLink v-else type="primary" @click="$router.push('login')">
+            去登录
+          </ElLink>
           <ThemeSwitch />
         </div>
       </div>
@@ -81,7 +88,7 @@ const router = useRouter()
       > .left {
         .logo {
           position: relative;
-          font-size: 1.5rem;
+          font-size: 22px;
           width: var(--lan-width);
           height: var(--header-height);
           padding-left: 20px;
@@ -89,6 +96,8 @@ const router = useRouter()
 
           display: flex;
           justify-content: center;
+
+          cursor: pointer;
 
           &:hover {
             background: #aaa5;
@@ -100,6 +109,18 @@ const router = useRouter()
             left: 80px;
             top: 25px;
             opacity: 0.7;
+          }
+
+          .env {
+            position: absolute;
+            top: 6px;
+            left: 12px;
+            line-height: 14px;
+            height: 16px;
+            font-size: 10px;
+            padding: 0 6px;
+            border-radius: 10px;
+            background: #f55a;
           }
         }
       }
@@ -114,6 +135,17 @@ const router = useRouter()
           --el-switch-on-color: #2c2c2c;
           --el-switch-off-color: #f2f2f255;
           --color: #333;
+        }
+
+        > .user {
+          text-decoration: none;
+          color: inherit;
+          padding-left: 20px;
+          padding-right: 20px;
+
+          &:hover {
+            background: #ccc5;
+          }
         }
       }
 

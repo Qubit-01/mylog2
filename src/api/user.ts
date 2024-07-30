@@ -1,5 +1,6 @@
 import type { User } from '@/types'
 import request from '@/utils/request'
+import Cookie from 'js-cookie'
 
 /**
  * 通过用户名密码获取带token的用户信息
@@ -29,12 +30,12 @@ export const login = (
  * @augments data { name: string, pswd: string }
  */
 export const getUser = (
-  data: { token: string } | { openidQ: string }
+  params: { token: string } | { openidQ: string } | { id: string }
 ): Promise<User> => {
   return request({
     url: 'user/get_user',
-    method: 'post',
-    data,
+    method: 'get',
+    params,
   })
 }
 
@@ -45,11 +46,11 @@ export const getUser = (
  * @augments data { name: string }
  */
 export const haveUser = (
-  data: { name: string } | { openIdQ: string }
+  data: { name: string } | { openidQ: string }
 ): Promise<number> => {
   return request({
     url: 'user/have_user',
-    method: 'post',
+    method: 'get',
     params: data,
   })
 }
@@ -85,6 +86,23 @@ export const updateSetting = (data: {
   return request({
     url: 'user/update_setting',
     method: 'post',
-    data: { token: localStorage.getItem('token'), ...data },
+    data: { token: Cookie.get('token'), ...data },
+  })
+}
+
+/**
+ * 更新用户openidQ user/update_user
+ *
+ * @augments userJson userEdit
+ * @return 受影响的条数
+ */
+export const updateUser = (data: {
+  token?: string
+  userJson: string
+}): Promise<number> => {
+  return request({
+    url: 'user/update_user',
+    method: 'post',
+    data: { token: Cookie.get('token'), ...data },
   })
 }
