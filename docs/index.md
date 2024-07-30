@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: 什么是多元记？
-      link: /markdown-examples
+      link: /什么是多元记
     - theme: alt
       text: 快速开始
       link: /api-examples
