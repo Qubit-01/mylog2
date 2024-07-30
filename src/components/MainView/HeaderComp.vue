@@ -4,6 +4,9 @@ import { BucketCDN } from '@/stores/constant'
 import useUserStore from '@/stores/user'
 const User = useUserStore()
 const router = useRouter()
+
+// 判断是否在dev环境
+const dev: boolean = import.meta.env.DEV
 </script>
 
 <template>
@@ -14,6 +17,7 @@ const router = useRouter()
           <div class="logo" @click="router.push('/')">
             <img src="@/assets/img/favicon.svg" />
             多元记
+            <div class="env" v-if="dev">DEV</div>
           </div>
         </div>
         <nav> 
@@ -105,6 +109,18 @@ const router = useRouter()
             left: 80px;
             top: 25px;
             opacity: 0.7;
+          }
+
+          .env {
+            position: absolute;
+            top: 6px;
+            left: 12px;
+            line-height: 14px;
+            height: 16px;
+            font-size: 10px;
+            padding: 0 6px;
+            border-radius: 10px;
+            background: #f55a;
           }
         }
       }
