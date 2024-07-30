@@ -39,3 +39,7 @@ cert
 
 # VsCount 的记录
 .VSCodeCounter
+
+# vitePress
+docs/.vitepress/cache
+docs/.vitepress/dist
