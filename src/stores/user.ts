@@ -152,6 +152,6 @@ export const logout = (to: string = '/') => {
 export const loginTest = () => {
   console.log('登录测试账号')
   loginByToken(
-    'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJVc2VyVG9rZW4iLCJpZCI6NDEsIm5hbWUiOiLmtYvor5XotKblj7ciLCJpYXQiOjE3MTM0NDMwOTksImV4cCI6MTcxODYyNzA5OX0.xufWbFxh9VY2LS9Tx8e3iYGG348wlPDBn9ynAj6tc9E'
+    'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJVc2VyVG9rZW4iLCJpZCI6NDEsIm5hbWUiOiLmtYvor5XotKblj7ciLCJpYXQiOjE3MjI0MjEwMDEsImV4cCI6MTcyNzYwNTAwMX0.NAaX9VNir9ngOL_ZZ2-xJnpnUiU_harklUhgemECRPY'
   )
 }
