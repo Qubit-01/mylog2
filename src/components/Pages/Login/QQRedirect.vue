@@ -15,7 +15,7 @@
  -->
 <script setup lang="ts">
 import QC from '@/utils/qq-connect'
-import { haveUser, login, signin, updateUser } from '@/api/user'
+import { bindPlatform, haveUser, login, signin, updateUser } from '@/api/user'
 import { ArrowLeftBold } from '@element-plus/icons-vue'
 import { baseURL } from '@/stores/constant'
 import { loginByToken } from '@/stores/user';
@@ -28,33 +28,45 @@ const pswd2 = ref('')
 const qqImg = ref(true)
 const user = reactive<{
   data: any
-  openidQ: string
-  accessToken: string
+  unionidQq: string
 }>({
   data: {},
-  openidQ: '',
-  accessToken: '',
+  unionidQq: '',
 })
+
+const accessToken = ref('')
 
 const captchaDom = ref<HTMLImageElement>()
 
+// @ts-ignore
+window.callback = async (res: any) => {
+  console.log('🐔jsonp', res.unionid);
+  // const unionidQq = await getUnionidQq({accessToken})
+  // console.log('🐔', unionidQq);
+
+  user.unionidQq = res.unionid
+  // 先看数据库有没有这个openId
+  const count = await haveUser({ unionidQq: user.unionidQq })
+  if (count === 0) state.value = 1
+  else {
+    console.log('🐤找到账号直接登录')
+    login({ unionidQq: user.unionidQq }).then(user => {
+      loginByToken(user.token!)
+    })
+  }
+}
+
 if (QC.Login.check()) {
   QC.api('get_user_info').success((res: any) => {
+    // 这里面只有用户信息，头像那些
     user.data = res.data
   })
   // 如果是登录状态
-  QC.Login.getMe(async (openidQ, accessToken) => {
-    user.openidQ = openidQ
-    user.accessToken = accessToken
-    // 先看数据库有没有这个openId
-    const count = await haveUser({ openidQ })
-    if (count === 0) state.value = 1
-    else {
-      console.log('🐤找到账号直接登录')
-      login({ openidQ }).then(user => {
-        loginByToken(user.token!)
-      })
-    }
+  QC.Login.getMe(async (unionId, accessToken) => {
+    const script = document.createElement('script');
+    script.src = `https://graph.qq.com/oauth2.0/me?access_token=${accessToken}&unionid=1`
+    document.head.appendChild(script);
+    // 这里用了jsonp，看上面的callback
   })
 } else {
   // 用户没有QQ登录直接进入此页面
@@ -62,32 +74,27 @@ if (QC.Login.check()) {
 }
 
 // 1.绑定已有账号
-const bd = () => {
+const bd = async () => {
   // 先登录获取token，再token和openid一起绑定
-  login({
+  const resUser = await login({
     name: loginData.name,
     pswd: loginData.pswd,
-  }).then(resUser => {
-    if (resUser.token) {
-      console.log('🐤', user.data)
-      const userJson: any = { openidQ: user.openidQ }
-      if (qqImg.value) userJson.img = user.data.figureurl_qq
-
-      updateUser({
+  })
+  if (resUser.token) {
+    // 先绑定平台，再更新头像
+    await bindPlatform({ token: resUser.token, platform: 'qq', unionid: user.unionidQq })
+    if (qqImg.value) {
+      const userJson = { img: user.data.figureurl_qq }
+      await updateUser({
         token: resUser.token,
         userJson: JSON.stringify(userJson),
-      }).then(count => {
-        if (count === 1) {
-          ElMessage({ message: '绑定成功', type: 'success' })
-          loginByToken(resUser.token!)
-        } else {
-          return ElMessage({ message: '绑定失败', type: 'error' })
-        }
       })
-    } else {
-      return ElMessage.error('用户名或密码不正确')
     }
-  })
+    ElMessage({ message: '绑定成功', type: 'success' })
+    loginByToken(resUser.token!)
+  } else {
+    return ElMessage.error('用户名或密码不正确')
+  }
 }
 
 // 2.用户选择注册新用户
@@ -111,33 +118,16 @@ const zc = async () => {
   if (userid === -1) return ElMessage.error('验证码错误')
 
   // 先登录获取token，再token和openid一起绑定
-  login({
-    name: loginData.name,
-    pswd: loginData.pswd,
-  }).then(resUser => {
-    // const token = resUser.token
-    console.log('🐤绑定')
-    if (resUser.token) {
-      const userJson: any = {
-        img: user.data.figureurl_qq, // 头像
-        openidQ: user.openidQ,
-      }
-      updateUser({
-        token: resUser.token,
-        userJson: JSON.stringify(userJson),
-      }).then(count => {
-        if (count === 1) {
-          ElMessage({ message: '绑定成功', type: 'success' })
-          loginByToken(resUser.token!)
-        } else {
-          ElMessage({ message: '绑定失败', type: 'error' })
-        }
-      })
-    } else {
-      ElMessage.error('用户名或密码不正确')
-      return false
-    }
-  })
+  const resUser = await login({ name: loginData.name, pswd: loginData.pswd })
+  if (resUser.token) {
+    // 先绑定平台，再更新头像
+    await bindPlatform({ token: resUser.token, platform: 'qq', unionid: user.unionidQq })
+
+    const userJson = { img: user.data.figureurl_qq }
+    await updateUser({ token: resUser.token, userJson: JSON.stringify(userJson) })
+    ElMessage({ message: '绑定成功', type: 'success' })
+    loginByToken(resUser.token!)
+  }
 }
 
 //刷新验证码
@@ -151,13 +141,7 @@ const changeImg = () => {
     <!-- {{ user }} -->
     <div class="title">
       <div class="left">
-        <ElButton
-          v-if="state > 1"
-          :icon="ArrowLeftBold"
-          @click="state = 1"
-          text
-          circle
-        />QQ登录
+        <ElButton v-if="state > 1" :icon="ArrowLeftBold" @click="state = 1" text circle />QQ登录
       </div>
 
       <div class="right">
@@ -166,11 +150,7 @@ const changeImg = () => {
       </div>
     </div>
 
-    <div
-      class="qq-redirect"
-      v-loading="state === 0"
-      element-loading-background="transparent"
-    >
+    <div class="qq-redirect" v-loading="state === 0" element-loading-background="transparent">
       <form v-if="state === 1">
         <div class="title2">没有找到对应的用户</div>
         <div>以前有注册过本网站吗？有的话直接给您绑定</div>
@@ -181,67 +161,24 @@ const changeImg = () => {
       <!-- 绑定已有 -->
       <form v-if="state == 2">
         <div class="title2">绑定已有账号</div>
-        <input
-          type="text"
-          class="username"
-          v-model="loginData.name"
-          autocomplete="off"
-          placeholder="用户名"
-        />
-        <input
-          type="password"
-          class="password"
-          v-model="loginData.pswd"
-          autocomplete="off"
-          placeholder="密码"
-        />
+        <input type="text" class="username" v-model="loginData.name" autocomplete="off" placeholder="用户名" />
+        <input type="password" class="password" v-model="loginData.pswd" autocomplete="off" placeholder="密码" />
         <ElSwitch v-model="qqImg" active-text="使用QQ头像" />
-        <ElButton
-          @click="bd"
-          size="large"
-          :disabled="!loginData.name.trim() || !loginData.pswd.trim()"
-          >绑定并登录</ElButton
-        >
+        <ElButton @click="bd" size="large" :disabled="!loginData.name.trim() || !loginData.pswd.trim()">绑定并登录</ElButton>
       </form>
 
       <!-- 注册新用户 -->
       <form v-if="state == 3">
         <div class="title2">注册新用户</div>
-        <input
-          type="text"
-          v-model="loginData.name"
-          autocomplete="off"
-          placeholder="用户名"
-        />
-        <input
-          type="password"
-          v-model="loginData.pswd"
-          autocomplete="off"
-          placeholder="密码"
-        />
-        <input
-          type="password"
-          v-model="pswd2"
-          autocomplete="off"
-          placeholder="确认密码"
-        />
+        <input type="text" v-model="loginData.name" autocomplete="off" placeholder="用户名" />
+        <input type="password" v-model="loginData.pswd" autocomplete="off" placeholder="密码" />
+        <input type="password" v-model="pswd2" autocomplete="off" placeholder="确认密码" />
         <div class="captcha">
-          <input
-            v-model="loginData.captcha"
-            placeholder="验证码"
-            type="text"
-            autocomplete="off"
-          />
+          <input v-model="loginData.captcha" placeholder="验证码" type="text" autocomplete="off" />
           <img ref="captchaDom" alt="验证码看不清，换一张" @click="changeImg" />
         </div>
-        <ElButton
-          class="btn"
-          @click="zc"
-          size="large"
-          :disable="
-            !loginData.name.trim() || !loginData.pswd.trim() || !pswd2.trim()
-          "
-        >
+        <ElButton class="btn" @click="zc" size="large" :disable="!loginData.name.trim() || !loginData.pswd.trim() || !pswd2.trim()
+          ">
           注册并登录
         </ElButton>
       </form>
@@ -270,6 +207,7 @@ const changeImg = () => {
     align-items: center;
     font-size: 1rem;
     gap: 8px;
+
     img {
       width: 2rem;
       height: 2rem;
@@ -289,7 +227,7 @@ const changeImg = () => {
     font-size: 1.3em;
   }
 
-  > form {
+  >form {
     display: flex;
     flex-direction: column;
     gap: 24px;

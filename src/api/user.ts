@@ -1,6 +1,6 @@
-import type { User } from '@/types'
-import request from '@/utils/request'
-import Cookie from 'js-cookie'
+import type { User } from "@/types";
+import request from "@/utils/request";
+import Cookie from "js-cookie";
 
 /**
  * 通过用户名密码获取带token的用户信息
@@ -14,12 +14,12 @@ export const login = (
         pswd: string
       }
     | {
-        openidQ: string
+        unionidQq: string
       }
 ): Promise<User> => {
   return request({
-    url: 'user/login',
-    method: 'post',
+    url: "user/login",
+    method: "post",
     data,
   })
 }
@@ -30,11 +30,11 @@ export const login = (
  * @augments data { name: string, pswd: string }
  */
 export const getUser = (
-  params: { token: string } | { openidQ: string } | { id: string }
+  params: { token: string } | { unionidQq: string } | { id: string }
 ): Promise<User> => {
   return request({
-    url: 'user/get_user',
-    method: 'get',
+    url: "user/get_user",
+    method: "get",
     params,
   })
 }
@@ -46,11 +46,11 @@ export const getUser = (
  * @augments data { name: string }
  */
 export const haveUser = (
-  data: { name: string } | { openidQ: string }
+  data: { name: string } | { unionidQq: string }
 ): Promise<number> => {
   return request({
-    url: 'user/have_user',
-    method: 'get',
+    url: "user/have_user",
+    method: "get",
     params: data,
   })
 }
@@ -62,16 +62,16 @@ export const haveUser = (
  * @augments data { name: string }
  */
 export const signin = (data: {
-  name: string
-  pswd: string
-  captcha: string
+  name: string;
+  pswd: string;
+  captcha: string;
 }): Promise<number> => {
   return request({
-    url: 'user/signin/signin',
-    method: 'post',
+    url: "user/signin/signin",
+    method: "post",
     data,
-  })
-}
+  });
+};
 
 /**
  * 更新用户设置 user/update_setting
@@ -80,29 +80,49 @@ export const signin = (data: {
  * @return 受影响的条数
  */
 export const updateSetting = (data: {
-  token?: string
-  settingJson: string
+  token?: string;
+  settingJson: string;
 }): Promise<number> => {
   return request({
-    url: 'user/update_setting',
-    method: 'post',
-    data: { token: Cookie.get('token'), ...data },
-  })
-}
+    url: "user/update_setting",
+    method: "post",
+    data: { token: Cookie.get("token"), ...data },
+  });
+};
 
 /**
- * 更新用户openidQ user/update_user
+ * 更新用户数据 user/update_user
  *
  * @augments userJson userEdit
  * @return 受影响的条数
  */
 export const updateUser = (data: {
   token?: string
-  userJson: string
+  userJson: string;
 }): Promise<number> => {
   return request({
-    url: 'user/update_user',
-    method: 'post',
-    data: { token: Cookie.get('token'), ...data },
-  })
-}
+    url: "user/update_user",
+    method: "post",
+    data: { token: Cookie.get("token"), ...data },
+  });
+};
+
+/**
+ * 绑定第三方平台
+ *
+ * @augments userJson userEdit
+ * @augments userJson userEdit
+ * @augments userJson userEdit
+ * @return 受影响的条数
+ */
+export const bindPlatform = (data: {
+  token?: string;
+  platform: string;
+  unionid: string;
+}): Promise<number> => {
+  return request({
+    url: "user/bind_platform",
+    method: "POST",
+    data: { token: Cookie.get("token"), ...data },
+  });
+};
